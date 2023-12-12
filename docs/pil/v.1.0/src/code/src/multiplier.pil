@@ -1,0 +1,26 @@
+include "config.pil";
+
+namespace Multiplier(%N);
+
+    // Polynomials
+    pol commit freeIn1;
+    pol commit freeIn2;
+    pol commit out;
+
+    // Constraints
+    out = freeIn1*freeIn2;
+
+// namespace Multiplier(%N);
+
+//     // Constant Polynomials
+//     pol constant RESET;
+
+//     // Committed Polynomials
+//     pol commit freeIn;
+//     pol commit out;
+
+//     // Intermediate Polynomials
+//     pol carry = out*freeIn;
+
+//     // Constraints
+//     out' = RESET*freeIn + (1 - RESET)*carry;

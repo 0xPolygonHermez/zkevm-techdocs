@@ -1,0 +1,790 @@
+
+
+\section{MulMod Opcode: Introduction}
+
+The \texttt{MULMOD} opcode performs the modular multiplication operation $r = a \cdot b \mod{n}$, where $a$, $b$, $n$, and $r$ are 256-bit integers (that is, $a, b, c \in \{0, \dots, 2^{256}-1\}$). The result $r$ is the remainder obtained when the product of $a$ and $b$ is divided by $n$. This operation can also be expressed as $a \cdot b = k \cdot n + r$, where $k$ is the quotient obtained when $a \cdot b$ is divided by $n$, and $r$ is the remainder. In this context, $r$ is in the range $0 \leq r < n$. For example, if $a = 11$, $b = 2$ and $n = 6$, then the result is $r = 4 = 11 \cdot 2 \mod{6}$. The condition $r<n$ guarantees that, for a given $(a,b,n)$, the tuple $(k,r)$ is unique. In our example, $(a,b,n)=(11,2,6) \rightarrow (3,4)$:  $11 \cdot 2 = 3 \cdot 6 + 4$.
+
+In our zkEVM architecture, we have a state machine called \textbf{Arith} that can verify 256-bit arithmetic operations. In particular, a combination of a sum and a multiplication. In more detail, providing the tuple $(x_1, y_1, x_2, y_2, y_3)$ \textbf{Arith} can verify that the tuple fulfills the following expression:
+\begin{align*}
+&x_1 \cdot y_1+x_2 = y_2 \cdot 2^{256} + y_3\\
+&\text{with } x_1, y_1, x_2, y_2, y_3 \in \{0, \dots, 2^{256}-1\}
+\end{align*}
+Thus, to implement the \texttt{MULMOD} opcode using \textbf{Arith}, we have to express the modular multiplication as a set 
+of equations with the previous form.
+
+
+
+\section{MulMod Opcode via zkEVM }
+
+\subsection{Reducing MULMOD to 256-bit arithmetic}
+
+Reducing its implementation to 256-bit arithmetic means that the multiplication and modulus operations will be performed using 256-bit integers instead of larger ones. This can be achieved by splitting the larger integers into 256-bit chunks and performing the operations on these smaller chunks. However, care must be taken to ensure that the final result is correct, as using smaller integers can lead to overflow or rounding errors. Additionally, this implementation will take more machine clocks due to the increased number of operations needed to perform the computation.
+
+Recall that we want to check that a given tuple $(a,b,k,n,r)$ fulfills the following constraints: 
+\begin{align*}
+&a \cdot b = k \cdot n + r \\
+&\text{where } a, b, n, r < 2^{256}. 
+\end{align*}
+Notice that $k$ can less than, equal to or bigger than $2^{256}$. But, in any case, $k < 2^{512}$ because $a,b < 2^{256}$. In order to be able to do the check using $256$-bits arithmetic, we split $k$ in its unique limbs $k_l, k_h \in \{0, \dots, 2^{256} - 1\}$ of $256$ bits. That is, $k_l$ and $k_h$ are the unique integers satisfying:
+\begin{align*}
+&k = k_h \cdot 2^{256} + k_l, \\
+&\text{where } a, b \in \{0, \dots, 2^{256} -1 \}. 
+\end{align*}
+
+Therefore, after replacing the new expression for $k$ in the former constraints, we obtain the subsequent ones:
+\begin{align*}
+&a \cdot b = (k_h \cdot 2^{256} + k_l) \cdot n + r  \iff \\
+&a \cdot b = (k_h \cdot n) \cdot 2^{256} + (k_l \cdot n + r) \\
+&\text{where } k_h \cdot n < 2^{256}.
+\end{align*}
+
+However, note that the expression $k_l \cdot n+r$ can be less than, equal to or bigger than $2^{256}$. Henceforth, we express $k_l \cdot n+r$ with its unique $256$-bit limbs $d_1, e \in \{0, \dots, 2^{256} - 1\}$:
+\[
+k_l \cdot n+r = d_1 \cdot 2^{256}+e.
+\]
+Replacing in our previous equation:
+\begin{align*}
+&a \cdot b = (k_h \cdot n+d_1) \cdot 2^{256} + e  \\
+&\text{where } k_h \cdot n+d_1, e < 2^{256}.
+\end{align*}
+On the other hand:
+\begin{align*}
+&a \cdot b = d \cdot 2^{256} + e  \\
+&\text{where } d, e < 2^{256}.
+\end{align*}
+And we had:
+\begin{align*}
+&a \cdot b = (k_h \cdot n+d_1) \cdot 2^{256} + e  \\
+&\text{where } k_h \cdot n+d_1, e < 2^{256}.
+\end{align*}
+Therefore:
+\[
+d = k_h \cdot n+d_1.
+\]
+
+
+\subsection{MULMOD Implementation Summary}
+
+If we provide a tuple $(a,b,n,d,e,k_h,k_l,d_1,r)$ that fulfills the following equations:
+
+\begin{align*}
+a \cdot b + 0 &= d \cdot 2^{256} + e,  \\
+k_l \cdot n + r &= d_1 \cdot 2^{256} + e, \\
+k_h \cdot n+d_1 &= 0 \cdot 2^{256} + d, \\
+r &< n, \\
+\text{where } a, b, n, d, e, &k_h, k_l, d_1, r \in  \{0, \dots, 2^{256} \}.
+\end{align*}
+
+Then, 
+\[
+r = a \cdot b \mod{n}.
+\]
+
+The previous equations will be checked with the $256$-bit arithmetic state machine. Finally, for optimization purposes, we need to take into account the special cases: 
+
+\[
+\text{ If } n \in \{0, 1\} \text{ then } r = 0.
+\]
+
+Similarly, we will distinguish the special case in which $k_h$ is 0. Note that, in this case, $d_1 = d$ so we can reduce the checks to provide a tuple $(a,b,n,d,e,k_l,r)$ that fulfills the following equations:
+\begin{align*}
+&a \cdot b + 0 = d \cdot 2^{256} + e \\
+&k_l \cdot n+r = d \cdot 2^{256} + e \\
+\end{align*}
+
+
+
+
+
+
+
+
+\section{zkEVM Specificity}
+
+\subsection{Memory SM}
+
+In first place, the Polygon zkEVM architecture incorporates a memory SM that can check memory operations (reads and writes). The memory SM plays a critical role in this process because it ensures that memory operations, such as reads and writes, are performed correctly and consistently. By checking the memory operations in a zero-knowledge context, the memory SM can guarantee that the computation was performed correctly without revealing any of the private data.
+
+The memory operates with addresses of 32 bits and words of 32 Bytes. This provides a maximum total size of $2^{32} \cdot 32 \text{ Bytes}=128$ Gigabytes. Transactions can have different memory contexts, each limited to 64 MB (which is a memory expansion of 8.5M gas). 
+
+The two instructions for using the memory SM are \texttt{MLOAD(address)} and \texttt{MSTORE(address)}. In the assembly, we can use memory labels to store the value of a registry in the address pointed by the label. The concrete addresses for memory labels are defined in a configuration file. For example, 
+
+\begin{zkasm}
+A		:MSTORE(arithA)
+\end{zkasm}
+
+stores the value of registry \texttt{A} at the address pointed by the memory label \texttt{arithA}. 
+
+
+
+
+
+
+\subsection{\texttt{STACK}}
+
+Since the EVM is a stack-based virtual machine, we reserve an address space to create a stack within the memory of the zkEVM. The classical pointer called \texttt{STACK POINTER} (\texttt{SP}) contains the address of the \textbf{next free position on the} \texttt{STACK}. A \texttt{POP} from the \texttt{STACK} can be implemented as:
+
+
+\begin{zkasm}
+SP -1 => SP
+$ => A		:MLOAD(SP)
+\end{zkasm}
+
+where we decrement \texttt{SP} to reposition it on the last element of the stack and
+then we load this element into registry \texttt{A}. Similarly, a \texttt{PUSH} into the \texttt{STACK} can be implemented as:
+
+\begin{zkasm}
+0		:MSTORE (SP++)
+\end{zkasm}
+
+which saves a \texttt{0} at the top of the stack and increments \texttt{SP}. An important note about both the stack and the memory is that the stack pointer and the memory are per context.
+
+
+
+
+
+
+
+%TODO dar una repasada al uso de la binaria con más assembly de ejemplo
+\subsection{Binary SM}
+
+The Polygon zkEVM architecture incorporates also a \textbf{Binary} SM that can check binary operations. More specifically, the binary state machine implements \textbf{additions}, \textbf{subtractions}, comparators (\textbf{less than for signed and unsigned integers} and \textbf{equality checks}) and bitwise operations (\textbf{AND}, \textbf{OR} and \textbf{XOR}). The binary uses a \texttt{carry} column for the carries of additions and subtractions, and for returning the binary results of comparisons. For example:
+
+\begin{zkasm}
+; C=1 if A < B, else C=0
+$   => C     :LT
+\end{zkasm}
+
+The previous instruction stores a \texttt{1} in registry \texttt{C} if the value in registry \texttt{A} is less than the value in registry \texttt{B} or stores a \texttt{0} in registry \texttt{C} otherwise.
+% Also in op
+
+
+
+
+
+
+
+
+
+\subsection{Jumps in the Main SM: \texttt{JMP}, \texttt{JMPC}, \texttt{JMPN}}
+
+
+The main SM has three assembly instructions for jumps: \texttt{JMP, JMPC} and \texttt{JMPN}.
+
+
+\begin{zkasm}
+; Unconditionally jumps to label myLabel
+       :JMP(myLabel)
+
+; Jumps to label myLabel if A < B
+$       :LT, JMPC(myLabel)
+
+; Jumps to label myLabel if A is negative
+A       :JMPN(myLabel)
+\end{zkasm}
+
+
+\begin{itemize}
+
+\item \texttt{JMP}: Jumps unconditionally to a label in the program.
+  
+\item \texttt{JMPC}: Jumps to a label in the program if \texttt{carry} $\neq 1$. In the example, carry is 1 if registry \texttt{A} is \textbf{Less Than (LT)} registry \texttt{B}.
+  
+\item \texttt{JMPN}: Jumps to a label in the program if \texttt{op0} is a negative value. In the example, the value of registry \texttt{A}. Negative values go from $-1$ to $-2^{32}$.
+  
+\end{itemize}
+
+
+
+
+
+%TODO
+%JMPC jumps to a label in the program if the preceding binary operation is true(in the example, a Less Than).
+%En verdad es un JumpCarry, y puede haber carry en caso de que sea true una expresion, o tambien en caso de que haya overflow en un ADD o underflow en un SUB.
+
+
+
+\subsection{Arith SM}
+
+\subsubsection{Arith SM: Basic Usage}
+
+We use the \textbf{Arith} SM with the \texttt{:ARITH} instruction. The \textbf{Arith} uses the \texttt{x1, y1, x2, y2} and \texttt{y3} 256-bit registries to check the following expression:
+
+\[
+x_1 \cdot y_1 + x_2 = y_2 \cdot 2^{256} + y_3
+\]
+
+In the \textbf{Main} SM, we use registry \texttt{A} as $x_1$, \texttt{B} as $y_1$, \texttt{C} as $x_2$, \texttt{D} as $y_2$ and \texttt{op} as $y_3$ to verify the arithmetic operation.
+
+
+\begin{zkasm}
+$${var _valArith = A * B + C}
+${_valArith >> 256} => D
+${_valArith} => E :ARITH
+\end{zkasm}
+
+In the example, at line 1, we instruct the executor into computing the big number $\texttt{A*B+C}$ from the current values of the registries \texttt{A}, \texttt{B} and \texttt{C} at the \textbf{Main} SM and store this value in an executor variable arbitrarily called \texttt{\_valArith}. At line 2, the executor computes the value of \texttt{y2} as a free input by shifting 256 bits \texttt{\_valArith} and stores the result in registry \texttt{D}. Finally, at line 3, the executor computes \texttt{op} (value of \texttt{y3}) as a free input, 
+stores \texttt{op} in registry \texttt{E} and also the \textbf{Arith} SM verifies the arithmetic expression.
+
+
+\subsubsection{Arith SM: \texttt{CALL} with an Assembly Subroutine}
+
+Another way of using the \textbf{Arith} SM is to use an assembly subroutine. Subroutines are invoked with \texttt{CALL(label)}. When a \texttt{CALL} is performed, the execution jumps into the specified label in the program. When the label's associated code finishes, the program execution continues at the line after the initial \texttt{CALL} invocation.
+
+
+\begin{zkasm}
+; calling the Arith
+   A         :MSTORE(arithA)
+   B         :MSTORE(arithB)
+             :CALL(mulARITH)
+
+; continues here after the assembly subroutine
+   A         :MLOAD(arithOverflow) 
+   B         :MLOAD(arithRes1)
+\end{zkasm}
+
+In particular, the \texttt{mulARITH} subroutine computes pure multiplications using the \textbf{Arith} SM to verify that: $\texttt{A} \cdot \mathtt{B}+0 = \mathtt{D} \cdot 2^{256} + \mathtt{op}$. The \texttt{mulARITH} subroutine uses memory to read the operands and leave the results. In this regard, observe that before jumping into \texttt{mulARITH}, we provide the operands to the \textbf{Arith} SM under the memory labels \texttt{arithA} and \texttt{arithB}. When the invocation of \texttt{mulArith} finishes, the values $\texttt{D}$ and $\texttt{E}$ are stored in memory under the memory labels \texttt{arithOverflow} and \texttt{arithRes1}, respectively. 
+
+
+
+\subsubsection{Arith SM: \texttt{mulARITH} Subroutine}
+
+
+\begin{zkasm}
+; zkevm-rom:main/utils.zkasm
+
+mulARITH: ; assembly subroutine for multiplication
+    RR              :MSTORE(tmpZkPC)
+    zkPC+1 => RR    :JMP(storeTmp)
+    $ => A          :MLOAD(arithA)
+    $ => B          :MLOAD(arithB)
+    0 => C
+    $${var _mulArith = A * B}
+    ${_mulArith >> 256} => D
+    ${_mulArith} => E :ARITH
+    E               :MSTORE(arithRes1)
+    D               :MSTORE(arithOverflow)
+    zkPC+1 => RR    :JMP(loadTmp)
+    $ => RR         :MLOAD(tmpZkPC)
+                    :JMP(RR)
+\end{zkasm}
+
+The registry \texttt{RR} contains the code return address. The value of \texttt{RR} is set when invoking the subroutine. In the subroutine, at line 4, we store the current value of the registry \texttt{RR} at the memory label \texttt{tmpZkPC}. This is because in line 6 we will jump to another subroutine. In line 5, we set the value of \texttt{RR} to the next line for correctly coming from the \texttt{tmpZkPC} subroutine.
+
+\begin{zkasm}
+storeTmp:
+    A                   :MSTORE(tmpVarA)
+    B                   :MSTORE(tmpVarB)
+    C                   :MSTORE(tmpVarC)
+    D                   :MSTORE(tmpVarD)
+    E                   :MSTORE(tmpVarE)
+                        :JMP(RR)
+
+loadTmp:
+    $ => A                  :MLOAD(tmpVarA)
+    $ => B                  :MLOAD(tmpVarB)
+    $ => C                  :MLOAD(tmpVarC)
+    $ => D                  :MLOAD(tmpVarD)
+    $ => E                  :MLOAD(tmpVarE)
+                            :JMP(RR)
+\end{zkasm}
+
+
+The \texttt{storeTmp} subroutine stores the values of the registries \texttt{A, B, C, D} and \texttt{E} in temporary memory labels and then jumps back to the return address at \texttt{RR}. The \texttt{loadTmp} subroutine does the opposite.
+
+\begin{zkasm}
+; zkevm-rom:main/utils.zkasm
+
+mulARITH: ; assembly subroutine for multiplication
+    RR              :MSTORE(tmpZkPC)
+    zkPC+1 => RR    :JMP(storeTmp)
+    $ => A          :MLOAD(arithA)
+    $ => B          :MLOAD(arithB)
+    0 => C
+    $${var _mulArith = A * B}
+    ${_mulArith >> 256} => D
+    ${_mulArith} => E :ARITH
+    E               :MSTORE(arithRes1)
+    D               :MSTORE(arithOverflow)
+    zkPC+1 => RR    :JMP(loadTmp)
+    $ => RR         :MLOAD(tmpZkPC)
+                    :JMP(RR)
+\end{zkasm}
+
+
+Let us return to the \texttt{multARITH} subroutine. In lines 6 and 7, the multiplicands are loaded from the associated memory labels. This subroutine is for pure multiplications, so in line 8, registry \texttt{C} is set to 0. Then, the executor is instructed to compute the proper \texttt{y2} and \texttt{y3} values. For computing these values, at line 9, the executor is instructed to compute the big number $\texttt{A*B}$ and to store the result in an executor variable called \texttt{\_mulArith}. Notice that we can specify pure executor functions inline using the syntax \texttt{\$\$\{...\}}. These pure executor functions do not directly contribute to the execution trace. At line 10, $\texttt{D}$ is computed by taking the bits 256 to 511 of \texttt{\_mulArith} and stored at registry \texttt{D}. A line 11, $\texttt{E}$ is computed by taking the bits 0 to 255 of \texttt{\_mulArith}. At this line, the $\texttt{E}$ value is at \texttt{op}, \texttt{:ARITH} checks the operation and the $\texttt{E}$ value is stored at the registry \texttt{E}. At lines 12 and 13 the result of the operation is stored in memory: $\texttt{E}$ in \texttt{arithRes1} and $\texttt{D}$ in \texttt{arithOverflow}. Finally, in line 14 we restore the previous values of registries, in line 15 we read the return code address and finally jump to this address in line 16.
+
+
+\subsection{Manage Errors: \texttt{stackUnderflow} and \texttt{outOfGas}}
+When we have errors, we call a function at the executor to log the error and then, we jump to the \texttt{handleError} code label.
+
+\begin{zkasm}
+; Stack and gas checks
+    SP - 3         :JMPN(stackUnderflow)
+    SP - 1 => SP
+    GAS-8 => GAS   :JMPN(outOfGas)
+    
+stackOverflow:
+    ${eventLog(onError, overflow)}
+    :JMP(handleError)
+    
+outOfGas:
+    ${eventLog(onError, OOG)}
+    :JMP(handleError)
+    
+handleError:
+    ; revert all state changes
+    $ => SR         :MLOAD(initSR)
+\end{zkasm}
+
+
+Line 2 checks that we have 3 elements at the top of the stack to do the MULMOD operation. Line 3 positions the \texttt{SP} at the address of the top element. Line 4 checks that there is enough gas remaining for doing the operation. When there's this type of error (\texttt{outOfGas}, \texttt{stackOverFlow}) the behavior is very similar to process an invalid OPcode: 
+
+\begin{itemize}
+    \item All the gas is consumed of the current Context (current call).
+    \item We return to the last context pushing a 0 to the stack.
+    \item Also we recover the \texttt{initSR} of the current context, meaning that all the changes will be reverted (in storage, nonce, bytecode, etc.) except for the gas consumption. 
+    \item Also the \texttt{gasRefund} will not be modified.
+\end{itemize}  
+
+
+
+\section{MULMOD Opcode Assembly}
+
+We are under the situation where the top of the stack looks like $\mathtt{STACK} = [a, b, n, ... ]$. The assembly can be found at \texttt{zkevm-rom:main/opcodes.zkasm}. It is important that a free input is just used once. If you use a free input multiple times, you should check that they are the consistent in the assembly. In our opcode, if we introduce ``a" several types, assembly must check that always the same ``a" is introduced (binary equal). Typically, free inputs that are used several times are those of the SM, e.g. in memory we can put the same free input multiple times but the assembly checks consistency.
+
+\begin{zkasm}
+  ; Stack and gas checks
+  SP - 3         :JMPN(stackUnderflow)
+  SP - 1 => SP
+  GAS-8 => GAS   :JMPN(outOfGas)
+
+  ; Load multiplicands
+  $ => A         :MLOAD(SP--)    ; (A<=a,B,C,D,E)
+  $ => B         :MLOAD(SP--)    ; (A=a,B<=b,C,D,E)
+  A              :MSTORE(arithA) ; [arithA<=a]
+  B              :MSTORE(arithB) ; [arithA=a,arithB<=b]
+  ${var _mulab = A * B}          ; FIX with $$
+
+  ; Check: if(n is 0 or 1) {r=0}
+  $ => A         :MLOAD(SP)      ; (A<=n,B=b,C,D,E)
+  2 => B                         ; (A=n,B<=2,C,D,E)
+  $              :LT, JMPC(zeroOneMod)
+
+  ; Check: a*b = d*2^256 + e
+        :CALL(mulARITH) ; [arithA=a, arithB=b, arithOverflow<=d, arithRes1<=e]
+
+  $${var _k = _mulab/A}
+  ; Check kh == 0
+  ${_k >> 256} => B ; (A=n,B<=kh,C,D,E) kh=k_b256-511
+  ${cond(B == 0)} :JMPN(mulModNoKH)
+\end{zkasm}
+
+
+
+
+\begin{zkasm}
+  ; Check: kl*n+r = d1*2^256+e
+  ${_k % (1 << 256)} => B                   ; (A=n,B<=kl,C,D,E)      op=kl=k_b0-255
+  ${_mulab % A} => C                        ; (A=n,B=kl,C<=r,D,E)    op=r=A*B%n
+  ${(B * A + C) >> 256} => D                ; (A=n,B=kl,C=r,D<=d1,E) op=d1=(B*A+C)_b256-511
+  $              :MLOAD(arithRes1), ARITH   ; (A=n,B=kl,C=r,D=d1,E)  op=[arithRes1]=e
+
+  ; Check: assert r<n
+  A => B              ; (A=n,B<=n,C=r,D=d1,E)
+  C => A              ; (A<=r,B=n,C=r,D=d1,E)
+  $ => A         :LT
+  1              :ASSERT
+
+  ; Check: kh*n+d1 = 0*2**256+d
+  ${_k >> 256} => A                           ; (A<=kh,B=n,C=r,D=d1,E)  op=kh=k_b256-511
+  D => C                                      ; (A=kh,B=n,C<=d1,D=d1,E)
+  0 => D                                      ; (A=kh,B=n,C=d1,D<=0,E)
+  $              :MLOAD(arithOverflow), ARITH  ; (A=kh,B=n,C=d1,D=0,E)   op=[arithOverflow]=d
+
+  ; PUSH r
+  C              :MSTORE(SP++)
+                 :JMP(readCode)
+\end{zkasm}
+
+
+
+
+
+
+\begin{zkasm}
+mulModNoKH:
+  ; Check: kl*n+r = d1*2^256+e where d1=d
+  ${_k} => B                               ; (A=n,B<=kl,C,D,E)     op=kl=k since kh=0
+  ${_mulAB % A} => C                       ; (A=n,B=kl,C<=r,D,E)   op=r=a*b%n
+  $ => D         :MLOAD(arithOverflow)     ; (A=n,B=kl,C=r,D<=d,E) op=[arithOverflow]=d
+  $              :MLOAD(arithRes1), ARITH  ; (A=n,B=kl,C=r,D=d,E)  op=[arithRes1]=e
+
+  ; Check: assert r<n
+  A => B              ; (A=n,B<=n,C=r,D=d,E)
+  C => A              ; (A<=r,B=n,C=r,D=d,E)
+  $ => A          :LT
+  1               :ASSERT
+
+  ; PUSH r
+  C               :MSTORE(SP++)
+                  :JMP(readCode)
+
+zeroOneMod:
+    0             :MSTORE(SP++)
+                  :JMP(readCode)
+\end{zkasm}
+
+
+
+  
+
+
+
+\subsection{Load Multiplicands}
+
+The first step of the MULMOD implementation is to POP the $\texttt{A}$ and $\texttt{B}$ values and load them into the proper memory labels:
+
+
+
+\begin{zkasm}
+; Load multiplicands
+$ => A         :MLOAD(SP--)    ; (A<=a,B,C,D,E)
+$ => B         :MLOAD(SP--)    ; (A=a,B<=b,C,D,E)
+A              :MSTORE(arithA) ; [arithA<=a]
+B              :MSTORE(arithB) ; [arithA=a,arithB<=b]
+${var _mulab = A * B}          ; FIX with $$
+\end{zkasm}
+
+
+Line 2 loads multiplicand $a$ and stores it in the registry \texttt{A}. This is denoted in comments as \texttt{(Registry=Value, ...)}. Line 3 does the same for multiplicand $b$. Line 4 stores the value in registry \texttt{A} into memory at label \texttt{arithA}. This is denoted in comments as \texttt{[mem\_label=Value, ...]}. Line 5 stores the value in registry \texttt{B} into memory at label \texttt{arithB}. Finally, at line 6, we instruct the executor to compute the big number $\texttt{A} \cdot \texttt{B}$ and store the result in the executor variable called \texttt{\_mulab}.
+
+\textbf{Note.} Ideally \texttt{\$\$} should be used at line 6 because it is a pure executor function but currently, \texttt{\$} has to be used which uses a row of the execution trace (this might be fixed in the future).
+
+
+
+\subsection{Special Cases Check}
+
+Next, we check if $n \in \{0,1\}$.
+
+\begin{zkasm}
+  ; Check: if(n is 0 or 1) {r=0}
+  $ => A         :MLOAD(SP)      ; (A<=n,B=b,C,D,E)
+  2 => B                         ; (A=n,B<=2,C,D,E)
+  $              :LT, JMPC(zeroOneMod)
+
+zeroOneMod:
+    0               :MSTORE(SP++)
+                    :JMP(readCode)
+\end{zkasm}
+
+The \texttt{LT} is an operation verified by the \textbf{Binary} state machine. \texttt{LT} must be 1 if the value of the registry \texttt{A} is lower than the value of the registry \texttt{B} and, 0 otherwise. The result of LT is introduced as a free input in the execution trace of the \textbf{Main} SM and verified by the \textbf{Binary} SM. \texttt{JMPC} jumps if the carry of the binary operation is 1. In this code, if $\texttt{A}<\texttt{B}$ the executor introduces \texttt{carry=1} as the free input and, \texttt{JMPC} jumps to \texttt{zeroOneMod}. At \texttt{zeroOneMod}, we store a 0 at the top of the stack as the result of the \texttt{MULMOD} operation and, finally, we jump to read the next opcode.
+
+
+
+
+
+
+
+
+
+
+
+\subsection{$a \cdot b$ Decomposition in 256-bit Limbs}
+\begin{zkasm}
+  ; Check: a*b = d*2^256 + e
+        :CALL(mulARITH) ; [arithA=a, arithB=b, arithOverflow<=d, arithRes1<=e]
+\end{zkasm}
+
+
+If $n$ is not a special case, we do not jump but we compute the decomposition of $a \cdot b$:
+ 
+$$a \cdot b = d \cdot 2^{256} + e $$
+
+Recall that the values $a$ and $b$ are stored at memory, at the memory labels \texttt{arithA} and \texttt{arithB}. The decomposition values $d$ and $e$, are also stored at memory after calling the subroutine, in particular, at the memory labels \texttt{arithOverflow} and \texttt{arithRes1}, respectively.
+
+
+
+
+
+
+
+
+\subsection{Check if $k_h = 0$}
+
+ Next, we compute $k_h$ and store it in the register \texttt{B}:
+
+
+\begin{zkasm}
+  $${var _k = _mulab/A}
+  ; Check kh == 0
+  ${_k >> 256} => B ; (A=n,B<=kh,C,D,E) kh=k_b256-511
+  ${cond(B == 0)} :JMPN(mulModNoKH)
+\end{zkasm}
+
+ Observe that we treat the case where $k_h = 0$ separately because 
+this case needs one check less.
+ If $k_h = 0$ we jump into the code label \texttt{mulModNoKH}.
+ Notice that we jump using a condition checked by the 
+executor: \texttt{cond(B==0)} and introduced as a free input.
+ This is a correct way of implementing the verification because the \textbf{Arith} SM will check all the expressions that enforce that $r$ is the correct result of the \texttt{MULMOD} operation.
+
+
+
+
+
+
+
+
+
+\subsection{Case where $K_h = 0$}
+
+
+\begin{zkasm}
+mulModNoKH:
+  ; Check: kl*n+r = d1*2^256+e where d1=d
+  ${_k} => B                               ; (A=n,B<=kl,C,D,E)     op=kl=k since kh=0
+  ${_mulAB % A} => C                       ; (A=n,B=kl,C<=r,D,E)   op=r=a*b%n
+  $ => D         :MLOAD(arithOverflow)     ; (A=n,B=kl,C=r,D<=d,E) op=[arithOverflow]=d
+  $              :MLOAD(arithRes1), ARITH  ; (A=n,B=kl,C=r,D=d,E)  op=[arithRes1]=e
+
+  ; Check: assert r<n
+  A => B              ; (A=n,B<=n,C=r,D=d,E)
+  C => A              ; (A<=r,B=n,C=r,D=d,E)
+  $ => A          :LT
+  1               :ASSERT
+
+  ; PUSH r
+  C               :MSTORE(SP++)
+                  :JMP(readCode)
+\end{zkasm}
+
+
+Recall that we already checked the decomposition of $a \cdot b$ into $256$-bits limbs. When $k_h=0$, we just need to check the following constraints:
+\begin{align*}
+k_l \cdot n+r &= d \cdot 2^{256}+e \\
+r &< n
+\end{align*}
+
+Line 4 loads $r$ in \texttt{C}. Line 5 loads the previously computed $d$. Line 6 loads the previously computed $e$ into \texttt{op} and triggers the \textbf{Arith} check using the \texttt{:ARITH} instruction. Lines 9, 10, 11 and 12 check $r < n$. If $r$ is not less than $n$, we abort the execution using the \texttt{ASSERT} instruction. The ASSERT instruction makes sure that the value at the \texttt{A} register is the same as 
+the value of \texttt{op}. If this is not fulfilled, the proof cannot be generated. The following constraint, then, its introduced into the PIL of the \textbf{Main} state machine:
+
+\begin{pil}
+(A-op) * assert = 0
+\end{pil}
+
+
+\textbf{Note}: The only way that an assert fails is because the executor has tried 
+to manipulate the free inputs and they do not fulfill the assert condition. If everything is OK, we push the result to the top of the stack and read the next opcode (lines 15 and 16).
+
+
+
+
+\subsection{Case where $K_h \neq 0$}
+
+
+
+\begin{zkasm}
+  ; Check: kl*n+r = d1*2^256+e
+  ${_k % (2 << 256)} => B                   ; (A=n,B<=kl,C,D,E)      op=kl=k_b0-255
+  ${_mulab % A} => C                        ; (A=n,B=kl,C<=r,D,E)    op=r=A*B%n
+  ${(B * A + C) >> 256} => D                ; (A=n,B=kl,C=r,D<=d1,E) op=d1=(B*A+C)_b256-511
+  $              :MLOAD(arithRes1), ARITH   ; (A=n,B=kl,C=r,D=d1,E)  op=[arithRes1]=e
+
+  ; Check: assert r<n
+  A => B              ; (A=n,B<=n,C=r,D=d1,E)
+  C => A              ; (A<=r,B=n,C=r,D=d1,E)
+  $ => A         :LT
+  1              :ASSERT
+
+  ; Check: kh*n+d1 = 0*2**256+d
+  ${_k >> 256} => A                           ; (A<=kh,B=n,C=r,D=d1,E)  op=kh=k_b256-511
+  D => C                                      ; (A=kh,B=n,C<=d1,D=d1,E)
+  0 => D                                      ; (A=kh,B=n,C=d1,D<=0,E)
+  $             :MLOAD(arithOverflow), ARITH  ; (A=kh,B=n,C=d1,D=0,E)   op=[arithOverflow]=d
+
+  ; PUSH r
+  C              :MSTORE(SP++)
+                 :JMP(readCode)
+\end{zkasm}
+
+
+
+In this case, all the expressions below have to be verified:
+\begin{align*}
+k_l \cdot n+r &= d_1 \cdot 2^{256}+e \\
+k_h \cdot n+d_1 &= 0 \cdot 2^{256}+d \\
+r &< n
+\end{align*}
+
+Lines 13 to 21 do the same as for the case $K_h = 0$. Lines 1 to 5 check that $k_l \cdot n + r = d_1 \cdot 2^{256} + e$. Lines 7 to 11 check that $r < n$. Previously computed values in memory are used with free inputs. Line 2 instructs the executor to compute $k_l$ and introduces this value as a free input that is copied to registry \texttt{B}. $k_l$ is computed as the 256 least significant bits of the big number $a \cdot b/n$. Line 3 instructs the executor to compute $n$ and introduce this value as a free input that is copied to \texttt{C}. Line 4 does something similar for the $d_1$ value, which is copied to \texttt{D}. Since $k_h \neq 0$, line 7 starts the verification that $r < n$. For the check, we use $d$ previously stored at the memory label \texttt{arithOverflow}. Value $k_h$ is computed as the bits from 256 to 511 of $k$. Finally, observe that $k_h$ is introduced as a free input and copied to \texttt{B}.
+
+
+\section{Counters and Batch Errors}
+
+\textbf{Counters} are a way to control that the total number of steps do not exceed the maximum polynomial size. Here, it is state that the maximum number of steps of the main we can take for the opcode is $150$:
+
+
+\begin{zkasm}
+%MAX_CNT_STEPS - STEP - 150 :JMPN(outOfCounters)
+\end{zkasm}
+
+We can invoke a maximum of $2$ times the \textbf{Binary} SM (two \texttt{:LT}) and $3$ times the \textbf{Arith} SM (three \texttt{:ARITH} instructions). Hence, we will add the following code at the beginning of the opcode
+
+
+\begin{zkasm}
+%MAX_CNT_ARITH - CNT_ARITH - 3 :JMPN(outOfCounters)
+%MAX_CNT_BINARY - CNT_BINARY - 2 :JMPN(outOfCounters)
+\end{zkasm}
+
+Here \texttt{\%MAX\_CNT\_ARITH} and \texttt{\%MAX\_CNT\_BINARY} are constants that define the maximum steps can take each of these state machines. If we go out of counters, then, there is an error in the processing of the batch (it is not an error of the user). We log this and restore the SR to the state root previous to the batch:
+
+
+\begin{zkasm}
+outOfCounters:
+    ${eventLog(onError, OOC)}
+                    :JMP(handleBatchError)
+
+handleBatchError:
+    $ => SR         :MLOAD(batchSR)
+    ${eventLog(onFinishTx)}
+    ${eventLog(onFinishBatch)}
+                    :JMP(processTxsEnd)
+\end{zkasm}
+
+
+
+
+
+
+
+
+
+
+% By Jesus Ligero
+% https://hackmd.io/opNRHByOQOenfqDRLdQeng
+%TODO Que hace el test? hace el PIL check el prover?
+\section{Running Integration Tests}
+
+\subsection{Running Integration Tests: Repositories}
+
+We are going perform integration tests with the prover for a contract
+that uses the \texttt{MULMOD} Opcode. First, download the needed repositories:
+
+\begin{lstlisting}[style=termt]
+$ git clone git@github.com:0xPolygonHermez/zkevm-rom.git
+$ git clone git@github.com:0xPolygonHermez/zkevm-proverjs.git
+$ git clone git@github.com:0xPolygonHermez/zkevm-testvectors.git
+\end{lstlisting}
+
+ Then, in each repository, install the dependencies with \texttt{npm install}.
+ Next, we are going to create a smart contract that uses the desired Opcode(s), 
+in this case, the \texttt{MULMOD} Opcode.
+
+
+\subsection{Running Integration Tests: Smart Contract}
+
+ In the \texttt{zkevm-testvectors} repository, go to \texttt{tools-calldata/evm/contracts}.
+ There, create a new contract with whatever you want to test.
+ In this case, we create a new file called \texttt{OpMulMod} with the following content:
+
+
+\begin{solidity}
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.7;
+
+contract OpMuldMod {
+  function Mulmod( uint256 a, uint256 b, uint256 n ) public view returns (uint256 result) {
+    assembly {
+      result := mulmod(a, b, n)
+    }
+  }
+}
+\end{solidity}
+
+
+
+
+
+
+
+\subsection{Running Integration Tests: Test Input Vectors}
+
+In the \texttt{zkevm-testvectors} repository, go to the directory \texttt{tools-calldata/evm/generate-test-vectors}. The easiest way to proceed is just copy one of the files and use it as template:
+
+
+\begin{itemize}
+
+\item Copy one of the files to a new file called \texttt{gen-test-mulmod.json}.
+
+\item  Then, just edit the \texttt{"txs"} and \texttt{"contracts"} properties of the JSON file. Any time you want to do a modification, e.g. changing the inputs, you just need to modify these two properties (the rest is updated automatically).
+
+\begin{json}
+    [
+    { "contracts": [{"contractName": "OpMuldMod", "paramsDeploy": {} }]},
+    "txs": [{
+        "from": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+        "to": "contract",
+        "nonce": "0",
+        "value": "0",
+        "contractName": "OpMuldMod",
+        "function": "MulMod",
+        "params": [ 256, 100000, 256 ],
+        "gasLimit": 100000,
+        "gasPrice": "1000000000",
+        "chainId": 1000
+    }],
+}
+]
+\end{json}
+
+\item Then, execute the following command for generating the inputs for the executor:
+\begin{lstlisting}[style=termt]
+    zkevm-testvectors/tools-calldata/evm$ ./gen-input.sh gen-test-mulmod.json
+\end{lstlisting}
+\textbf{Note}: the \texttt{gen-input.sh} script will search for the file in \texttt{tools-calldata/evm/generate-test-vectors/}.
+\normalsize
+The previous command creates two files:
+
+\texttt{zkevm-testvectors/state-transition/calldata/test-mulmod.json}
+
+This file contains data necessary for creating the inputs for the executor. You don't have to do anything with this file. It is useful only if you want to do executor debugging.
+
+\texttt{zkevm-testvectors/inputs-executor/calldata/test-mulmod\_0.json}
+
+This is the actual executor input. The 0 in the name of the file is because we only add one test case in our example. If we add several tests then, multiple inputs (with more sequential numbers) would be created.
+
+\end{itemize} 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Running Integration Tests: Execution Trace}
+
+Now we can create the execution trace with the input. To do so, go to the \texttt{zkevm-proverjs} repository and in project root, execute the following command:
+
+\begin{lstlisting}[style=termt]
+$ node --max-old-space-size=4096 src/main_executor.js /path/to/test-mulmod_0.json -r /path/to/zkevm-rom/build/rom.json -d -s
+\end{lstlisting}
+
+When the command finishes, you can take a look at the traces at:
+
+\texttt{zkevm-proverjs/src/sm/sm\_main/logs-full-trace/test-mulmod\_0\_\_full\_trace\_0.json}
+Search at this file for \texttt{"opcode": "MULMOD"}. Remark that the test will check that the trace fulfills the associated PIL.
+
+
+

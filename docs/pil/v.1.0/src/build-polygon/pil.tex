@@ -1,0 +1,268 @@
+% IACR Transactions CLASS DOCUMENTATION
+% Written by Gaetan Leurent gaetan.leurent@inria.fr (2016-2018)
+%
+% To the extent possible under law, the author(s) have dedicated all
+% copyright and related and neighboring rights to this software to the
+% public domain worldwide. This software is distributed without any
+% warranty.
+%
+% You should have received a copy of the CC0 Public Domain Dedication
+% along with this software. If not, see
+% <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+\documentclass[preprint]{iacrtrans} 
+\usepackage[utf8]{inputenc}
+
+\setcounter{tocdepth}{4}
+
+%% VERSION 
+\newcommand{\version}{v.1.0}
+
+
+%% TITLE
+\title{
+	\includegraphics[width=\columnwidth]{logo_zkEVM.png} 	\\ \vspace{0.3cm}
+	Technical Document 										\\ \vspace{0.3cm}	
+	Polynomial Identity Language (PIL): A Machine Description Language for Verifiable Computation		\\ \vspace{0.3cm}
+	\version
+}
+
+\institute{}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+% This package controls how hyperlinks are displayed
+% https://es.overleaf.com/learn/latex/Hyperlinks
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor={red!80!black},urlcolor={blue!80!black}}
+
+%Multiple columns
+\usepackage{multicol}
+
+% Used for super calligraphic font \mathscr{}
+\usepackage{mathrsfs} 
+
+%This ensures spaces when using ensure math and no $$ are used to introduce math
+\usepackage{xspace}
+
+\usepackage{colortbl}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{fact}[thm]{Fact}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% BEGIN OF CODE HIGHLIGHTING AND LISTINGS %%%%%%
+
+\usepackage{showexpl}
+\makeatletter
+\def\lst@filenamerpl{_\textunderscore $\textdollar}
+\makeatother
+\lstset{frame=shadowbox, basicstyle=\footnotesize\ttfamily, showstringspaces=false,
+    rulesepcolor=\color{black}, upquote=true}
+% \lstset{language=bash, frame=shadowbox, basicstyle=\footnotesize, showstringspaces=false,
+    % rulesepcolor=\color{black}, upquote=true, }
+\lstdefinestyle{scriptStyle}{
+    basicstyle=\footnotesize,% control font of code
+    preset=\footnotesize,% adjust font size of output
+    numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=5pt,
+    frame=tlbr,
+    pos=r,% want output on rightbackgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+\usepackage{tcolorbox}
+\tcbuselibrary{minted,skins,listings}
+\definecolor{mybg}{rgb}{0.96,0.96,0.98}
+\lstdefinelanguage{Pil}{
+    keywords=[1]{pol, commit, constant, in, is, connect, public, namespace}, % generic keywords including crypto operations
+    keywordstyle=[1]\color{blue!70!}\bfseries,
+    keywords=[3]{include}, % modules
+    keywordstyle=[3]\color{brown}\bfseries,
+    keywords=[4]{},% types; money and time units
+    keywordstyle=[4]\color{teal}\bfseries,
+    keywords=[5]{field, bool, u32, u16, u8},	% environment variables
+    keywordstyle=[5]\color{violet}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{green!40!black}\ttfamily,
+    stringstyle=\color{blue}\ttfamily,
+    %	morestring=[b]',
+    %	morestring=[b]"
+}
+
+\newtcblisting{pil}{
+    listing engine=listings,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    listing options={
+        language={Pil},
+        basicstyle=\footnotesize \ttfamily,
+        frame=none,
+        % numbers=left,
+        % numberstyle=\tiny,
+        % numbersep=9pt,
+        tabsize=2,
+        breaklines=true,
+        showtabs=false,
+        captionpos=b
+    },
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{js}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={tabsize=2,linenos=false,texcl=true,fontsize=\footnotesize},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+%%%%%$ END OF CODE HIGHLIGHTING AND LISTINGS %%%%%%
+
+%%%%%%%%%%%%%%%%%%% BEGIN OF MACROS %%%%%%%%%%%%%%%%%%%
+
+% Cryptocode: https://github.com/arnomi/cryptocode
+% You have to update the package manually by downloading the latest ".sty" in the link above and then:
+% sudo mv ~/cryptocode.sty usr/share/texlive/texmf-dist/tex/latex/cryptocode
+\usepackage[
+lambda,
+operators,
+landau, %este es el de bigO
+probability,
+%sets,
+logic, %para or,and...	
+asymptotics,
+keys
+]{cryptocode}
+
+% My own procedure blocks to show protocols
+\createprocedureblock{mypb}{center, boxed}{}{}{linenumbering}
+\createprocedureblock{mypbnonum}{center, boxed}{}{}{}
+
+% Numbering style
+\renewcommand{\pclnstyle}[1]{\text{#1}}
+\renewcommand{\pclnseparator}{.}
+
+\renewcommand{\vec}[1]{\ensuremath{\boldsymbol{#1}}\xspace}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Hyphen inside math mode
+\mathchardef\mhyphen="2D
+
+% Mathbb
+\newcommand{\FF}{\ensuremath{\mathbb{F}}\xspace}
+\newcommand{\GG}{\ensuremath{\mathbb{G}}\xspace}
+\newcommand{\NN}{\ensuremath{\mathbb{N}}\xspace}
+
+% Mathcal
+\newcommand{\A}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\I}{\ensuremath{\mathcal{I}}\xspace}
+\newcommand{\M}{\ensuremath{\mathcal{M}}\xspace}
+\renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+\newcommand{\R}{\ensuremath{\mathcal{R}}\xspace}
+\newcommand{\T}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\V}{\ensuremath{\mathcal{V}}\xspace}
+\newcommand{\W}{\ensuremath{\mathcal{W}}\xspace}
+
+% Mathscr
+\newcommand{\PPP}{\ensuremath{\mathscr{P}}\xspace}
+
+% Caligraphic Combinations
+\DeclareMathAlphabet{\mathpgoth}{OT1}{pgoth}{m}{n}
+\newcommand{\plonk}{\ensuremath{\mathcal{P}\mathfrak{lon}\mathcal{K}}\xspace}
+\newcommand{\plookup}{\ensuremath{\mathpgoth{plookup}}\xspace}
+
+% Abbreviations
+\newcommand{\otr}{\ensuremath{\overline{\text{P}}}\xspace}
+\newcommand{\AIR}{\ensuremath{\mathsf{A}}\xspace}
+\newcommand{\eAIR}{\ensuremath{\mathsf{eA}}\xspace}
+\newcommand{\fsel}{\ensuremath{f^{\text{sel}}}\xspace}
+\newcommand{\tsel}{\ensuremath{t^{\text{sel}}}\xspace}
+\newcommand{\ID}{\ensuremath{\textsf{ID}}\xspace}
+
+% Columns
+\newcommand{\RESET}{\ensuremath{\mathtt{RESET}}\xspace}
+\newcommand{\SEL}{\ensuremath{\mathtt{SEL}}\xspace}
+\newcommand{\FACTOR}{\ensuremath{\mathtt{FACTOR}}\xspace}
+\newcommand{\ISLAST}{\ensuremath{\mathtt{ISLAST}}\xspace}
+\newcommand{\QL}{\ensuremath{\mathtt{QL}}\xspace}
+\newcommand{\QR}{\ensuremath{\mathtt{QR}}\xspace}
+\newcommand{\QM}{\ensuremath{\mathtt{QM}}\xspace}
+\newcommand{\QO}{\ensuremath{\mathtt{QO}}\xspace}
+\newcommand{\QC}{\ensuremath{\mathtt{QC}}\xspace}
+\newcommand{\SA}{\ensuremath{\mathtt{SA}}\xspace}
+\newcommand{\SB}{\ensuremath{\mathtt{SB}}\xspace}
+\newcommand{\SC}{\ensuremath{\mathtt{SC}}\xspace}
+
+\newcommand{\att}{\ensuremath{\mathtt{a}}\xspace}
+\newcommand{\btt}{\ensuremath{\mathtt{b}}\xspace}
+\newcommand{\ctt}{\ensuremath{\mathtt{c}}\xspace}
+\newcommand{\dtt}{\ensuremath{\mathtt{d}}\xspace}
+\newcommand{\ett}{\ensuremath{\mathtt{e}}\xspace}
+\newcommand{\ftt}{\ensuremath{\mathtt{f}}\xspace}
+\newcommand{\sel}{\ensuremath{\mathtt{sel}}\xspace}
+\newcommand{\freeIn}{\ensuremath{\mathtt{freeIn}}\xspace}
+\newcommand{\out}{\ensuremath{\mathtt{out}}\xspace}
+\newcommand{\carry}{\ensuremath{\mathtt{carry}}\xspace}
+\newcommand{\add}{\ensuremath{\mathtt{add}}\xspace}
+\newcommand{\row}{\ensuremath{\mathtt{row}}\xspace}
+\newcommand{\bits}{\ensuremath{\mathtt{bits}}\xspace}
+\newcommand{\nbits}{\ensuremath{\mathtt{nbits}}\xspace}
+
+% Programs
+\newcommand{\Multiplier}{\ensuremath{\mathsf{Multiplier}}\xspace}
+\newcommand{\Main}{\ensuremath{\mathsf{Main}}\xspace}
+\newcommand{\Negation}{\ensuremath{\mathsf{Negation}}\xspace}
+\newcommand{\pilcom}{\ensuremath{\mathsf{pilcom}}\xspace}
+
+\newcommand{\Bracket}[1]{\ensuremath{\left[#1\right]}\xspace}
+
+% Make a nice empty set
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+% Make a nice phi
+\let\oldphi\phi
+\let\phi\varphi
+
+% Make a straight single quote for PIL
+\newcommand{\nextStep}[1]{#1\textsf{'}\xspace}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\maketitle
+\today
+\vspace{-5mm}
+\end{titlepage}
+
+% use optional argument because the \LaTeX command breaks the PDF keywords
+% \keywords[\publname, ToSC, TCHES, LaTeX]{TBD \and TBD}
+
+{\hypersetup{linkcolor=.}\tableofcontents}
+
+\newpage
+
+\input{../latex/language.tex}
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{../cryptobib/abbrev3, ../cryptobib/crypto, ../bib/bibliography}
+
+\end{document}

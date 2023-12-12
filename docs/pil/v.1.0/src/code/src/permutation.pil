@@ -1,0 +1,9 @@
+include "config.pil";
+
+namespace A(%N);
+    pol commit a, b, c, sel;
+
+    sel {a, b, c} is B.sel {B.e, B.d, B.f};
+
+namespace B(%N);
+    pol commit d, e, f, sel;

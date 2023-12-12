@@ -1,0 +1,88 @@
+{
+ "nCommitments": 4,
+ "nQ": 0,
+ "nIm": 0,
+ "nConstants": 0,
+ "publics": [],
+ "references": {
+  "Example1.a": {
+   "type": "cmP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Example1.b": {
+   "type": "cmP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Example2.a": {
+   "type": "cmP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Example2.b": {
+   "type": "cmP",
+   "id": 3,
+   "polDeg": 1024,
+   "isArray": false
+  }
+ },
+ "expressions": [
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 0,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 1,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 2,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 3,
+   "next": false
+  }
+ ],
+ "polIdentities": [],
+ "plookupIdentities": [],
+ "permutationIdentities": [
+  {
+   "f": [
+    0
+   ],
+   "t": [
+    1
+   ],
+   "selF": null,
+   "selT": null,
+   "fileName": "test.pil",
+   "line": 6
+  },
+  {
+   "f": [
+    2
+   ],
+   "t": [
+    3
+   ],
+   "selF": null,
+   "selT": null,
+   "fileName": "test.pil",
+   "line": 11
+  }
+ ],
+ "connectionIdentities": []
+}

@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: estark.aux
+The style file: alpha.bst
+Database file #1: ../bib/bibliography.bib
+Database file #2: ../cryptobib/abbrev3.bib
+Reallocated str_pool (elt_size=1) to 130000 items from 65000.
+Reallocated str_pool (elt_size=1) to 195000 items from 130000.
+Database file #3: ../cryptobib/crypto.bib
+You've used 18 entries,
+            2543 wiz_defined-function locations,
+            13891 strings with 164200 characters,
+and the built_in function-call counts, 8114 in all, are:
+= -- 802
+> -- 437
+< -- 17
++ -- 153
+- -- 150
+* -- 558
+:= -- 1303
+add.period$ -- 71
+call.type$ -- 18
+change.case$ -- 121
+chr.to.int$ -- 17
+cite$ -- 18
+duplicate$ -- 294
+empty$ -- 581
+format.name$ -- 170
+if$ -- 1708
+int.to.chr$ -- 2
+int.to.str$ -- 0
+missing$ -- 8
+newline$ -- 105
+num.names$ -- 66
+pop$ -- 163
+preamble$ -- 1
+purify$ -- 140
+quote$ -- 0
+skip$ -- 272
+stack$ -- 0
+substring$ -- 331
+swap$ -- 92
+text.length$ -- 17
+text.prefix$ -- 5
+top$ -- 0
+type$ -- 140
+warning$ -- 0
+while$ -- 73
+width$ -- 22
+write$ -- 259

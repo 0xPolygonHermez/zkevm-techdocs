@@ -1,0 +1,483 @@
+
+
+\section{Our eSTARK Protocol}\label{sec:generic-description}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Extended Algebraic Intermediate Representation (eAIR)}
+
+In this section we introduce the notion of eAIRs and eAIR satisfiability as a natural extension of the well-studied AIRs \cite{C:BBHR19}. Informally speaking, an eAIR is an AIR whose expressiveness is extended with more type of allowed constraints. In the following recall that $G = \langle g \rangle$ is a multiplicative subgroup of $\FF$ of order $n$.
+
+\begin{definition}[AIR and AIR Satisfiability]\label{def:AIR}
+  Given polynomials $p_1,\dots,p_M \in \FF[X]$, an \textit{algebraic intermediate representation (AIR)} $\AIR$ is a set of algebraic constraints $\{C_1,\dots,C_K\}$ such that each $C_i$ is a polynomial over $\FF[X_1,\dots,X_M,X_1',\dots,X_M']$. For each $C_i$, the first half variables $X_1,\dots,X_M$ will be replaced by polynomials $p_1(X),\dots,p_M(X)$, whereas the second half variables $X_1',\dots,X_M'$ will be replaced by polynomials $p_1(gX),\dots,p_M(gX)$.
+
+  Moreover, we say that polynomials $p_1,\dots,p_M$ \textit{satisfy a given AIR} $\AIR = \{C_1,\dots,C_K\}$ if and only if for each $i \in [K]$ we have that:
+  \[
+    C_i(p_1(x),\dots,p_M(x),p_1(gx),\dots,p_M(gx)) = 0, \forall x \in G.
+  \]
+  % i.e., each constraint $C_i$ vanishes over $G$ when is replaced by $p_1,\dots,p_M$ appropriately.  
+\end{definition}
+\begin{bremark}
+  There are two main simplifications between our definition for AIR and the definition for AIR in \cite{EPRINT:StarkWare21}: (1) we define constraints only over the ``non-shifted'' and ``shifted-by-one'' version of the corresponding polynomials, i.e., $p_i(X)$ and $p_i(gX)$, respectively; and (2) we enforce constraints to vanish over the whole $G$ and not over a subset of it. The following definitions can, however, support a more generic version. 
+\end{bremark}
+
+Now, we extend the definition of an AIR by allowing the arguments defined in Section \ref{sec:vector-arguments} as new types of available constraints.
+\begin{definition}[Extended AIR]\label{def:extended-AIR}
+  Given polynomials $p_1,\dots,p_M \in \FF[X]$, an \textit{extended algebraic intermediate representation (eAIR)} $\eAIR$ is a set of constraints $\eAIR = \{C_1,\dots,C_K\}$ such that each $C_i$ can be one of the following form:
+  \begin{enumerate}
+    \item[(a)] A polynomial over $\FF[X_1,\dots,X_M,X_1',\dots,X_M']$ as in Def. \ref{def:AIR}.
+    %TODO: Decide better notation for selectors
+    \item[(b)] A positive integer $R_i$, a set of $2R_i$ polynomials $C_{i,j}$ over $\FF[X_1,\dots,X_M]$ and two selectors $\fsel_i,\tsel_i$ over $\FF[X]$ (recall that $\fsel_i(x),\tsel_i(x) \in \{0,1\}$ for all $x \in G$).
+    \item[(c)] An integer $S_i \in [M]$, a subset of $S_i$ polynomials $p_{(1)},\dots,p_{(S_i)} \in \FF[X]$ from the set $\{p_1,\dots,p_M\}$ and $S_i$ more polynomials $S_{\sigma_1},\dots,S_{\sigma_{S_i}}$.
+  \end{enumerate}
+Finally, we refer to the set constraints of the form described in $(a)$ as the set of \textit{identity constraints} of $\eAIR$ and to the set of constraints of the form described by eiher $(b)$ or $(c)$ as the set of \textit{non-identity constraints} of $\eAIR$.
+\end{definition}
+Definition \ref{def:extended-AIR} aims to capture the arguments in Section \ref{sec:vector-arguments} in a slightly more generic way. Here, the polynomials subject to these arguments are not exactly static polynomials $p_1,\dots,p_M$, but they are generated as a polynomial combination between $p_1,\dots,p_M$.
+
+In what follows, we use $\otr$ as a shorthand for $(p_1,\dots,p_M)$ and denote by $C \circ \otr$ to the univariate polynomial over $\FF[X]$ resulting from the substitution of each of the variables $X_i,X_i'$ of the constraint $C \in \FF[X_1,\dots,X_M,X_1',\dots,X_M']$ by $p_i(X),p_i(gX)$, respectively. That is $C \circ \otr$ is the polynomal $C(p_1(X),\dots,p_M(X),p_1(gX),\dots,p_M(gX))$.
+
+% To formalize these concepts, we will make use of multivariate polynomials $C \in \FF[X_1,\dots,X_M]$, such that its composition with a sequence of polynomials $\otr = (p_1,\dots,p_M)$, $P_i \in \FF[X]$, denoted $C \circ \otr$, is a univariate polynomial. For instance, one could have $C(X_1,X_2) = X_1X_2 -2^8X_2 +23$ and then if we compose $C$ with $a(X) = X^2+2^8$ and $b(X) = X^3 + 3X^2$ we obtain:
+% \[
+%   C(a,b) = X^5 + 3X^4 + 23.
+% \]
+
+\begin{definition}[Extended AIR Satisfiability]
+  We say that polynomials $p_1,\dots,p_M \in \FF[X]$ \textit{satisfy a given eAIR} $\eAIR = \{C_1,\dots,C_K\}$ if and only if for each $i \in [K]$ one and only one of the following is true for all $x \in G$:
+  \[
+  \begin{array}{c}
+    (C_i \circ \otr)(x) = 0, \\[0.3cm]
+    \fsel_i(x) \cdot  ((C_{i,1} \circ \otr)(x),\dots,(C_{i,R_i} \circ \otr)(x)) \in \tsel_i(x) \cdot ((C_{i,R_i+1} \circ \otr)(x),\dots,(C_{i,2R_i} \circ \otr)(x)), \\[0.3cm]
+    \fsel_i(x) \cdot  ((C_{i,1} \circ \otr)(x),\dots,(C_{i,R_i} \circ \otr)(x)) \doteq \tsel_i(x) \cdot ((C_{i,R_i+1} \circ \otr)(x),\dots,(C_{i,2R_i} \circ \otr)(x)), \\[0.3cm]
+    (p_{(1)}(x),\dots,p_{(S_i)}(x)) \propto (S_{\sigma_{1}}(x),\dots,S_{\sigma_{S_i}}(x)).
+  \end{array}
+  \]
+\end{definition}
+
+
+%TODO: Preprocessing phase!?
+%TODO: Improve this section, I do not like it
+%TODO: talk about the "theoretical" version with oracle when it is done and add a draw about this phase
+%GOOD resource for this https://aszepieniec.github.io/stark-anatomy/faster#preprocessing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The Setup Phase}
+
+During the protocol of Section \ref{sec:our-IOP}, both the prover and the verifier will need to have access to a set of preprocessed polynomials $\pre_i \in \FF[X]$. In particular, the prover will need to have full access to them, either in coefficient or in evaluation form, in order to be able to correctly generate the proof. On the other hand, the verifier will only need to have acces to a subset the evaluations of these polynomial over the domain $H$.
+
+To this end, in our protocol we assume the existence of a phase, known as the \textit{setup phase}, that is prior to the protocol message exchange but after the particular statement to be proven (or equivalently, the set of constraints that describe the statement) is fixed. In the setup phase, the preprocessed polynomials are computed and the prover and the verifier receive different information regearding them. Particularly, the setup phase, with input a set of polynomial constraints, consists on the following steps:
+\begin{enumerate}
+  \item The trace LDE of each preprocessed polynomial is computed. 
+  \item The Merkle tree of the set of preprocessed polynomials is computed.
+  \item Finally, the complete tree is sent to the prover and its corresponding root is sent to the verifier. This way, when the verifier needs to compute the evaluation of any preprocessed polynomial over $h \in H$, he can request it from the prover, who will respond with the evaluation along with its corresponding Merkle tree path. The verifier then verifies the accuracy of the information received by using the root of the tree.
+\end{enumerate}
+\begin{remark}
+  Since the computational effort of the setup phase is greater than $\O(\log(n))$, we cannot include this phase as part of the verifier description if we want our protocol to satisfy verifier scalability.
+\end{remark} 
+
+Note that the setup phase does not include a measure for the verifier to be sure that the computation of Merkle tree of preprocessed polynomials is correct. However, as the setup phase input is basically the set of polynomial constraints representing the problem's statement (something that the verifier also knows), the verifier can run at any time the setup phase to check the validity of the computations.
+
+Moreover, both the prover and the verifier will need to have access to the evaluations over $H$ of the vanishing polynomial $Z_G(X) := X^n -1$ and the first Lagrange polynomial $L_1(X) := \frac{g(X^n-1)}{n(X-g)}$. However, $Z_G$ and $L_1$ will appear later on in the protocol, and although in principle we do not consider them preprocessed polynomials, they are publicly known and therefore included in the Merkle tree computation of the setup phase.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Our IOP for eAIR}\label{sec:our-IOP}
+
+Before the start of the protocol, we assume the prover and verifier have fixed a specific eAIR instance $\eAIR = \left\{\widetilde{C}_1,\dots,\widetilde{C}_{T'}\right\}$ and that the constraints of $\eAIR$ are ordered as follows: first, the identity constraints, then the lookup arguments, followed by the permutation arguments, and finally, the connection arguments. Additionally, we assume that the setup phase has been successfully executed.
+
+Throughout the description of the protocol, we use the following useful notation:
+\begin{itemize}
+  \item Let $N,R$ be two non-negative integers. We set $N$ to be the number of trace column polynomials and $R$ to be the number of preprocessed polynomals.
+  \item Among the set of polynomial constraints $\eAIR$, we denote by $M,M',M'' \in \ZZ^*$ the number of lookup arguments, permutation arguments and connection arguments, respectively. 
+  \item The prover parameters $\pparams$ are composed by the finite field $\FF$, the domains $G$ and $H$, the field extension $\KK$, the eAIR instance $\eAIR$, all the public values, the set of committed polynomials and the Merkle tree of preprocessed polynomals.
+  \item The verifier parameters $\vparams$ are composed by the finite field $\FF$, the domains $G$ and $H$, the field extension $\KK$, the eAIR instance $\eAIR$, all the public values and the Merkle tree's root of preprocessed polynomials.
+\end{itemize}
+
+Our IOP for eAIR, which can be seen as an extension of the DEEP-ALI protocol \cite{EPRINT:BGKS19}, is a follows.
+\begin{protocol}[IOP for eAIR]\label{prot:IOP-eAIR}
+  The protocol starts with a set of trace column polynomials $\tr_1,\dots,\tr_N \in \FF_{<n}[X]$ and preprocessed polynomials $\pre_1,\dots,\pre_R \in \FF_{<n}[X]$. The following protocol is used by a prover to prove to a verifier that polynomials $\tr_1,\dots,\tr_N,\pre_1,\dots,\pre_R$ satisfy $\eAIR$:
+\begin{enumerate}
+  \item \textbf{Trace Column Oracles:} The prover sets oracle functions $[\tr_1],\dots,[\tr_N]$ to $\tr_1$,$\dots$,$\tr_N \in \FF_{<n}[X]$ for the verifier, who responds with uniformly sampled values $\alpha,\beta \in \KK$. During this step, the prover also computes the intermediate polynomials resulting from the subset of identity constraints. Let $K \in \ZZ^*$ be the number of these polynomials, denoted as $\im_i \in \FF_{<n}[X]$, where $i \in [K]$. It is important to recall that new identity constraints must also be considered when introducing intermediate polynomials, as demonstrated in Eq. \eqref{eq:intermediate-constraint}. As additional intermediate polynomials may be introduced in Round \ref{item:grand-product-oracles}, the prover will set oracles for $\im_1,\dots,\im_K$ in that round. \label{item:execution-trace-oracles}
+
+  \item \textbf{Plookup Oracles:} As explained by Section \ref{sec:vector-arguments}, the prover, if needed:
+  \begin{itemize}
+    \item Uses $\alpha$ to reduce both vector lookups and vector permutations into simple (possibly selected) lookups and permutations.
+    \item Uses $\beta$ to reduce both selected lookups and selected permutations into simple (non-selected) lookups and permutations.
+  \end{itemize}
+  
+  After the previous two reductions, the prover computes the Plookup polynomials $h_{i,1},h_{i,2} \in \KK_{<n}[X]$ for each lookup argument, with $i \in [M]$. Then, he sets oracle functions $[h_{1,1}]$,$[h_{1,2}]$,$\dots$,$[h_{M,1}]$,$[h_{M,2}]$ for the verifier, who answers with uniformly sampled values $\gamma,\delta \in \KK$. \label{item:plookup-oracles}
+  
+  \item \textbf{Grand-Product and Intermediate Oracles:} The prover uses $\gamma,\delta$ to compute the grand-product polynomials $Z_i \in \KK_{<n}[X]$ for each argument, with $i \in [M+M'+M'']$.
+  
+  Importantly, some identity constraints induced by the constraints asserting the validity of the connection argument's grand-product polynomials might be of degree greater or equal than $4$. Therefore, following Section \ref{sec:controlling-degree}, the prover split these constraints into multiple constraints of degree at most $3$ by the introduction of intermediate polynomials. Let $K' \in \ZZ^*$ be the number of introduced intermediate polynomials, denoted as $\im_{K'+i} \in \KK[X]$, where $i \in [K']$. 
+  
+  The prover sets oracle functions $[Z_1]$,$\dots$,$[Z_{M+M'+M''}]$ and $[\im_1]$,$\dots$,$[\im_{K+K'}]$ for the verifier. The verifier answers with a uniformly sampled value $\afr \in \KK$. \label{item:grand-product-oracles}
+  
+  At this point, the original eAIR $\eAIR = \{\widetilde{C}_1,\dots,\widetilde{C}_{T'}\}$ has been reduced to an AIR $\AIR = \{C_1,\dots,C_T\}$, with $T \geq T'$, so we continue by executing the DEEP-ALI protocol over $\AIR$ with the modifications mentioned in Sections \ref{sec:quotient-polynomial} and \ref{sec:controlling-degree}. 
+  \begin{bremark}
+    Rounds \ref{item:plookup-oracles} and \ref{item:grand-product-oracles} are skipped by both the prover and the verifier if the eAIR instance $\eAIR$ is in fact an AIR. In such case, Round \ref{item:constraint-trace-oracles} follows from Round \ref{item:execution-trace-oracles}.
+  \end{bremark}
+
+  %TODO: Invent a better notation for \otr in this case
+  \item \textbf{Trace Quotient Oracles:} The prover computes the polynomial $Q(X) \in \KK[X]$:
+  \[
+    Q(X) := \sum_{i=1}^T \afr^{i-1} \frac{(C_i \circ \otr)(X)}{Z_G(X)},
+  \]
+  where we have now used $\otr$ to denote the sequence of polynomials containing $\tr_1,\dots,\tr_N$, $\pre_1,\dots,\pre_R$, $h_{1,1},h_{1,2},\dots,h_{M,1},h_{M,2}$, $Z_1,\dots,Z_{M+M'+M''}$ and finally $\im_1,\dots,\im_{K+K'}$. Therefore, $(C_i \circ \otr)(X)$ is the (univariate) polynomal resulting from the composition of the (multivariate) polynomial $C_i$ and the non-shifted and shifted version of the (univariate) polynomials in $\otr$. Then, the prover splits $Q$ into two trace quotient polynomials $Q_1$ and $Q_2$ of degree lower than $n$, and sets their oracles $[Q_1]$ and $[Q_2]$ for the verifier. Polynomials $Q_1$ and $Q_2$ satisfy the following:
+  \begin{equation}\label{eq:ali-check}
+    Q_1(X) + X^n \cdot Q_2(X) = \sum_{i=1}^T \afr^{i-1} \frac{(C_i \circ \otr)(X)}{Z_G(X)}.
+  \end{equation}
+   \label{item:constraint-trace-oracles}
+
+  \item \textbf{DEEP Query Answers:} The verifier samples a uniformly sampled DEEP query $z \in \KK \backslash (G \cup H)$. Note that the verifier prohibits $z \in G$ to enable evaluation of the right-hand side of Eq. \eqref{eq:ali-check} and prohibits $z \in H$ to enable evaluation of the polynomial $F$, defined in Round \ref{item:FRI-protocol}, during the FRI protocol.
+  Then, the verifier queries either the oracles set by the prover in previous rounds or the oracles to the preprocessed polynomials to obtain the evaluation sets $\Evals(z)$ and $\Evals(gz)$. Two observations should be made: first, it is possible for a polynomial to have evaluations in both $\Evals(z)$ and $\Evals(gz)$; and second, evaluations of preprocessed polynomials are also included within $\Evals(z)$ and $\Evals(gz)$. The verifier then sends to the prover uniformly sampled values $\epsilon_1,\epsilon_2 \in \KK$.
+  
+  \item \textbf{FRI Protocol:} Among the set of polynomals in $\otr$, respectively denote by $f_i$ and $h_i$ those whose evaluation respectively belong to $\Evals(z)$ and $\Evals(gz)$. The prover computes the polynomials $\FRI_1,\FRI_2 \in \KK[X]$:
+  \begin{align*}
+    \FRI_1(X) &:= \sum_{i = 1}^{|\Evals(z)|} \epsilon_2^{i-1} \frac{f_i(X) - f_i(z)}{X-z} \\[0.2cm]
+    \FRI_2(X) &:= \sum_{i = 1}^{|\Evals(gz)|} \epsilon_2^{i-1} \frac{h_i(X) - h_i(gz)}{X-gz},
+  \end{align*}
+  after which he computes the polynomial $\FRI(X) := \FRI_1(X) + \epsilon_1 \cdot \FRI_2(X)$. Finally, the prover and the verifier run the FRI protocol to prove the low degreness of $\FRI$, which starts by setting oracle acces to $\FRI$ for the verifier. \label{item:FRI-protocol}
+
+  \item \textbf{Verification:} Similar to the vanilla STARK verifier, the verifier proceeds as follows:
+  \begin{enumerate}
+    \item \textbf{ALI Consistency.} Checks that the trace quotient polynomials $Q_1$ and $Q_2$ are consistent with the trace column polynomials $\tr_1,\dots,tr_N$, the preprocessed polynomials $\pre_1,\dots,\pre_R$, the plookup-related polynomials $h_{1,1}$,$h_{1,2}$, $\dots$, $h_{M,1}$,$h_{M,2}$, the grand-product polynomials $Z_1, \dots, Z_{M+M'+M''}$ and the intermediate polynomials $\im_1,\dots,\im_{K+K'}$. The verifier achieves so by means of Eq. \eqref{eq:ali-check} and the evaluations in $\Evals(z)$ and $\Evals(gz)$.
+    \item \textbf{Batched FRI Verification.} It runs the batched FRI verification procedure on the polynomial $\FRI$.
+  \end{enumerate}
+  
+  If either $(a)$ or $(b)$ fail at any point, the verifier aborts and rejects. Otherwise, the verifier accepts.
+\end{enumerate}
+\end{protocol}
+
+
+
+
+
+\ifSOUNDNESS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Soundness Analysis (TODO Héctor)}
+
+% TODO: Hector check notation.
+
+\[
+  \frac{m+1/2}{\sqrt{\rho}} \left(\frac{T-1}{|\KK|} + \frac{S(|G|-1)+(|G|-1)}{|\KK|-|H|-|G|}\right) + \eFRI,
+\]
+% where $k = |G|$ and $n = |H|$.
+
+We obtain the main result of this article.
+\begin{theorem}[STIK for eAIR]\label{thm:STIK}
+  Protocol \ref{prot:IOP-eAIR} constitutes a scalable transsparent IOP of knowledge (STIK) for extended AIR satisfiability, i.e., a prover can use Protocol \ref{prot:IOP-eAIR} to prove to a verifier the possession of a set of polynomials $p_1,\dots,p_{N+R} \in \FF_{<n}[X]$ satisfying a given extended AIR instance $\eAIR = \left\{\widetilde{C}_1,\dots,\widetilde{C}_{T'}\right\}$. In particular, denote by $\eeSTARK$ to the soundness error of the protocol. Then:
+  \begin{enumerate}
+    \item[(a)] if the given eAIR $\eAIR$ is an AIR, we have:
+    \[
+      \eeSTARK = \ell \left(\frac{T-1}{|\KK|} + \frac{(D + |G| + 2)\cdot \ell}{|\KK|-|H|-|G|}\right) + \eFRI,
+    \]
+    \item[(b)] otherwise, we have:
+    \[
+      \eeSTARK = \left(\frac{|G| \cdot N+1}{|\KK|}\right)^2 + \ell \left(\frac{T-1}{|\KK|} + \frac{(D + |G| + 2)\cdot \ell}{|\KK|-|H|-|G|}\right) + \eFRI,
+    \]
+  \end{enumerate}
+  where $\ell = m/\rho$, $m \geq 3$ is an integer and $\eFRI$ corresponds to the soundness error of the batched FRI protocol.
+\end{theorem}
+
+Before starting with the proof, let us discuss the main differences between the common part of this soundness bound and the bound of Theorem \ref{thm:STARK-soundness}:
+\begin{enumerate}
+  \item In the computation of the quotient polynomial $Q$ we are using powers of a random value $\afr^{i-1}$ instead of a pair $(\afr_i,\bfr_i)$ for each constraint $C_i$. This leads to a polynomial of degree $T-1$ in the variable $\afr$ and therefore the Schwartz-Zippel lema increases the bound from $1/|\KK|$ to $(T-1)/|\KK|$.
+  \item Since we are splitting the quotient polynomial $Q$ into polynomials $Q_1,Q_2$ that follow a linear relation with $Q$ (i.e., that $Q_1(X) + X^nQ_2(X) = Q(X)$) instead of exponential (i.e., that $Q_1(X^2) + XQ_2(X^2) = Q(X)$) we only need to restrict the sampling space for $z$ at $\KK \backslash (G \cup H)$ instead of $\KK \backslash (G \cup \bar{H})$.
+\end{enumerate}
+
+\begin{proof}[Proof of Theorem \ref{thm:STIK}]
+We start the proof by restricting it to the case of $\eAIR$ being an AIR, that is, we assume that no arguments are among the set of constraints. This means that neither Round 2 nor Round 3 of the previous protocol are needed and are therefore skipped. The resulting protocol turns out to be the (modfied) vanilla STARK resulting from the combination of the DEEP-ALI protocol and the batched version of the FRI protocol. A proof that this combination results in a sound protocol is typicallly divided into two parts: (1) first, the soundness analysis of the DEEP-ALI part can be found in Theorem 6.2 of \cite{EPRINT:BGKS19}; (2) second, the proof that the batched FRI as to applied in Section \ref{sec:STIK-to-STARK} is sound can be found in Theorem 8.3 of \cite{EPRINT:BCIKS20}. The proof that the combination of these two sound protocols leads to a secure protocol can be found in Corollary 2 of \cite{EPRINT:StarkWare21}. In this case $\eSTARK = \eeSTARK$.
+
+What remains to prove is the expression for the soundness of the protocol when there are arguments present in $\eAIR$. 
+\end{proof}
+
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{From a STIK to a Non-Interactive STARK}\label{sec:STIK-to-STARK}
+
+As described in Definition \ref{def:STARK}, transforming the STIK of Section \ref{sec:our-IOP} to a STARK is very straightforward. First, oracles sent from the prover to the verifier in each round are substituted by a single Merkle tree root as explained in Section \ref{sec:committing}. So, for instance, oracle access to $[\tr_1],\dots,[\tr_N]$ set by the prover in the first round is substituted by the Merkle tree root of the Merkle tree containing the evaluations of $\tr_1,\dots,\tr_N$ over the domain $H$. Second, instead of letting the verifier asking a query to a set of polynomial oracles $[f_1],\dots,[f_N]$ at the same point $v$, the verifier asks for these evaluations to the prover and the prover answers with $f_1(v),\dots,f_N(v)$ together with the Merkle path associated with them. We do not specify the specific hash function used in the computation of each Merkle tree, but we only state that this hash function does not have any relation to the hash function used to render the protocol non-interactive, as long as its output space is in the appropriate field.
+
+\ifNOPOLYGON
+To render the following protocol in a non-interactive manner, we use the Fiat-Shamir heuristic \cite{C:FiaSha86}. To this end, let $\H \colon \{0,1\}^* \to \KK$ denote the hash function, modelled as a random oracle in the soundness analysis, that instantiates the heuristic. We emphasize that $\H$ takes any number of inputs and returns elements of $\KK$.
+\fi
+
+We denote by $\seed$ to the concatenation of the initial eAIR instance $\eAIR = \left\{\widetilde{C}_1,\dots,\widetilde{C}_{T'}\right\}$, all the public values and the Merkle tree's root of preprocessed polynomials. This value will act as the seed to the hash function $\H$ in order to simulate the first verifier's message. 
+% After the first hash computation, we will use $\transcript$ to refer to the concactenation of $\seed$ and the proof elements written by the prover up to the current protocol's round.
+
+\ifNOPOLYGON
+Moreover, to simulate subsequent verifier's messages we use a technique called \textit{hash chaining}:
+\begin{definition}[Hash Chain]\label{def:hash-chain}
+  Let $\H \colon \{0,1\}^* \to \KK$ be a hash function and let $a_1,\dots,a_r$ be the messages sent from the prover to the verifier in an interactive protocol, where each $a_i$ represent a set of $\KK$ elements.
+  % We do not specify the specific form of the $a_i$ since can represent various protocol-related elements (e.g., a set of $\KK$ values). 
+  A \textit{hash chain} is the set of field elements $\beta_1,\beta_2,\dots,\beta_r$ obtained as follows:
+  \begin{align*}
+    \beta_1 &= \H(\seed, a_1), \\
+    \beta_2 &= \H(\beta_1, a_2), \\
+    \beta_3 &= \H(\beta_2, a_3), \\
+    &\vdots \\
+    \beta_r &= \H(\beta_{r-1}, a_r).
+  \end{align*}
+\end{definition}
+A proof that the resulting non-interactive protocol is sound after applying the Fiat-Shamir using hash chaining can be found, for example, in Theorem 4 of \cite{EPRINT:AttFehKlo21}.
+
+\begin{remark}
+  In Definition \ref{def:hash-chain} we have avoided writing the generalization of having multiple verifier's messages sent at the same round. In such case, we compute them as $\beta_{i,j} = \H(\beta_{i-1},a_i,j)$ for $i \in [r]$ and $j = 1,2,\dots$. As a consequence, in round $i+1$ we must include every generated $\beta_{i,j}$ to compute the verifier' messages, i.e.,  $\beta_{i+1,j} = \H(\{\beta_{i,j}\}_j,a_{i+1},j)$ with $k = 1,2,\dots$
+\end{remark}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Full Protocol Description}
+
+We split the protocol's description between the prover algorithm and verifier algorithm and compose each round in the prover algorithm of the computation the verifier's challenges (via Fiat-Shamir) and the actual messages computed by the prover. We reuse the notation and assumptions from Section \ref{sec:our-IOP}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{PROVER ALGORITHM}
+
+%TODO: ADd parameters and make the diagrams non-interactive
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 1: Trace Column Polynomials}
+
+Given the trace column polynomials $\tr_1,\tr_2,\dots,\tr_N \in \FF_{<n}[X]$, the prover commits to them, as explained in Section \ref{sec:committing}, computing their associated Merkle root:
+\mypbnonum{}{
+  \P(\pparams) \<  \< FS \\[][\hline]
+  \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \< 
+}
+
+During this step, the prover also computes the intermediate polynomials $\im_1,\dots,\im_K$ resulting from the subset of identity constraints.
+
+% The first prover output is $\MTR(\tr_1,\dots,\tr_N)$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 2: Plookup Polynomials}\label{par:round-2}
+
+
+
+\ifNOPOLYGON
+The prover computes the reducing challenges $\alpha, \beta \in \KK$:
+
+\[
+  \alpha = \H(\seed,\MTR\left(\left\{\tr_i\right\}_i\right),1),\quad \beta = \H(\seed,\MTR\left(\left\{\tr_i\right\}_i\right),2).
+\]
+\fi
+
+\ifPOLYGON
+First of all we initialize a transcript instance \transcript. Now, the prover adds the \seed and the Merkle root for the commitment of the trace polynomials $\{\tr_i\}_i$ into the transcript
+\[
+	\transcriptAdd(\seed, \MTR(\{\tr_i\}_i))
+\]
+and extracts the corresponding challenges $\alpha, \beta \in \KK$ to be sent to the verifier:
+\[
+\alpha = \transcriptExtract{1}(\transcript), \quad \beta = \transcriptExtract{2}(\transcript).
+\]
+\fi
+
+Using $\alpha$ and $\beta$, the prover computes the Plookup polynomials $h_{i,1},h_{i,2} \in \KK_{<n}[X]$ for each lookup argument, with $i \in [M]$, and commits to them:
+\mypbnonum{}{
+  \P(\pparams) \< \< FS \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \<
+}
+
+% The second prover output is $\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 3: Grand-Product and Intermediate Polynomials}\label{par:round-3}
+
+\ifNOPOLYGON
+The prover computes the permutation challenges $\gamma,\delta \in \KK$: 
+\[
+  \gamma = \H(\alpha,\beta,\MTR\left(\{h_{i,j}\}_{i,j}\right),1),\quad \delta = \H(\alpha,\beta,\MTR\left(\{h_{i,j}\}_{i,j}\right),2).
+\]
+\fi
+
+\ifPOLYGON
+The prover adds the Merkle root of the tree for the commitment of the set $\{h_{i, j}\}_{i, j}$ of polynomials to the transcript
+\[
+\transcriptAdd(\MTR(\{h_{i, j}\}_{i, j})),
+\]
+and extracts the corresponding challenges $\gamma, \delta \in \KK$ to be sent to the verifier
+\[
+\gamma = \transcriptExtract{1}(\transcript), \quad \delta = \transcriptExtract{2}(\transcript).
+\]
+\fi
+
+The prover uses $\gamma,\delta$ to compute the grand-product polynomials $Z_i \in \KK_{<n}[X]$ for each argument, with $i \in [M+M'+M'']$. 
+The prover also computes the remaining intermediate polynomials $\im_{K+1},\dots,\im_{K+K'}$. 
+
+In this round, the prover commits to both the grand-product polynomials and all the intermediate polynomials. To save one element in the proof, the prover uses the same Merkle tree for both the grand-product and the intermediate polynomials:
+\mypbnonum{}{
+  \P(\pparams) \< \< FS \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$}} \<
+}
+
+% The third prover output is $\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 4: Trace Quotient Polynomials}
+
+\ifNOPOLYGON
+The prover computes the combination challenge $\afr \in \KK$:
+\[
+  \afr = \H(\gamma,\delta,\MTR\left(\{Z_i\}_i\right)),\MTR\left(\{\im_i\}_i\right)).
+\]
+\fi
+
+\ifPOLYGON
+The prover adds the Merkle roots of the trees for the commitments by the sets $\{Z_i\}_i$ and $\{\im_i\}_i$ of polynomials to the transcript
+\[
+\transcriptAdd(\MTR(\{Z_i\}_i), \MTR(\{\im_i\}_i)),
+\]
+and extracts the corresponding challenge $\afr \in \KK$ to be sent to the verifier
+\[
+\afr = \transcriptExtract{1}(\transcript).
+\]
+\fi
+
+The prover uses $\afr$ to compute the quotient polynomial $Q \in \KK_{<2n}[X]$: 
+\[
+  Q(X) := \sum_{i=1}^T \afr^{i-1} \frac{(C_i \circ \otr)(X)}{Z_G(X)},
+\]
+and splits it into two polynomials $Q_1$ and $Q_2$ of degree lower than $n$ as in Eq. \eqref{eq:quotient-split}. Then, the prover commits to these two polynomials:
+\mypbnonum{}{
+  \P(\pparams) \< \< FS \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\afr$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Q_1,Q_2)$}} \<
+}
+
+Recall that $Q_1,Q_2$ satisfy the following relation with $Q$:
+\begin{equation}\label{eq:ali-check2}
+  Q_1(X) + X^n \cdot Q_2(X) = \sum_{i=1}^T \afr^{i-1} \frac{(C_i \circ \otr)(X)}{Z_G(X)}.
+\end{equation}
+
+% The fourth prover output is $\MTR(Q_1,Q_2)$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 5: DEEP Query Answers}
+
+\ifNOPOLYGON
+The prover computes the evaluation challenge $z \in \KK$: 
+\begin{equation}\label{fs-5}
+  z = \H(\afr,\MTR(Q_1,Q_2)).
+\end{equation}
+
+If $z$ falls either in $G$ or $H$, then we introduce a counter as an extra input to the hash function $\H$ in Eq. \eqref{fs-5} and keep incrementing it until $z \in \KK \backslash (G \cup H)$. The probability that $z$ is not of the expected form is proportional to $(|G|+|H|)/|\KK|$, which is sufficiently small for all practical purposes.
+\fi
+
+\ifPOLYGON
+The prover adds the Merkle root of the tree for the commitments of the $Q_1$ and $Q_2$ polynomials to the transcript
+\[
+\transcriptAdd(\MTR(Q_1, Q_2)),
+\]
+and extracts the corresponding challenge $z \in \KK$ to be sent to the verifier
+\[
+z = \transcriptExtract{1}(\transcript).
+\]
+
+If $z$ falls either in $G$ or $H$, then we introduce a counter as an extra input to the hash function and keep incrementing it until $z \in \KK \backslash (G \cup H)$. The probability that $z$ is not of the expected form is proportional to $(|G|+|H|)/|\KK|$, which is sufficiently small for all practical purposes.
+\fi
+
+The prover computes the evaluation sets $\Evals(z)$ and $\Evals(gz)$:
+\mypbnonum{}{
+  \P(\pparams) \< \< FS \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\afr$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Q_1,Q_2)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$z$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz)\}$}} \<
+}
+
+% The fifth prover output is $(\Evals(z),\Evals(gz))$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Round 6: FRI Protocol}
+
+\ifNOPOLYGON
+The prover computes the combination challenges $\epsilon_1,\epsilon_2 \in \KK$:
+\[
+  \epsilon_1 = \H(z,\Evals(z),\Evals(gz),1), \quad \epsilon_2 = \H(z,\Evals(z),\Evals(gz),2).
+\]
+\fi
+
+\ifPOLYGON
+The prover adds the the sets $\Evals(z)$ and $\Evals(gz)$ into the transcript
+\[
+\transcriptAdd(\Evals(g), \Evals(gz)),
+\]
+and extracts the corresponding challenges $\epsilon_1, \epsilon_2 \in \KK$ to be sent to the verifier
+\[
+\epsilon_1 = \transcriptExtract{1}(\transcript), \quad \epsilon_2 = \transcriptExtract{2}(\transcript).
+\]
+\fi
+
+  
+Among the set of polynomals in $\otr$, respectively denote by $f_i$ and $h_i$ those whose evaluation respectively belong to $\Evals(z)$ and $\Evals(gz)$. The prover computes the polynomials $\FRI_1,\FRI_2 \in \KK[X]$:
+\begin{align*}
+  \FRI_1(X) &:= \sum_{i = 1}^{|\Evals(z)|} \epsilon_2^{i-1} \frac{f_i(X) - f_i(z)}{X-z} \\[0.2cm]
+  \FRI_2(X) &:= \sum_{i = 1}^{|\Evals(gz)|} \epsilon_2^{i-1} \frac{h_i(X) - h_i(gz)}{X-gz},
+\end{align*}
+after which he computes the polynomial $\FRI(X) := \FRI_1(X) + \epsilon_1 \cdot \FRI_2(X)$. Finally, the prover executes the (non-interactive version of the) FRI protocol to prove the low degreness of the $\FRI$ polynomials, after which he obtains a FRI proof $\pi_{\text{FRI}}$. 
+\mypbnonum{}{
+  \P(\pparams) \< \< FS \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\afr$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(Q_1,Q_2)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$z$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz)\}$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\epsilon_1,\epsilon_2$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\pi_{\text{FRI}}$}} \<
+}
+
+% The sixth prover output is $\pi_{\text{FRI}}$.
+
+The full description of the transcript can be found in Figure \ref{fig:STARK3} of Appendix \ref{sec:full-descriptions}
+
+The prover returns:
+\[
+\pi_{\text{eSTARK}} = 
+\left(
+\begin{array}{c}
+\MTR(\tr_1,\dots,\tr_N), \MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2}), \\[0.2cm]
+\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'}),\\[0.2cm]
+\MTR(Q_1,Q_2),\Evals(z),\Evals(gz), \pi_{\text{FRI}}
+\end{array}
+\right)
+\]
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{VERIFIER ALGORITHM}
+
+In order to verify the STARK, the verifier performs the following steps:
+\begin{enumerate}
+  \item Checks that $\MTR(\tr_1,\dots,\tr_N)$, $\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$, $\MTR(Z_1,\dots,Z_{M+M'+M''},$ $\im_1,\dots,\im_{K+K'})$, $\MTR(Q_1,Q_2)$ are all in $\KK$.
+  \item Checks that every element in both $\Evals(z)$ and $\Evals(gz)$ is from $\KK$.
+  \item Computes the challenges $\alpha,\beta,\gamma,\delta,\afr,z,\epsilon_1,\epsilon_2 \in \KK$ from the elements in $\seed$ and $\pi_{\text{eSTARK}}$ (except for $\pi_{\text{FRI}}$, which is used to compute the challenges within FRI).
+  
+  \item \textbf{ALI Consistency.} Checks that the trace quotient polynomials $Q_1$ and $Q_2$ are consistent with the trace column polynomials $\tr_1,\dots,tr_N$, the preprocessed polynomials $\pre_1,\dots,\pre_R$, the plookup-related polynomials $h_{1,1}$,$h_{1,2}$, $\dots$, $h_{M,1}$,$h_{M,2}$, the grand-product polynomials $Z_1, \dots, Z_{M+M'+M''}$ and the intermediate polynomials $\im_1,\dots,\im_{K+K'}$. The verifier achieves so by means of Eq. \eqref{eq:ali-check2} and the evaluations contained in $\Evals(z)$ and $\Evals(gz)$.
+  
+  \item \textbf{Batched FRI Verification.} Using $\pi_{\text{FRI}}$, it runs the batched FRI verification procedure on the polynomial $\FRI$.
+\end{enumerate}
+
+If either any of the previous steps fail at any point, the verifier aborts and rejects. Otherwise, the verifier accepts.

@@ -1,0 +1,69 @@
+{
+ "nCommitments": 3,
+ "nQ": 0,
+ "nIm": 0,
+ "nConstants": 0,
+ "publics": [],
+ "references": {
+  "Multiplier.freeIn1": {
+   "type": "cmP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Multiplier.freeIn2": {
+   "type": "cmP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Multiplier.out": {
+   "type": "cmP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  }
+ },
+ "expressions": [
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 2,
+     "next": false
+    },
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 0,
+       "next": false
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 1,
+       "next": false
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "polIdentities": [
+  {
+   "e": 0,
+   "fileName": "multiplier.pil",
+   "line": 11
+  }
+ ],
+ "plookupIdentities": [],
+ "permutationIdentities": [],
+ "connectionIdentities": []
+}

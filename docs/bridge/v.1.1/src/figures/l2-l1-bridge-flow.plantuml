@@ -1,0 +1,41 @@
+@startuml data-exchange-resolution-k
+skinparam Shadowing false
+skinparam DefaultFontName Bitstream Vera Sans
+skinparam DefaultMonospacedFontName Bitstream Vera Sans Mono
+skinparam SequenceMessageAlign direction
+skinparam MaxMessageSize 500
+skinparam Style strictuml
+skinparam Monochrome true
+skinparam Dpi 300
+scale max 800 width
+
+!pragma teoz true
+
+hide footbox
+participant "L2 User" as L2U #white
+participant "L2 PolygonZkEVMBridge.sol" as SCL2B  #white
+participant "PolygonZkEVMGlobalExitRootL2.sol" as SCGERML2  #white
+participant "Aggregator" as Agg #white
+participant "PolygonZkEVM.sol" as POE #white
+participant "PolygonZkEVMGlobalExitRoot.sol" as SCGERM  #white
+participant "L1 PolygonZkEVMBridge.sol" as SCL1B  #white
+participant "L1 User " as L1U #white
+
+group L2 Bridge TX
+L2U->>SCL2B++: call **bridgeAsset**
+SCL2B->>SCGERML2 ++--: call **updateExitRoot** with new L2 EMT root
+end
+SCGERML2->>Agg++--: query **Last L2 EMT**
+group L1 Batch Verification TX
+Agg->>POE++--: call **verifyBatches**
+POE->>SCGERM++--: call **updateExitRoot** with new L2 EMT root
+SCGERM--
+end
+
+group L1 Claim TX
+L1U->>SCL1B++--: call **claimAsset** 
+SCL1B->>SCGERM++--: request specific GEMT
+SCGERM->>SCL1B++--: response specific GEMT
+SCL1B->>L1U++--: transfer bridged asset 
+end
+

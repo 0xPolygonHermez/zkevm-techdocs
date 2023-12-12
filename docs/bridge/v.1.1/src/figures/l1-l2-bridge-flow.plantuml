@@ -1,0 +1,39 @@
+@startuml data-exchange-resolution-k
+skinparam Shadowing false
+skinparam DefaultFontName Bitstream Vera Sans
+skinparam DefaultMonospacedFontName Bitstream Vera Sans Mono
+skinparam SequenceMessageAlign direction
+skinparam MaxMessageSize 250
+skinparam Style strictuml
+skinparam Monochrome true
+skinparam Dpi 300
+scale max 800 width
+!pragma teoz true
+
+hide footbox
+participant "L1 User " as L1U #white
+participant "L1 PolygonZkEVMBridge.sol" as SCL1B  #white
+participant "PolygonZkEVMGlobalExitRoot.sol" as SCGERM  #white
+participant "Sequencer" as seq #white
+participant "PolygonZkEVMGlobalExitRootL2.sol" as SCGERML2  #white
+participant "L2 PolygonZkEVMBridge.sol" as SCL2B  #white
+participant "L2 User" as L2U #white
+
+group L1 Bridge TX
+L1U->>SCL1B++: call **bridgeAsset**
+SCL1B->>SCGERM ++--: call **updateExitRoot** with new L1 EMT root
+SCGERM--
+end
+seq++
+seq->>SCGERM++--: query **globalExitRootMap**
+SCGERM->>seq++--: response **globalExitRootMap**
+
+seq->>SCGERML2++--: synchronize **globalExitRootMap**
+SCGERML2--
+group L2 Claim TX
+L2U->>SCL2B++--: call **claimAsset** 
+SCL2B->>SCGERML2++--: request specific GEMT
+SCGERML2->>SCL2B++--: response specific GEMT
+SCL2B->>L2U++--: transfer bridged asset 
+
+

@@ -1,0 +1,318 @@
+% !TEX root = ../build-polygon/proof-recursion.tex
+
+\section{Building zkEVM Proofs}
+
+The setup phase runs with the proverjs. 
+The circuits build in the setup phase can be used as many times
+as desired.
+In production, the proof generation runs with the prover written in C++.
+The prover receives the information about the particular composition of 
+proofs via an gRPC API.
+Next we explain how to use each software component in more detail.
+
+\subsection{Preprocessing and Initialitiation}
+%https://hackmd.io/6HgHAvgjR-CB08UaU5MsjA?view
+
+
+\subsubsection{Requirements}
+
+In order to verify the Smart Contract, there will be necessary a machine with at least $256$GB of RAM and $16$ cores. This section's tutorial will give instructions for a \texttt{r6a.8xlarge} AWS instance, with $16$ cores, $32$ threads and $512$GB of SSD. This instance uses Ubuntu 22.04 LTS costing $1.82$ dollars per hour. 
+
+
+\subsubsection{Setup}
+
+First of all, we ought prepare the OS in order to be able to run the verification procedure: we update the apt packages and install \texttt{tmux}, \texttt{git} and \texttt{curl}.
+
+\begin{lstlisting}[style=termt]
+sudo apt update
+sudo apt install -y tmux git curl
+\end{lstlisting}
+
+Posteriorly, the kernel configuration parameters should be changed in order to accept high amount of memory:
+
+\begin{lstlisting}[style=termt]
+echo "vm.max_map_count=655300" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -w vm.max_map_count=655300
+export NODE_OPTIONS="--max-old-space-size=230000"
+\end{lstlisting}
+
+Now, we install the \texttt{NodeSource} \texttt{Node.js} \texttt{18.x} repository onto our Ubuntu machine. \textbf{It is important to check that the main version of Node is \texttt{18}. }
+
+\begin{lstlisting}[style=termt]
+curl -sL "https://deb.nodesource.com/setup_18.x" -o nodesource_setup.sh
+sudo bash nodesource_setup.sh
+sudo apt install -y nodejs
+node -v
+\end{lstlisting}
+
+Moreover, in order to be able to compile circuits involved, we need \texttt{circom} installed: 
+
+\begin{lstlisting}[style=termt]
+cd ~
+git clone https://github.com/iden3/circom.git
+cd circom
+git checkout v2.1.4
+git log --pretty=format:'%H' -n 1
+\end{lstlisting}
+
+The hasth of the commit should be 
+\[
+\texttt{ca3345681549c859af1f3f42128e53e3e43fe5e2.}
+\]
+
+Now, we install and compile \texttt{cicom} using Rust's package manage and build system: \texttt{cargo}. It is important to check that the version of \texttt{circom} is \texttt{2.1.4}:
+
+\begin{lstlisting}[style=termt]
+sudo apt install -y cargo
+cargo build --release
+cargo install --path circom
+export PATH=$PATH:~/.cargo/bin
+echo 'PATH=$PATH:~/.cargo/bin' >> ~/.profile
+circom --version
+\end{lstlisting}
+
+In order to build the tree of constants in a fast way we have integrated a tool called \texttt{bctree}. We can build it using the following set of commands:
+
+\begin{lstlisting}[style=termt]
+cd ~
+git clone https://github.com/0xPolygonHermez/zkevm-prover.git
+cd zkevm-prover
+git checkout b9179f3b870c2922b11d09462b447d0fc35dd2f9
+git submodule init
+git submodule update
+sudo apt install -y build-essential libomp-dev libgmp-dev nlohmann-json3-dev libpqxx-dev nasm libgrpc++-dev libprotobuf-dev grpc-proto libsodium-dev uuid-dev libsecp256k1-dev
+make -j bctree
+\end{lstlisting}
+
+This step takes approximately $8$ minutes to complete.
+
+
+
+\subsubsection{Preprocessing}
+
+The next step consists on building all the setup steps specified before in this document, such as building all constants and circuits. This can be done using the code below. Observe that we are actually using the previously built \texttt{bcee} tool above in the last command, under the \texttt{--bctree} flag.
+
+\begin{lstlisting}[style=termt]
+cd ~
+git clone https://github.com/0xPolygonHermez/zkevm-proverjs.git
+cd zkevm-proverjs
+git checkout 59694e4a8a9358772c23e8110f53aee049e2d5bd
+npm install
+tmux -c "npm run buildsetup --bctree=../zkevm-prover/build/bctree"
+\end{lstlisting}
+
+This step is quite long, it takes approximately 4.5 hours. 2 out of 4.5 hours are for the \texttt{powersOfTau28\_hez\_final.ptau} download, a file of 288GB that it’s loaded only once.
+
+\subsection{Verification of the Smart Contract}
+
+As a final result of the previous steps, the smart contract that verifies the test has been generated. This file is \texttt{final.fflonk.verifier.sol}. At this point, it is possible to verify the smart contract using the source code or verify that the bytecode is the same. 
+
+\subsubsection{Option 1: Verify the Smart Contract using the Source Code}
+
+To verify the bytecode, you must compile with the precisely same version, compiler, and parameters to be sure that even the metadata hash contained in the bytecode is exactly the same. The following instructions generate a project to build using the hardhat tool.
+
+\begin{lstlisting}[style=termt]
+cd ~
+mkdir contract
+cd contract
+npm init -y 
+npm install hardhat
+mkdir -p contracts/verifiers
+echo -e "module.exports={solidity:{compilers:[{version: \"0.8.17\",settings:{optimizer:{enabled:true,runs:999999}}}]}}" > hardhat.config.js
+\end{lstlisting}
+
+Once the project structure is created, we proceed to copy the smart contract generated in the previous step. This smart contract was saved on \path{~ /zkevm-proverjs/build/proof}, and must be copied to \texttt{contracts/verifiers} with exactly the name \texttt{FflonkVerifier.sol}. If the name or the path changes, the hash of metadata changes too, for this reason, is essential to respect the exact name and path. This can be done by executing these commands:
+
+\begin{lstlisting}[style=termt]
+
+cp ~/zkevm-proverjs/build/proof/final.fflonk.verifier.sol contracts/verifiers/FflonkVerifier.sol
+sha256sum contracts/verifiers/FflonkVerifier.sol
+\end{lstlisting}
+
+We should double check that the output hash digest for the \texttt{FflonkVerifier.sol} file is exactly the one shown below:
+\[
+\texttt{60a850bd73a316d6f85bfdf05bc69ee01f84d889004e98b07847719f59e49761.}
+\]
+
+Once this is done and check, we can compile the Smart Contract using the following command:
+
+\begin{lstlisting}[style=termt]
+npx hardhat compile
+\end{lstlisting}
+
+The bytecode of the Smart Contract was on the \texttt{bytecode} property of the \texttt{.json} file \texttt{FflonkVerifier.json} generated on path \texttt{artifacts/contracts/verifiers/FflonkVerifier.sol}:
+
+\begin{lstlisting}[style=termt]
+608060405234801561001057600080fd5b50612a
+07806100206000396000f3fe6080604052348015
+61001057600080fd5b506004361061002b576000
+:
+:
+017fffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffe0908116603f01
+1681019083821181831017156129875761298761
+28aa565b81604052828152886020848701011115
+6129a057600080fd5b8260208601602083013760
+006020848301015280965050505050506129c884
+602085016128d9565b9050925092905056fea264
+6970667358221220f7f0438c1c741f762e101c4e
+ae732373046d40de3d0f2e0808e1fac1d863c78f
+64736f6c63430008110033
+\end{lstlisting}
+
+The following command allows us to extract previous bytecode in one line of a file \texttt{FflonkVerifier.sol.compiled.bytecode}:
+
+\begin{lstlisting}[style=termt]
+grep bytecode artifacts/contracts/verifiers/FflonkVerifier.sol/FflonkVerifier.json |sed 's/.*"\(0x.*\)".*/\1/' > FflonkVerifier.sol.compiled.bytecode
+\end{lstlisting}
+
+If you prefer you can copy by hand the content of the bytecode of the file
+\[
+\texttt{artifacts/contracts/verifiers/FflonkVerifier.sol/FflonkVerifier.json}
+\]
+to the file \texttt{FflonkVerifier.sol.compiled.bytecode}. Remember to copy only the content inside the double quotes (without double quotes).
+
+Then, use the hash-digest to verify integrity of the compiled bytecode
+
+\begin{lstlisting}[style=termt]
+sha256sum FflonkVerifier.sol.compiled.bytecode
+\end{lstlisting}
+
+The expected result is the following one
+\[
+\texttt{44f70b6a1548f49214027169db477f03e92492f19ac5594c648edb478316cbec.}
+\]
+
+
+\subsubsection{Option 2: Verify the Smart Contract comparing the Bytecode}
+
+To download bytecode of deployed Smart Contract we need his address. In this case it’s \texttt{0x4ceB990D2E2ee6d0e163fa80d12bac72C0F28D52}. Then, we can direct to Etherscan, Blockscout or Beaconcha to get transaction bytecode.
+
+Some applications running on the terminal may limit the amount of input they will accept before their input buffers overflow. To avoid this situation create file \path{FflonkVerifier.sol.explorer.bytecode} with an editor such as \texttt{nano} or \texttt{vi}.
+
+\begin{lstlisting}[style=termt]
+cd ~/contract
+nano FflonkVerifier.sol.explorer.bytecode
+\end{lstlisting}
+
+Then, paste the clipboard to the file and compare that the two files providing to both Option 1 and Option 2 are actually the same. We can do it using a \texttt{diff}:
+
+\begin{lstlisting}[style=termt]
+cd ~/contract
+diff FflonkVerifier.sol.compiled.bytecode FflonkVerifier.sol.explorer.bytecode
+\end{lstlisting}
+
+
+Or using a hash file integrity verification method:
+
+\begin{lstlisting}[style=termt]
+cd ~/contract
+sha256sum FflonkVerifier.sol.*.bytecode
+\end{lstlisting}
+
+The output of the previous command in the terminal should be
+
+\begin{lstlisting}[style=termt]
+44f70b6a1548f49214027169db477f03e92492f19ac5594c648edb478316cbec  FflonkVerifier.sol.compiled.bytecode
+44f70b6a1548f49214027169db477f03e92492f19ac5594c648edb478316cbec  FflonkVerifier.sol.explorer.bytecode
+\end{lstlisting}
+
+
+\subsection{zkEVM Proving}
+
+
+\subsubsection{Prover JS}
+
+The \texttt{main\_executor} script located in the \texttt{src} folder is used to generate the committed polynomials \texttt{commit.bin} of the execution trace for a compiled \texttt{rom.json} file coming from a \texttt{rom.zkasm} file by the zkASM compiler using a specific set of inputs from a file \texttt{input.json}. The common use of this script is shown below:
+
+\begin{lstlisting}[style=termt]
+node src/main_executor <input.json> -r <rom.json> -o <commit.bin>
+\end{lstlisting}
+
+Below, we list all the possible additional parameters that can be added to modify its usage:
+
+\begin{itemize}
+
+
+\item \path{-t <test.json>}: Test.
+
+\item \path{-l <logs.json>}: Output for logs.
+
+\item \path{-s}: Skip \texttt{.pil} file compilation.
+
+\item \path{-d}: Debug mode.
+
+\item \path{-p}: select a concrete PIL program. For example, \texttt{pilprogram.pil}.
+
+\item \path{-P}: Load \texttt{pilConfig.json} file.
+
+\item \path{-u}: Unsigned transactions mode.
+
+\item \path{-e}: Skip asserts \texttt{newStateRoot} and \texttt{newLocalExitRoot}.
+
+\item \path{-v}: Verbose mode.
+
+
+\end{itemize}
+
+
+The \texttt{buildall} command is used as a main entrypoint to all the build setup steps specified in the previous sections. 
+
+\begin{lstlisting}[style=termt]
+npm run buildall 
+\end{lstlisting}
+
+Below, we describe how to use it in full detail, listing all the involved flags:
+
+\begin{itemize}
+
+\item \path{--pil=<pil_file.pil>}: This option specifies the name of the PIL file to compile. For example, \path{--pil=src/main.pil}.
+
+\item \path{--pilconfig=<pilconfig.json>}: This option specifies the name of the PIL configuration file to use. The PIL configuration file contains various settings and options that affect the compilation process. For example, \path{--pilconfig=config/pilconfig.json}.
+
+\item \path{--starkstruct=debug}: This option generates an automatic STARK struct adapted to the PIL bits number. This option is typically used for debugging purposes. 
+
+\item \path{--from=<step>}: This option specifies the step at which to start the build/rebuild process. For example, \path{--from=c12setup}.
+
+\item \path{--continue}: This option continues the build process from where it left off during the previous build.
+
+\item \path{--step=<step>}: This option specifies single specific build step to execute. For example, \path{--step=c12setup}.
+
+\item \path{--build=<build_dir>}: This option specifies the name of the build directory to use. The build directory is where the compiled output files are stored. For example, \path{--build=build/basic_proof}.
+
+\item \path{--input=<input_file>}: This option specifies the name of the input file to use for the build process. For example, \path{--input=test/myinputfile.json}.
+
+\end{itemize}
+
+\subsubsection{Prover C++}
+
+The code and the instructions to compile and run the zkEVM Prover can be found at \href[]{https://github.com/0xPolygonHermez/zkevm-prover}{0xPolygonHermez/zkevm-prover} GitHub repository.
+The zkEVM Prover process can provide up to three RPC services. 
+
+The \textbf{Executor service} calls the Executor component of the zkEVM Prover to generate an execution trace for a set of L2 transactions.
+The execution trace can be used to prove the new state resulting after executing all the involved transactions. 
+However, this service does not generate the proof, just the execution trace.
+This service is used as fast way to check if a proposed batch or batches of transactions are properly built and if they fit in a single execution trace. 
+In other words, if the transactions of the batch or batches fit into a single proof.
+The interface of this service is defined at the file \href[]{https://github.com/0xPolygonHermez/zkevm-prover/blob/main/src/grpc/proto/executor.proto}{executor.proto}.
+
+The \textbf{StateDB service} provides an interface to access to database of the L2 state. 
+This state is succinctly represented by the root of a Merkle tree and the service provides 
+the corresponding data and their Merkle proofs.
+This service is used by the Executor component and by the Prover component and it represents the single source of truth 
+for the current state.
+Among others, we can obtain account balances, nonce values, contract deployted bytecode, storage and so on.
+The interface of this service is defined at the file \href[]{https://github.com/0xPolygonHermez/zkevm-prover/blob/main/src/grpc/proto/statedb.proto}{statedb.proto}. 
+
+Finally, the \textbf{Aggregator service} offers the highest level of service among all the services provided by the zkEVM prover.
+In more detail, this service can create a proof for a single batch or a proof for multiple batches if the fit in the execution trace.
+In addition, this service is able to create an aggregated proof if a pair of  independent proofs of consecutive batches are provided.
+When the Aggregator service is called to generate a proof, the service uses the Executor component to create the corresponding execution trace and from this trace the associated committed polynomials. 
+Finally, with the pre-processed and committed polynomials the proof is generated.
+When called with a pair of proofs of consecutive batches the service 
+generates an aggregated proof.
+The interface of this service is defined at the file \href[]{https://github.com/0xPolygonHermez/zkevm-prover/blob/main/src/grpc/proto/aggregator.proto}{aggregator.proto}. 
+
+%TODO we can describe in more detail the messages (requests and responses)
+
+

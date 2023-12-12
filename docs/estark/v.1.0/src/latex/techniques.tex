@@ -1,0 +1,607 @@
+
+
+\section{Our Techniques}
+
+In this section we explain the main differences between the techniques used during the rounds of the vanilla STARK (Section \ref{sec:vanilla-STARK}) and our techniques. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Commiting to Multiple Polynomial at Once}\label{sec:committing}
+
+For this section, explicitly set $H = \{h_1,h_2,h_3,\dots,h_m\}$.
+% , where $h \in \FF$ is an element of order $2^kn$, with $2^k$ typically called the \textit{blowup factor}, and $s \in \FF\backslash H$ is a field element chosen to obtain such coset.From now on we will denote by $m$ to $2^kn$ for notation clarity. 
+% In this section it will be important to keep in mind that the characterisitic of the field chosen to be $2^{64} - 2^{32} + 1$.
+Also, denote by $f_0,f_1,\dots,f_N \in \FF_{<n}[X]$ the set of polynomials that we want to construct the Merkle Tree on. That is, the input to the Merkle Tree constructor is the set of evaluations:
+\[
+\begin{array}{|ccccc|}
+\hline
+f_0(h_1), & f_1(h_1), & f_2(h_1), &\dots, &f_N(h_1) \\[0.1cm]
+f_0(h_2), & f_1(h_2), & f_2(h_2), &\dots, &f_N(h_2) \\
+\vdots & \vdots &\vdots &\cdots & \vdots \\
+f_0(h_m), & f_1(h_m), & f_2(h_m), & \dots, &f_N(h_m) \\
+\hline
+\end{array}
+\]
+
+A leaf element of the Merkle Tree will consist on the evaluations of all the polynomials at a single point. This will be convinient for a latter step of the STARK generation. For instance, in the batched FRI protocol we group evaluations of all the original polynomials at a common point for succinctly answering a batched consistency check. Specifically, assuming that $f_0,f_1,\dots,f_N$ are the original polynomials,  the leaf elements of the Merkle Tree, indexed by the corresponding value, will consist on:
+\[
+\begin{array}{|ccc|}
+\hline
+\text{leaf } h_1 & \Longrightarrow & \H(f_0(h_1), f_1(h_1), f_2(h_1), \dots, f_N(h_1)) \\[0.1cm]
+\text{leaf } h_2 & \Longrightarrow & \H(f_0(h_2), f_1(h_2), f_2(h_2), \dots, f_N(h_2)) \\
+\vdots &  & \vdots \\[0.1cm]
+\text{leaf } h_m & \Longrightarrow & \H(f_0(h_m), f_1(h_m), f_2(h_m), \dots, f_N(h_m)) \\
+\hline
+\end{array}
+\]
+where $\H$ is any collision resistant hash function. Notice how if $h_i$ is the requested point of check by the verifier, then the prover can prove the consistency of all the evaluations $f_0(h_i),\dots,f_N(h_i)$ with the corresponding Merkle root in a single Merkle path.
+
+%TODO: Be sure it satisfies round-by-round soundness.....
+A proof that the resulting non-interactive protocol is knowledge sound after applying the Fiat-Shamir using this strategy can be found, for example, in Theorem 4 of \cite{EPRINT:AttFehKlo21}.
+
+
+\ifPOLYGON
+To be more specific, the hash function $H$ is set to be the Poseidon \cite{USENIX:GKRRS21} hash function. Poseidon was chosen because it was created to minimize prover and verifier complexities when zero-knowledge proofs are generated and validated. Notably, the best hashing performance is obtained when the state size is limited to $12$ field elements, $4$ of which are occupied by the capacity of the hash function. This implies that, in order to get the best Poseidon performance, we have to restrict the input size to be of $8$ field elements.
+
+Leaf hashes are performed ``linearly''. By linearly we mean that, if the input to the hash function is $t_1(sh^i)$, $t_2(sh^i)$, $\dots$, $t_N(sh^i)$, then we process it as follows:
+\begin{enumerate}
+	\item The input is split in chunks of $8$ elements, filling with repetitions of the $0$ element if $N$ is not a multiple of $8$.
+	\item The first chunk is hashed using Poseidon with capacity $(0, 0, 0, 0)$.
+	\item The following chunk is hashed using Poseidon with the capacity being the output of the previous hash.
+	\item Go to Step 3 until there are no more chunks.
+\end{enumerate}
+
+An example of this process can be seen in the Figure \ref{fig:linear-hash}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.7\textwidth]{../figures/poseidon-linear-hash}
+	\caption{Leaf hash computation on input $(t_1(sh^i), \dots, t_{11}(sh^i))$ in a linear manner.}
+	\label{fig:linear-hash}
+\end{figure}
+
+Once all the hashed leafs are obtained, one starts to construct the Merkle tree by continually hashing two child nodes using Poseidon with capacity $(0,0,0,0)$ and defining the parent node as the output. This that this is well defined because Poseidon's output consist on $4$ field elements, while its input size consists on $8$. See Figure \ref{fig:full-poseidon} for an example with $4$ leafs.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.6\textwidth]{../figures/MT-poseidon-example}
+	\caption{Merkle's tree hash computation assuming $4$ leafs.}
+	\label{fig:full-poseidon}
+\end{figure}
+
+In fact, this procedure has been extended in order to being able to compute hashes faster using several GPUs. First of all, we are splitting all our polynomials in $4$ chunks of size:
+\[
+\mathtt{batchSize} = \Biggl\lfloor \max \left( 8, \frac{N + 3}{4} \right)  \Biggr\rfloor.
+\]
+
+Of course, it may be possible that not all of the chunks have exactly this amount of elements. In this case, we prioritize to fill the first $3$ ones up to this size, letting the last one become smaller, but not so smaller. The idea is that, with the formula above, the chunk size is increased by $1$ once $N$ increase by $4$ (when $N > 32$, which is the first time when all chunks has exactly \texttt{batchSize} number of elements). Hence, for $N$ big enough, the last chunk never will become smaller than $\mathtt{batchSize} - 3$, becoming a almost uniform distribution of the polynomials among the $4$ chunks. Table \ref{tab:multi-gpu-chunks} shows several examples on how this chunk division sizes looks like.
+
+\begin{figure}[h!]
+	\centering
+	\[
+	\begin{array}{|c|c|c|c|c|c|}
+	\hline
+	N	&\texttt{batchSize}	&\textbf{Chunk 1}	&\textbf{Chunk 2}	&\textbf{Chunk 3}	&\textbf{Chunk 4}	\\
+	\hline
+	1		&8			&1				&0				&0				&0				\\
+	\cdots	&\cdots		&\cdots			&\cdots			&\cdots			&\cdots			\\
+	8		&8			&8				&0				&0				&0				\\
+	9		&8			&8				&1				&0				&0				\\
+	10		&8			&8				&2				&0				&0				\\
+	\cdots	&\cdots     &\cdots			&\cdots			&\cdots			&\cdots			\\
+	17		&8			&8				&8				&1				&0				\\
+	\cdots	&\cdots		&\cdots			&\cdots			&\cdots			&\cdots			\\
+	25		&8			&8				&8				&8				&1				\\
+	\cdots	&\cdots		&\cdots			&\cdots			&\cdots			&\cdots			\\
+	32		&8			&8				&8				&8				&8				\\
+	33		&9			&9				&9				&9				&6				\\
+	34		&9			&9				&9				&9				&7				\\
+	35		&9			&9				&9				&9				&8				\\
+	36		&9			&9				&9				&9				&9				\\
+	37		&10			&10				&10				&10				&7				\\
+	38		&10			&10				&10				&10				&8				\\
+	\cdots	&\cdots		&\cdots			&\cdots			&\cdots			&\cdots			\\
+	51		&13			&13				&13				&13				&12				\\
+	\cdots	&\cdots		&\cdots			&\cdots			&\cdots			&\cdots			\\
+	\hline
+	\end{array}
+	\]
+	\caption{Chunk's size distribution for several values of $N$.}
+	\label{tab:multi-gpu-chunks}
+\end{figure}
+
+After the polynomial splitting in $4$ chunks (say $T_1, T_2, T_3$ and $T_4$), we perform the previously defined linear hash of all of them in a parallel way, ending up with a set of a maximum amount of $16$ field elements corresponding to the $4$ outputs of $4$ field elements each. To finish this updated version of the linear hash, we perform the linear hash of this $16$ elements as done previously, which outputs a final total amount of $4$ field elements. More precisely, if 
+\[
+LH(T_i) = (H_{i, 1}, H_{i, 2}, H_{i, 3}, H_{i, 4})	\quad i \in \{1, 2, 3, 4\},
+\]
+then the final output will be
+\[
+\scalebox{0.85}{\mbox{\ensuremath{\displaystyle 
+			LH(H_{1, 1}, H_{1, 2}, H_{1, 3}, H_{1, 4}, H_{2, 1}, H_{2, 2}, H_{2, 3}, H_{2, 4}, H_{3, 1}, H_{3, 2}, H_{3, 3}, H_{3, 4}, H_{4, 1}, H_{4, 2}, H_{4, 3}, H_{4, 4})
+}}},
+\]
+where $LH$ denotes the single-GPU version of the linear hash. 
+
+\input{../latex/transcript.tex}
+\fi
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Preprocessed Polynomials and Public Values}\label{sec:preprocessed-public}
+
+Among the set of polynomials that are part of the polynomial constraint system representing the problem's statement, we differentiate between two types: \textit{committed polynomials} and \textit{preprocessed polynomials}. 
+
+Committed polynomals are those polynomials for which the verifier only has oracle access and are therefore committed (via Merkle trees) by the prover before the verifier starts querying them. In other words, these polynomals can only be known, in principle, in its entire form by the prover of the protocol. Constrastly, the verifier is limited to know a ``small fraction'' of these polynomials' coefficients. In practise, this fraction is randomly chosen by the verifier and is proportional to the number of oracle queries that the verifier makes to the particular polynoial. For the shake of the protocols to be scalable, the number of queries made to committed polynomials should be at most logarithmic in their degree. An example of committed polynomials are trace columns polynomials $\tr_i$.
+
+On the other hand, preprocessed polynomials are totally known by the verifier even before the execution of the corresponding protocol. More precisely, once a polynomial constraint system $\C$ is fixed, the verifier has complete access (either in coefficient form or in evaluation form) to the set of preprocessed polynomials. As with committed polynomials, the verifier ends up needing only a small subset of evaluations of such polynomials. An example of preprocessed polynomials are Lagrange polynomials $L_i$.
+
+\begin{example}\label{example:pre-public}
+  As an example, the polynomial constraint such that for all $x\in G$ satisfies:
+  \begin{equation}\label{eq:pre-public}
+    L_1(x) (\tr_1(x) - 7) = 0,
+  \end{equation}
+  is composed of the committed polynomial $\tr_1$ and the preprocessed (Lagrange) polynomial $L_1$, and is satisfied if and only if $\tr_1(g) = 7$.  
+\end{example}
+
+
+Finally, \textit{public values} are defined as the set of committed polynomials evaluations that are attested by some constraint. Clearly, public values are known to both the prover and the verifier and a particular polynomial can have many public values associated with it. In Example \ref{example:pre-public}, the value $\tr_1(g)$ is a public value since Eq. \eqref{eq:pre-public} constraints it to be equal to $7$. 
+
+
+%TODO: Write this section with different degrees in both sides
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adding Selected Vector Arguments}\label{sec:vector-arguments}
+
+In this section, we describe how to augment the type of available constraints
+with the arguments presented in Section \ref{sec:preliminaries:arguments}.
+Recall that we will add three new types of arguments:
+\begin{itemize}
+  \item \textbf{Lookup ($\in$)}. The set constructed from the evaluations of a polynomial $f$ over a multiplicative subgroup $G$ is contained in an equally defined set of another polynomial $t$. We denote it as $f \in t$.
+  \item \textbf{Multiset Equality ($\doteq$)}. The vector constructed from the evaluations of a polynomial $f$ over a multiplicative subgroup $G$ is a permutation of an equally defined vector of another polynomial $t$. We denote it as $f \doteq t$.
+  \item \textbf{Connection ($\propto$)}. The vector constructed from the evaluations of a set of polynomials $f_1,\dots,f_{\ell}$ over a multiplicative subgroup $G$ does not vary after applying a known permutation $\sigma$ to them. We denote it as $(f^{(1)},\dots,f^{(\ell)} \propto (S^{(\sigma_1)},\dots,S^{(\sigma_{\ell})})$.
+\end{itemize}
+In order to include non-identity constraints to the protocol, we will represent them through their succinct set of identity constraints. We denote by $M^{\in}$ the number of lookup instantiations, $M^{\doteq}$ the number of multiset equality instantiations and $M^{\propto}$ the number of connection instantiations.
+
+As detailed in Section \ref{sec:preliminaries:arguments}, for the 
+lookup argument, we need to compute and commit the associated polynomials $h_{1,j}$ and $h_{2,j}$ before being able to compute the corresponding grand-product polynomial for each lookup constraint $j \in [M]$. 
+This sums up to $2M$ polynomials.
+After this, for each non-identity constraint, we compute the associate grand-product polynomial $Z$ and commit to it. This definition of this polynomial is different depending on which argument we are executing as
+shown in Section \ref{sec:preliminaries:arguments}.
+This sums up to $M$ lookup polynomials, $M'$ multiset equality polynomials and $M''$ connection polynomials. Overall, adding non-identity constraints adds up to $3M + M' + M''$ polynomials (that will need to be committed) and $2(M+M'+M'')$ polynomial constraints to the STARK.
+%TODO: Check if the number of polynomials in the connection argument can be reduced to one somehow, similar to lookups and permutations (as I explain in the following section).
+
+%TODO: Motivate it with examples? Not necessary
+
+Following, we explain how we generalize both lookups and multiset equalities to not only involving multiple polynomials, but also to a subset of the resulting vector. Therefore, somewhat artificially, enlarge the expressiveness of our arguments and let us handle more generic non-identity constraints.
+% Let's explain first how we reduce vector lookups or multiset equalities to simple (i.e., one polynomial) lookups or multiset equalities.
+% \begin{definition}[Vector Arguments]
+%   Given $2R$ multivariate polynomials $C_i \in \FF[X_1,\dots,X_N]$ and $N$ univariate polynomials $P_i \in \FF[X]$, a \textit{vector lookup} is the argument in which for all $x \in G$ there exists some $y \in G$ such that:
+%   \begin{equation}\label{eq:vector-lookup}
+%     ((C_1 \circ \otr)(x),\dots,(C_R \circ \otr)(x)) = ((C_{R+1} \circ \otr)(y),\dots,(C_{2R} \circ \otr)(y)).
+%   \end{equation}
+%
+%   A \textit{vector permutation} is defined analogously, but multiplicies of elements should be the same. That is, if for instance there exists $x_1,x_2 \in G$ such that $(C_1 \circ \otr)(x_1),\dots,(C_R \circ \otr)(x_1) = (C_1 \circ \otr)(x_2),\dots,(C_R \circ \otr)(x_2)$, then there should exist $y_1,y_2 \in G$ such that $(C_{R+1} \circ \otr)(y_1),\dots,(C_{2R} \circ \otr)(y_1) = (C_{R+1} \circ \otr)(y_2),\dots,(C_{2R} \circ \otr)(y_2)$ and for which Eq. \eqref{eq:vector-lookup} holds.
+% \end{definition}
+%
+% To reduce the previous vector argments to simple ones, we make use of a uniformly sampled element $\alpha \in \KK$. Namely, instead of trying to generate a grand-product polynomial for Eq. \eqref{eq:vector-lookup}, we define the following polynomials:
+% \begin{align}\label{eq:vector-simple}
+% \begin{split}
+%   F'(X) &:= (C_1 \circ \otr)(X) + \alpha (C_2 \circ \otr)(X) + \dots +\alpha^{R-1}(C_R \circ \otr)(X), \\[0.1cm]
+%   T'(X) &:= (C_{R+1} \circ \otr)(X) + \alpha (C_{R+2} \circ \otr)(X) + \dots + \alpha^{R-1}(C_{2R} \circ \otr)(X),
+% \end{split}
+% \end{align}
+% and compute the grand-product polynomial for the relation $F' \in T'$ or $F' \doteq T'$. Notice that both $F'$ and $T'$ are in general polynomials with coefficients over the field extension $\KK$. This reduction leads to the following result, whose proof is a direct consequence of the Schwartz–Zippel lemma.
+%
+% \begin{lemma}\label{col:vector-to-simple}
+%   Given $F',T' \in \KK[X]$ as defined by Eq. \eqref{eq:vector-simple}, if $F' \in T'$, then Eq. \eqref{eq:vector-lookup} (respectively the equation for vector permutations) holds excepts with probability $n \cdot R/|\KK|$ over the random election of $\alpha$.
+% \end{lemma}
+%
+% Now, let's go one step further by the introduction of \textit{selectors}. Informally speaking, a selected lookup (permutation) is a lookup (permutation) not between the specified two polynomials $f,t$, but between the polynomials generated by the multiplication of $f$ and $t$ with (generally speaking) independently generated selectors. We generalize to the vector setting.
+% \begin{definition}[Selected Vector Arguments]\label{def:sel-args}
+%   We are given $2R$ multivariate polynomials $C_i \in \FF[X_1,\dots,X_N]$ and $N$ univariate polynomials $P_i \in \FF[X]$. We are also given two polynomials $\fsel,\tsel \in \FF[X]$ whose range over the domain $G$ is $\{0,1\}$. That is, $\fsel$ and $\tsel$ are \textit{selectors}. A \textit{selected vector lookup} is the argument in which for all $x \in G$ there exists some $y \in G$ such that:
+%   \begin{equation}\label{eq:selected-lookup}
+%     \fsel(x) \cdot  ((C_1 \circ \otr)(x),\dots,(C_R \circ \otr)(x)) = \tsel(y) \cdot ((C_{R+1} \circ \otr)(y),\dots,(C_{2R} \circ \otr)(y)).
+%   \end{equation}
+%
+%   A \textit{selected vector permutation} is defined analogously, but multiplicies of elements should be the same. 
+% \end{definition}
+%
+% \begin{bremark}
+% Note that if $\fsel = \tsel = 1$, then Eq. \eqref{eq:selected-lookup} is reduced to \eqref{eq:vector-lookup}; if $\fsel = \tsel = 0$ then the argument is trivial; and if either $\fsel$ or $\tsel$ are equal to the constant $1$, then we remove the need for $\fsel$ or $\tsel$, respectively.
+% \end{bremark}
+%
+% To reduce the previous selected vector lookup to simple ones, we proceed in two steps. First, we use the reduction in Eq. \eqref{eq:vector-simple} to reduce the inner vector argument to a simple one. This process outputs polynomials $F',T' \in \KK[X]$. Second, we make use of another uniformly sampled $\beta \in \KK$. Namely, instead of trying to generate a grand-product polynomial for Eq. \eqref{eq:selected-lookup}, we define the following polynomials:
+% \begin{align}\label{eq:F-T-sel}
+% \begin{split}
+% T(X) &:= \tsel(X) [T'(X) - \beta] + \beta, \\[0.1cm]
+% F(X) &:= \fsel(X) [F'(X) - T(X)] + T(X),
+% \end{split}
+% \end{align}
+% and compute the grand-product polynomial for the relation $F \in T$. 
+% Importantly, the presentation ``re-ordering'' in Eq. \eqref{eq:F-T-sel} is relevant. More precisely, if $\beta$ had been introduced in the definition of $F$ instead, then there would be situations in which we would end up having $\beta$ as a lookup value and therefore the lookup argument not being satisfied even if the selectors are correct.
+% %TODO: Example of hte previous paraprah
+%
+% To reduce selected vector permutations to simple ones, we follow a similar process than with selected vector lookups. We also first use the reduction in Eq. \eqref{eq:vector-simple} to reduce the inner vector argument to simple one, but then we define:
+% \begin{align}\label{eq:F-T-sel-perm}
+%   \begin{split}
+%   F(X) &:= \fsel(X) [F'(X) - \beta] + \beta,\\[0.1cm]
+%   T(X) &:= \tsel(X) [T'(X) - \beta] + \beta, 
+% \end{split}
+% \end{align}
+% Here, we have been able to firstly define $F$ since we are dealing with permutations instead of inclusions.
+%
+% Simlarly to the vector-to-simple reduction, we obtain the following result.
+% \begin{lemma}\label{col:svector-to-simple}
+%   Given $F,T \in \KK[X]$ as defined by Eq. \eqref{eq:F-T-sel} (respectively, Eq. \eqref{eq:F-T-sel-perm}), if $F \in T$, then Eq. \eqref{eq:selected-lookup} (respectively the equation for selected vector permutations) holds excepts with probability $R \cdot n/|\KK| + 1/|\KK|$ over the random (and independently) election of $\alpha$ and $\beta$.
+% \end{lemma}
+% \begin{proof}
+%   We denote the polynomials $(C_i \circ \otr)$ by $f_i$ for $i \in [R]$, and by $t_i$ for $i > R$. Assume there exists some $x \in G$ such that for all $y \in G$ we have:
+%   \[
+%     \fsel(x) \cdot  (f_1(x),\dots,f_R(x)) \neq \tsel(y) \cdot (t_1(y),\dots,t_R(y)).
+%   \]
+%   Due to Corollary \ref{col:vector-to-simple}, we have that $\fsel(x)F'(x) = \fsel(x)(f_1(x) + \alpha f_2(x) + \dots + \alpha^{R-1} f_R(x)) \neq \tsel(y)T'(y) = \tsel(y)(t_1(y) + \alpha t_2(y) + \dots + \alpha^{R-1} t_R(y))$ except with probability $R \cdot n/|\KK|$. Therefore, we obtain:
+%   \[
+%     \fsel(x) [F'(x) - T(x)] + T(x) \neq \tsel(y) [T'(y) - \beta] + \beta,
+%   \]
+%   except with probability $1/|\KK|$.
+% \end{proof}
+Let's explain first how we reduce vector lookups or multiset equalities to simple (i.e., one polynomial) lookups or multiset equalities.
+\begin{definition}[Vector Arguments]\label{def:vec-args}
+  Given polynomials $f_i,t_i \in \KK_{<n}[X]$ for $i\in[N]$, a \textit{vector lookup} is the argument in which for all $x \in G$ there exists some $y \in G$ such that:
+  \begin{equation}\label{eq:vector-lookup}
+    (f_1(x),\dots,f_N(x)) = (t_1(y),\dots,t_N(y)).
+  \end{equation}
+
+  A \textit{vector mutliset equality} is defined analogously, but multiplicies of elements should be the same. That is, if for instance there exists $x_1,x_2 \in G$ such that $(f_1(x_1),\dots,f_N(x_1)) = (f_1(x_2),\dots,f_N(x_2))$, then there should exist $y_1,y_2 \in G$ such that $(t_1(y_1),\dots,t_N(y_1)) = (t_1(y_2),\dots,t_N(y_2))$ and for which Eq. \eqref{eq:vector-lookup} holds.
+\end{definition}
+
+To reduce the previous vector argments to simple ones, we make use of a uniformly sampled element $\alpha \in \KK$. Namely, instead of trying to generate a grand-product polynomial for Eq. \eqref{eq:vector-lookup}, we define the following polynomials:
+\begin{align}\label{eq:vector-simple}
+  F'(X) := \sum_{i=1}^N \alpha^{i-1}f_i(X), \quad T'(X) := \sum_{i=1}^N \alpha^{i-1}t_i(X),
+\end{align}
+and compute the grand-product polynomial for the relation $F' \in T'$ or $F' \doteq T'$. Notice that both $F'$ and $T'$ are in general polynomials with coefficients over the field extension $\KK$ even if every coefficient of $f_i,t_i$ are precisely over the base field $\FF$. This reduction leads to the following result, whose proof is a direct consequence of the Schwartz–Zippel lemma.
+
+\begin{lemma}\label{col:vector-to-simple}
+  Given polynomials $f_i,t_i \in \KK_{<n}[X]$ for $i\in[N]$ and $F',T' \in \KK_{<n}[X]$ as defined by Eq. \eqref{eq:vector-simple}, if $F' \in T'$ (resp. $F' \doteq T'$), then Eq. \eqref{eq:vector-lookup} (resp. the equation for vector multiset equality) holds excepts with probability $n \cdot (N-1)/|\KK|$ over the random election of $\alpha$.
+\end{lemma}
+
+Now, let's go one step further by the introduction of \textit{selectors}. Informally speaking, a selected lookup (mutliset equality) is a lookup (multiset equality) not between the specified two polynomials $f,t$, but between the polynomials generated by the multiplication of $f$ and $t$ with (generally speaking) independently generated selectors. We generalize to the vector setting.
+\begin{definition}[Selected Vector Arguments]\label{def:sel-args}
+  We are given polynomials $f_i,t_i \in \KK[X]$ for $i\in[N]$. Furthermore, we are also given two polynomials $\fsel,\tsel \in \FF[X]$ whose range over the domain $G$ is $\{0,1\}$. That is, $\fsel$ and $\tsel$ are \textit{selectors}. A \textit{selected vector lookup} is the argument in which for all $x \in G$ there exists some $y \in G$ such that:
+  \begin{equation}\label{eq:selected-lookup}
+    \fsel(x) \cdot  (f_1(x),\dots,f_N(x)) = \tsel(y) \cdot (t_1(y),\dots,t_N(y)).
+  \end{equation}
+
+  A \textit{selected vector multiset equality} is defined analogously, but multiplicies of elements should be the same as explained in Def. \ref{def:vec-args}.
+\end{definition}
+
+\begin{bremark}
+Note that if $\fsel = \tsel = 1$, then Eq. \eqref{eq:selected-lookup} is reduced to \eqref{eq:vector-lookup}; if $\fsel = \tsel = 0$ then the argument is trivial; and if either $\fsel$ or $\tsel$ are equal to the constant $1$, then we remove the need for $\fsel$ or $\tsel$, respectively.
+\end{bremark}
+
+To reduce the previous selected vector lookup to simple ones, we proceed in two steps. First, we use the reduction in Eq. \eqref{eq:vector-simple} to reduce the inner vector argument to a simple one. This process outputs polynomials $F',T' \in \KK[X]$. Second, we make use of another uniformly sampled $\beta \in \KK$ as follows. Namely, instead of trying to generate a grand-product polynomial for Eq. \eqref{eq:selected-lookup}, we define the following polynomials:
+\begin{align}\label{eq:F-T-sel}
+\begin{split}
+T(X) &:= \tsel(X) [T'(X) - \beta] + \beta, \\[0.1cm]
+F(X) &:= \fsel(X) [F'(X) - T(X)] + T(X),
+\end{split}
+\end{align}
+and compute the grand-product polynomial for the relation $F \in T$. 
+Importantly, the presentation ``re-ordering'' in Eq. \eqref{eq:F-T-sel} is relevant: if $\beta$ had been introduced in the definition of $F$ instead, then there would be situations in which we would end up having $\beta$ as a lookup value and therefore the lookup argument not being satisfied even if the selectors are correct.
+\begin{example}
+Choose $N=1$, $n=2^3$. We compute the following values:
+\[
+\begin{array}{|c|}
+\hline
+x	\\
+\hline
+g	\\
+g^2	\\
+g^3	\\
+g^4	\\
+g^5	\\
+g^6	\\
+g^7	\\
+g^8	\\
+\hline
+\end{array}
+\hspace{0.3cm}
+\begin{array}{|c|c|c|c|}
+\hline
+f_1(x)	& F'(x) & \fsel(x) & F(x)	\\
+\hline
+3 & 3 & 0	& 1	\\
+7 & 7 & 1	& 7	\\
+4 & 4 & 0	& 7	\\
+1 & 1 & 1	& 1	\\
+5 & 5 & 1	& 5	\\
+1 & 1 & 0	& 5	\\
+2 & 2 & 1	& 2	\\
+5 & 5 & 1	& 5	\\
+\hline
+\end{array}
+\hspace{0.3cm}
+\begin{array}{|c|c|c|c|}
+\hline
+t_1(x)	& T'(x) & \tsel(x) & T(x)	\\
+\hline
+1	& 1	& 1	& 1	\\
+1	& 1	& 0	& \beta	\\
+7	& 7	& 1	& 7	\\
+6	& 6	& 0	& \beta	\\
+5	& 5	& 1	& 5	\\
+5	& 5 & 1	& 5	\\
+5	& 5	& 0	& \beta	\\
+7	& 2	& 1	& 2	\\
+\hline
+\end{array}
+\]
+Notice how $F \in T$. However, if we would have instead defined $F,T$ as
+$F(X) = \fsel(X) [F'(X) - \beta] + \beta$ and $T(X) = \tsel(X) [T'(X) - F(X)] + F(X)$ then we would end up having $\beta$ as a lookup value, which implies that $F \notin T$ even tho $f_1,t_1$ and $\fsel,\tsel$ are correct.
+\end{example}
+
+To reduce selected vector mutliset equalities to simple ones, we follow a similar process than with selected vector lookups. We also first use the reduction in Eq. \eqref{eq:vector-simple} to reduce the inner vector argument to simple one, but then we define:
+\begin{align}\label{eq:F-T-sel-perm}
+  \begin{split}
+  F(X) &:= \fsel(X) [F'(X) - \beta] + \beta,\\[0.1cm]
+  T(X) &:= \tsel(X) [T'(X) - \beta] + \beta, 
+\end{split}
+\end{align}
+Here, we have been able to firstly define $F$ since we are dealing with mutliset equalities instead of inclusions.
+
+Simlarly to the vector-to-simple reduction, we obtain the following result by observing that polynomials $F,T$ (either from Eq. \eqref{eq:F-T-sel} or Eq. \eqref{eq:F-T-sel-perm}) are of total degree $N-1$ over variables $\alpha,\beta$.
+\begin{lemma}\label{col:svector-to-simple}
+  Given polynomials $f_i,t_i \in \KK_{<n}[X]$ for $i\in[N]$ and $F,T \in \KK_{<n}[X]$ as defined by Eq. \eqref{eq:F-T-sel} (resp. Eq. \eqref{eq:F-T-sel-perm}), if $F \in T$ (resp. $F \doteq T$), then Eq. \eqref{eq:selected-lookup} (resp. the equation for selected vector multiset equalities) holds excepts with probability $n \cdot (N-1)/|\KK|$ over the random and independent election of $\alpha$ and $\beta$.
+\end{lemma}
+% \begin{proof}
+%   Assume there exists some $x \in G$ such that for all $y \in G$ we have:
+%   \[
+%     \fsel(x) \cdot  (f_1(x),\dots,f_N(x)) \neq \tsel(y) \cdot (t_1(y),\dots,t_N(y)).
+%   \]
+%   Due to Lemma \ref{col:vector-to-simple}, we have that $\fsel(x)F'(x) = \fsel(x)(f_1(x) + \alpha f_2(x) + \dots + \alpha^{N-1} f_N(x)) \neq \tsel(y)T'(y) = \tsel(y)(t_1(y) + \alpha t_2(y) + \dots + \alpha^{N-1} t_N(y))$ except with probability $n \cdot N/|\KK|$. Therefore, we obtain:
+%   \[
+%     \fsel(x) [F'(x) - T(x)] + T(x) \neq \tsel(y) [T'(y) - \beta] + \beta,
+%   \]
+%   except with probability $1/|\KK|$.
+% \end{proof}
+
+Lemmas \ref{col:vector-to-simple} and \ref{col:svector-to-simple} imply the following bounds.
+\begin{theorem}[Soundness Bounds]\label{thm:sound-bound}
+  Given polynomials $f_i,t_j \in \KK_{<n}[X]$ for $i\in[N]$, we obtain:
+  \begin{enumerate}
+    \item \textbf{Plookup}. Let $F,T \in \KK_{<n}[X]$ as defined by Eq. \eqref{eq:F-T-sel}. If a prover that interacts with a verifier causes it to accept with probability greater than:
+    \[
+      \ePlo := n\frac{N-1}{|\KK|} + \frac{4n-2}{|\KK|},
+    \]
+    then Eq. \eqref{eq:selected-lookup} holds.
+
+    \item \textbf{Multiset Equality}. Let $F,T \in \KK_{<n}[X]$ as defined by Eq. \eqref{eq:F-T-sel-perm}. If a prover that interacts with a verifier causes it to accept with probability greater than:
+    \[
+      \eMulEq := n\frac{N-1}{|\KK|} + \frac{n}{|\KK|},
+    \]
+    then Eq. \eqref{eq:selected-lookup} holds.
+
+    \item \textbf{Connection}. Let $F,T \in \KK_{<n}[X]$ as defined by Eq. \eqref{eq:F-T-sel-perm}. If a prover that interacts with a verifier causes it to accept with probability greater than:
+    \[
+      \eMulEq := \ell\frac{n}{|\KK|},
+    \]
+    then Eq. \eqref{eq:selected-lookup} holds.
+  \end{enumerate} 
+\end{theorem}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TODO: Probably do it more generic, with polynomial combination instead of single polynomials
+\begin{example}\label{sec:concrete-example}
+Say that for all $x \in G$ the prover wants to prove that he knows some polynomials $\tr_1,\tr_2,\tr_3,\tr_4,\tr_5 \in \FF_{<n}[X]$ such that:
+\begin{align}\label{eq:pol4}
+\begin{array}{c}
+\tr_1 \in \tr_3, \\[0.2cm]
+\tr_3 \doteq \tr_4, \\[0.2cm]
+(\tr_2,\tr_1,\tr_5) \propto (S_{\sigma_1},S_{\sigma_2},S_{\sigma_3}),
+\end{array}
+\end{align}
+where we have used the notation $\doteq$ to denote that $c$ and $d$ are a permutation of each other, without specifying a particular permutation.
+
+Following the previous section and Section \ref{sec:controlling-degree}, the polynomial constraint system \eqref{eq:pol4} gets transformed to the following one, so that for all $x \in G$:
+\begin{align*}
+\begin{array}{c}
+  L_1(x) \left( Z_1(x) - 1\right) = 0, \\[0.2cm]
+Z_1(gx) = \displaystyle Z_1(x)\frac{(1+\beta)(\gamma + \tr_1(x))(\gamma(1+\beta) + \tr_3(x) + \beta \tr_3(gx))}{(\gamma(1+\beta) + {h_{1,1}}(x) + \beta {h_{1,2}}(x))(\gamma(1+\beta) + {h_{1,2}}(x) + \beta {h_{1,1}}(gx))}, \\[0.4cm]
+L_1(x) \left( Z_2(x) - 1\right) = 0, \\[0.2cm]
+Z_2(g x) = \displaystyle Z_2(x)\frac{(\gamma + \tr_3(x))}{(\gamma + \tr_4(x))}, \\[0.4cm]
+L_1(x) \left( Z_3(x) - 1\right) = 0, \\[0.2cm]
+\im_1(x) = (\tr_1(x) + \beta k_1x + \gamma)(\tr_5(x) + \beta k_2x + \gamma), \\[0.2cm]
+\im_2(x) = (\tr_1(x) + S_{\sigma_2}(x) + \gamma)(\tr_5(x) + S_{\sigma_3}(x) + \gamma), \\[0.2cm]
+Z_3(g x) = \displaystyle Z_3(x)\frac{(\tr_2(x) + \beta x + \gamma) \im_1(x)}{(\tr_2(x) + S_{\sigma_1}(x) + \gamma)\im_2(x)},
+\end{array}
+\end{align*}
+where we notice that the only type of argument that sometimes need to be adjusted are the connection arguments.
+\end{example}
+
+
+We end this section by explaining the protocol corresponding to a multiple execution of the previously protocols combined all together. Denote by $M$ to the number of lookups, by $M'$ the number of multiset equalities and by $M''$ the number of connections. 
+\begin{protocol}\label{prot:extended-plookup}
+The protocol starts with a set of polynomials $f_{i,j},t_{i,j} \in \FF_{<n}[X]$ for $i\in[N]$ and $j\in[M+M'+M'']$ known to the prover. Here, for each $j \in [M]$, $\{f_{i,j},t_{i,j}\}_i$ correspond to the polynomials of each $M$ plookup invocations; for each $j \in [M+1,M+M']$, $\{f_{i,j},t_{i,j}\}_i$ correspond to the polynomials of each $M'$ multiset equality invocations and for each $j \in [M+M'+1,M+M'+M'']$, $\{f_{i,j}\}_i$ correspond to the polynomials of each $M''$ connection invocations and $\{t_{i,j}\}_i$ correspond to the polynomials $\{S_{i,\sigma_{j}}\}_i$ derived from each permutation $\sigma_j$. For each $j \in [M+M']$, the prover possibly also knows selectors $\fsel_j,\tsel_j$.
+\begin{enumerate}
+  \item \textbf{Execution Trace Oracles:} The prover sends oracle functions $[f_{i,j}],[t_{i,j}],[\fsel_j],[\tsel_j]$ to the verifier, who responds with uniformly sampled values $\alpha,\beta \in \KK$.
+  \item \textbf{Plookup Oracles:} The prover computes the Plookup polynomials $h_{1,j},h_{2,j}$ for each plookup invocation $j \in [M]$. Then, he sends oracle functions of them to the verifier, who answers with uniformly sampled values $\gamma,\delta \in \KK$.
+  \item \textbf{Grand-Product Oracles:} The prover computes the grand-product polynomials $Z_j$ for each argument $j \in [M+M'+M'']$ and sends oracle functions of them to the verifier.
+  \item \textbf{Verification:} For each $j \in [M]$ and all $x \in G$, the verifier checks that constraints in Eq. \eqref{eq:look-Z} hold; for each $j \in [M+1,M+M']$, constraints in Eq. \eqref{eq:permutation-Z} hold; and for each $j \in [M+M'+1,M+M'+M'']$, constraints in Eq. \eqref{eq:connection-Z} hold.
+\end{enumerate}
+\end{protocol}
+
+\mypbnonum{}{
+  \P \< \< \V \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\{[f_{i,j}],[t_{i,j}],[\fsel_j],[\tsel_j]\}_{i,j}$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{[h_{1,1}],[h_{2,1}], \dots, [h_{1,M}],[h_{2,M}]\}$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{[Z_1],\dots,[Z_{M+M'+M''}]\}$}} \<
+}
+
+Using Theorem \ref{thm:sound-bound} and the Parallel Repetition Theorem for polynomial IOPs \cite{EPRINT:BenChiSpo16}, \cite{Goldreich98} we obtain the following result. Use $M_1,M_2,M_3$ to refer to the number of simple, vector and selected vector lookups. We have $M = M_1+M_2+M_3$. For the multiset equality scenario, analogously define $M_1',M_2',M_3'$.
+\begin{corollary}[Soundness of Protocol \ref{prot:extended-plookup}]
+  Let $\ePlo,\eMulEq,\eCon$ be the soundness for a single invocation of the protocols asserting the lookup, multiset equality and connection arguments, respectively. Then if the prover interacts with the verifier in Protocol \ref{prot:extended-plookup} and causes it accept with probability greater than:
+  \[
+  \eArgs := \left(n\frac{1}{|\KK|}\right)^{M_1}\left(n\frac{N}{|\KK|}\right)^{M_2}\left(n\frac{N}{|\KK|}\right)^{M_3} \cdot (\eMulEq)^{M'} \cdot (\eCon)^{M''},
+  \]
+  then each of the $M$ lookup, $M'$ multiset equality and $M''$ connection arguments get satisifed.
+\end{corollary}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{On the Quotient Polynomial}\label{sec:quotient-polynomial}
+
+In the vanilla STARK protocol, the quotient polynomial $Q$ (Eq. \ref{eq:quotient-polynomial}) is computed by adjusting the degree of the rational functions:
+\[
+  q_i(X) := \frac{C_i(\tr_1(X), \dots, \tr_N(X), \tr_1(gX), \dots, \tr_N(gX))}{Z_{G}(X)},
+\]
+to a sufficiently large power of two $D$ with the help of two random values $\afr_i,\bfr_i$. The sum of the resulting polynomials $\hat{q}_i := (\afr_iX^{D-\deg(q_i)-1} + \bfr_i) \cdot q_i(X)$ is precisely $Q$. 
+
+There are two major issues with the previous definition of the quotient polynomial: (1) it leads to an amount of uniformly sampled values $\afr_i,\bfr_i$ proportional to the number of constraints; and (2) \cite{EPRINT:StarkWare21} (or any other source, as far as we know) does not provide a proof of why the degree adjustment is necessary at all. On the other side, problematic (1) becomes a real problem when the proof size should be as small as possible and therefore this made us explore sound alternatives.
+
+Therefore, we obtain a single random value $\afr \in \KK$ and define the quotient polynomial as a random linear combination of the rational functions $q_i$ as follows:
+\[
+  Q(X) := \sum_{i=1}^{\ell} \afr^{i-1} q_i(X).
+\]
+Note that we not only we remove the degree adjustment of the $q_i$'s, but also use powers of a uniformly sampled value $\afr$ instead of sampling one value per constraint. A proof that this alternative way of computing the quotient polynomial is sound was carefully analized in Theorem 7 of \cite{EPRINT:Habock22} (and based on Theorem 7.2 of \cite{EPRINT:BCIKS20}). Importantly, the soundness bound of this alternative version is linearly increased by the number of constraints $\ell$, so we might assume from now on that $\ell$ is sublinear in $|\KK|$ to ensure the security of protocols.
+
+%TODO: Talk about why we restrict the domain to be G: Compilation step from a problem on "the mind" of the prover to the proper arithmetization}
+
+
+%TODO: Why do we do that
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Controlling the Constraint Degree wih Intermediate Polynomials}\label{sec:controlling-degree}
+
+In the vanilla STARK protocol, the initial set of constraints that one attest to compute the proof over is of unbounded degree. However, when one arrives at the point after computing the quotient polynomial $Q$, it should be split into polynomials of degree lower than $n$ to ensure the same redundancy is added as with the trace column polynomials $\tr_i$ for a sound application of the FRI protocol. In this section we explain an alternative for this process and propose the split to happen ``at the beginning'' and not ``at the end'' of the proof computation. 
+
+Therefore, we will proceed with this approach assuming that the arguments in Section \ref{sec:preliminaries:arguments} are included among the initial set of constraints. The constraints imposed by the grand-products polynomials $Z_i$ of multiset equalities and lookups are of known degree: degree $2$ for the former and degree $3$ for the latter. Based on this information, we will propose a splitting procedure that allows for polynomial constraints up to degree $3$, but will split any exceeding it.
+
+Say the initial set of polynomial constraints $\C = \{C_1, \dots, C_\ell \}$ contain a constraint of total degree greater or equal than $4$. For instance, say that we have $\C = \{C_1,C_2\}$ with:
+\begin{equation}\label{eq:example}
+\begin{split}
+  C_1(X_1,X_2,X_3,X_1',X_2',X_3') &= X_1 \cdot X_2 \cdot X_2' \cdot X_3' - X_3^3, \\[0.2cm]
+  C_2(X_1,X_2,X_3,X_1',X_2',X_3') &= X_2 -7 \cdot X_1' + X_3'.
+\end{split}
+\end{equation}
+Now, instead of directly computing the (unbounded) quotient polynomial $Q$ and then doing the split, we will follow the following process:
+\begin{enumerate}
+  \item Split the constraints of degree $t \geq 4$ into $\ceil{t/3}$ constraints of degree lower or equal than $3$ through the introduction of one formal variable and one constraint per split.
+  \item Compute the rational functions $q_i$. Notice the previous step restricts the degree of the $q_i$'s to be lower than $2n$.
+  \item Compute the quotient polynomial $Q \in \FF_{<2n}[X]$ and then split it into (at most) two polynomials $Q_1$ and $Q_2$ of degree lower than $n$ as follows:
+  \begin{equation}\label{eq:quotient-split}
+    Q(X) = Q_1(X) + X^n \cdot Q_2(X),
+  \end{equation}
+  where $Q_1$ is obtained by taking the first $n$ coefficients of $Q$ and $Q_2$ is obtained by taking the last $n$ coefficients (filling with zeros if necessary).
+  \begin{remark}
+    Here, we might have that $Q_2$ is identically equal to $0$. This is in contrast with the technique used for the split in Eq. \eqref{eq:trace-quotient-polynomial}, where the quotient polynomial $Q$ is distributed uniformly across each of the trace quotient polynomials $Q_i$.
+  \end{remark}
+\end{enumerate}
+This process will ``control'' the degree of $Q$ so that it will be always of degree lower than $2n$.
+
+Following with the example in Eq. \eqref{eq:example}, we rename $C_2$ to $C_3$ and introduce the formal variable $Y_1$ and the constraint:
+\begin{equation}\label{eq:intermediate-constraint}
+  C_2(X_1,X_2,X_3,X_1',X_2',X_3',Y_1) = X_1 \cdot X_2 - Y_1,
+\end{equation}
+
+Now, in order to compute the rational functions $q_i$, we have to compose $C_2$ not only with the trace column polynomials $\tr_i$ but also with additional polynomials corresponding with the introduced variables $Y_i$. We will denote these polynomials as $\im_i$ and refer to them as \textit{intermediate polynomials}.
+
+Hence, the set of constraints in \eqref{eq:example} gets augmented to the following set:
+\begin{align*}
+\begin{split}
+  C_1(X_1,X_2,X_3,X_1',X_2',X_3',Y_1) &= Y_1 \cdot X_2' \cdot X_3' - X_3^3, \\[0.2cm]
+  C_2(X_1,X_2,X_3,X_1',X_2',X_3',Y_1) &= X_1 \cdot X_2 - Y_1, \\[0.2cm]
+  C_3(X_1,X_2,X_3,X_1',X_2',X_3',Y_1) &= X_2 -7 \cdot X_1' + X_3',
+\end{split}
+\end{align*}
+where we include the variable $Y_1$ in $C_3$ for notation simplicity. Note that now what we have is two constraints of degree lower than $3$, but we have added one extra variable and constraint to take into account.
+
+Discussing more in depth the tradeoff generated between the two approaches, we have for one side that $\deg(Q) = \max_i\{\deg(q_i)\} = \max_i\{\deg(C_i)(n-1)-|G|\}$. Denote by $i_{\text{max}}$ the index of the $q_i$ where the maximum is attained. Then, the number of polynomials $S$ in the split of $Q$ is equal to:
+\[
+\ceil{\frac{\deg(Q)}{n}} = \ceil{\frac{\deg(C_{i_{\text{max}}})(n-1)-|G|}{n}} = \deg(C_{i_{\text{max}}}) + \ceil{-\frac{|G|}{n}},
+\]
+which is equal to either $\deg(C_{i_{\text{max}}})-1$ or $\deg(C_{i_{\text{max}}})$.
+
+We must compare this number with the number of additional constraints (or polynomials) added in our proposal. So, on the other side we have that the overall number of constraints $\tilde{\ell}$ is:
+\[
+\sum_{i=1}^{\ell} \ceil{\frac{\deg(C_i)}{3}},
+\]
+with $\tilde{\ell} \geq \ell$.
+
+We conclude that the appropriate approach should be chosen based on the minimum value between $\tilde{\ell}-\ell$ and $S$. Specifically, if the goal is to minimize the number of polynomials in the proof generation, then the vanilla STARK approach should be taken if $\min\left\{\tilde{\ell}-\ell,S\right\} = S$, and our approach should be taken if $\min\left\{\tilde{\ell}-\ell,S\right\} = \tilde{\ell}-\ell$.
+
+%TODO: Correct typos and inconsistencies please
+\begin{example}
+  To give some concrete numbers, let us compare both approaches using the following set of constraints:
+  \begin{align*}
+  C_1(X_1, X_2, X_3, X_4, X_1') &= X_1 \cdot X_2^2 \cdot X_3^4 \cdot X_4 - X_1', \\[0.2cm]
+  C_2(X_1, X_2, X_3) &= X_1 \cdot X_2^3 + X_3^3 , \\[0.2cm]
+  C_3(X_2, X_3, X_4, X_2') &= X_2^3 \cdot X_3 \cdot X_4 + X_2',
+  \end{align*}
+  
+  In the vanilla STARK approach, we obtain $S = 8$.
+  % extra polynomials in the splitting because the degree of the first constraint (which is the one with highest degree) is $9$. 
+  On the other side, using the early splitting technique explained before, by substituting $X_1 \cdot X_2^2$ by $Y_1$ and $X_2 \cdot X_3 \cdot X_4$ by $Y_2$ we transform the previous set of constraints into an equivalent one having all constraints of degree less or equal than $3$. This reduction only introduces $2$ additional constraints: 
+  \begin{align*}
+  C_1(X_1', Y_1, Y_2) &= Y_1^2 \cdot Y_2 - X_1', \\[0.2cm]
+  C_2(X_2, X_3, Y_1) &= Y_1 \cdot X_2 + X_3^3, \\[0.2cm]
+  C_3(X_2, X_2', Y_2) &= Y_2 \cdot X_2^2 + X_2', 	\\[0.2cm]
+  C_4(X_1, X_2, Y_1) &= 	Y_1 - X_1 \cdot X_2^2\\[0.2cm]
+  C_5(X_2, X_3, X_4, Y_2) &= Y_2 - X_2 \cdot X_3 \cdot X_4
+  \end{align*}
+  
+  Henceforth, the early splitting technique is convenient in this case, introducing $3$ new polynomials instead of the $7$ that proposes the vanilla STARK approach. 
+  
+  However, early splittings are not unique. That is, we can reduce the degree of the constraints differently, giving producing more polynomials and worsening our previous splitting in terms of numbers of polynomials. For example, the following set of constraints (achieved by substituting $X_1 \cdot X_2^2$ by $Y_1$, $X_3^3$ by $Y_2$, $X_3 \cdot X_4$ by $Y_3$ and $X_2^3$ by $Y_4$) is equivalent to the former ones, but in this case we added $4$ extra polynomial constraints:
+  \begin{align*}
+  C_1(X_1', Y_1, Y_2, Y_3) &= Y_1 \cdot Y_2 \cdot Y_3 - X_1', \\[0.2cm]
+  C_2(X_2, Y_1, Y_2) &= Y_1 \cdot X_2 + Y_2, \\[0.2cm]
+  C_3(X_2', Y_3, Y_4) &= Y_3 \cdot Y_4 + X_2', \\[0.2cm]
+  C_4(X_1, X_2, Y_1) &= Y_1 - X_1 \cdot X_2^2, \\[0.2cm]
+  C_5(X_3, Y_2) &= Y_2 - X_3^3, \\[0.2cm]
+  C_6(X_3, X_4, Y_3) &= Y_3 - X_3 \cdot X_4, \\[0.2cm]
+  C_7(X_2,Y_4) &= Y_4 - X_2^3
+  \end{align*}
+  
+  % On the other side, a system of constraints composed by the following kind of constraints is not easily early-reducible:
+  % \[
+  % C_i(X_i, X_{i+1}, X_{i+2}) = X_i^3 \cdot X_{i+1} + X_{i+1}^3 \cdot X_i + X_{i+2}
+  % \]
+  
+  % More specifically, each $C_i$ added into our constraints system will increase by $2$ the number of polynomial constraints if the early splitting technique is used. Informally, these constraints do not have repetitions in the monomials composing them, not allowing to generate optimal substitutions as done before. Therefore, even having only one of such constraints, Vanilla STARK approach is preferable.
+  
+  % That being said, a careful and sophisticated analysis using Computational Algebra techniques should be used in order to choose the optimal solution between both approaches. However, as a rule of thumb, our approach is preferable whenever only a few constraints exceed degree $3$ or/and there exists several repetitions among the monomials of the exceeding constraints.
+\end{example} 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{FRI Polynomial Computation}\label{sec:computing-polynomials}
+
+Recall from Section \ref{sec:vanilla-STARK} the $\FRI$ polynomial was computed as follows:
+\begin{align*}
+\begin{array}{rl}
+\FRI(X) := &\displaystyle~\sum_{i \in I_1} \epsilon^{(1)}_i \cdot \frac{\tr_i(X) - \tr_i(z)}{X - z} + \sum_{i \in I_2} \epsilon^{(2)}_i \cdot \frac{\tr_i(gX) - \tr_i(gz)}{X - gz} \\[0.2cm]
+  &\displaystyle + \sum_{i=1}^S \epsilon^{(3)}_i \cdot \frac{Q_i(X) - Q_i(z^S)}{X - z^S},
+\end{array}
+\end{align*}
+where $I_1 = \{i \in [N] \colon \tr_i(z) \in \Evals(z)\}$, $I_2 = \{i \in [N] \colon \tr_i(gz) \in \Evals(gz)\}$ and $\epsilon^{(1)}_i,\epsilon^{(2)}_j,\epsilon^{(3)}_k \in \KK$ for all $i \in I_1,j\in I_2, k\in[S]$. This way of computing the $\FRI$ polynomial has again (see Section \ref{sec:quotient-polynomial}) the issue that the number of random values sent from the verifier is proportional to the number of polynomials involved in the previous sum.
+
+We will therefore compute the $\FRI$ polynomial by requesting two random values $\epsilon_1,\epsilon_2 \in \KK$ instead, using $\epsilon_1$ to compute the part regarding evaluations at $z$ and $gz$ separately, and finally mixing it all together with $\epsilon_1$.
+
+Following with the previous example, we define polynomials $\FRI_1,\FRI_2 \in \KK_{<n}[X]$:
+\begin{align*}
+\FRI_1(X) &:= \sum_{i \in I_1} \epsilon_2^{i-1} \cdot \frac{\tr_i(X) - \tr_i(z)}{X - z} + \sum_{i=1}^S \epsilon_2^{|I_1|+i-1} \cdot \frac{Q_i(X) - Q_i(z)}{X - z} \\[0.2cm]
+\FRI_2(X) &:= \sum_{i \in I_2} \epsilon_2^{i-1} \cdot \frac{\tr_i(gX) - \tr_i(gz)}{X - gz},
+\end{align*}
+and then we set $\FRI(X) := \FRI_1(X) + \epsilon_1 \cdot \FRI_2(X)$. Note that since $\epsilon_1,\epsilon_2$ are uniformly sampled elements, then so is $\epsilon_1 \cdot \epsilon_2^i$ for all $i \geq0$. 
+
+A commonly used alternative version of the $\FRI$ polynomial computation in practice involves requesting a single random value $\epsilon \in \KK$ and directly computing
+\begin{align*}
+\widetilde{\FRI}(X) := &~\sum_{i \in I_1} \epsilon^{i-1} \cdot \frac{\tr_i(X) - \tr_i(z)}{X - z} + \sum_{i \in I_2} \epsilon^{|I_1|+i-1} \cdot \frac{\tr_i(gX) - \tr_i(gz)}{X - gz} \\
+& + \sum_{i=1}^S \epsilon^{|I_1|+|I_2|+i-1} \cdot \frac{Q_i(X) - Q_i(z^S)}{X - z^S}.
+\end{align*}
+This version has the disadvantage of not being computable in parallel like the previous version, so we prefer the first option (even if it means increasing the proof size by one field element). Specifically, when the powers of $\epsilon_2$ are being computed, it is possible to compute the polynomials $\FRI_1$ and $\FRI_2$ both sequentially and in parallel, while $\widetilde{\FRI}$ can only be computed sequentially after the computation of the powers of $\epsilon$.

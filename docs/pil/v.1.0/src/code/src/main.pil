@@ -1,0 +1,12 @@
+include "global.pil";
+include "multiplier.pil";
+include "negation.pil";
+include "config.pil";
+
+namespace Main(%N);
+    pol commit a, neg_a, op;
+
+    a in Global.BITS4;
+
+    {a, neg_a} in {Negation.a, Negation.neg_a};
+    {a, neg_a, op} in {Multiplier.freeIn1, Multiplier.freeIn2, Multiplier.out};

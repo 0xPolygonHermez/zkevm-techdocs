@@ -1,0 +1,120 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{GKR{\etalchar{+}}21}
+
+\bibitem[AFK21]{EPRINT:AttFehKlo21}
+Thomas Attema, Serge Fehr, and Michael Kloo{\ss}.
+\newblock Fiat-shamir transformation of multi-round interactive proofs.
+\newblock Cryptology ePrint Archive, Report 2021/1377, 2021.
+\newblock \url{https://eprint.iacr.org/2021/1377}.
+
+\bibitem[BBHR18]{ICALP:BBHR18}
+Eli {Ben-Sasson}, Iddo Bentov, Yinon Horesh, and Michael Riabzev.
+\newblock Fast reed-solomon interactive oracle proofs of proximity.
+\newblock In Ioannis Chatzigiannakis, Christos Kaklamanis, D{\'a}niel Marx, and
+  Donald Sannella, editors, {\em ICALP 2018}, volume 107 of {\em {LIPIcs}},
+  pages 14:1--14:17. Schloss Dagstuhl, July 2018.
+
+\bibitem[BBHR19]{C:BBHR19}
+Eli {Ben-Sasson}, Iddo Bentov, Yinon Horesh, and Michael Riabzev.
+\newblock Scalable zero knowledge with no trusted setup.
+\newblock In Alexandra Boldyreva and Daniele Micciancio, editors, {\em
+  CRYPTO~2019, Part~III}, volume 11694 of {\em {LNCS}}, pages 701--732.
+  Springer, Heidelberg, August 2019.
+
+\bibitem[BCI{\etalchar{+}}20]{EPRINT:BCIKS20}
+Eli {Ben-Sasson}, Dan Carmon, Yuval Ishai, Swastik Kopparty, and Shubhangi
+  Saraf.
+\newblock Proximity gaps for reed-solomon codes.
+\newblock Cryptology ePrint Archive, Report 2020/654, 2020.
+\newblock \url{https://eprint.iacr.org/2020/654}.
+
+\bibitem[BCS16]{EPRINT:BenChiSpo16}
+Eli {Ben-Sasson}, Alessandro Chiesa, and Nicholas Spooner.
+\newblock Interactive oracle proofs.
+\newblock Cryptology ePrint Archive, Report 2016/116, 2016.
+\newblock \url{https://eprint.iacr.org/2016/116}.
+
+\bibitem[BGKS19]{EPRINT:BGKS19}
+Eli {Ben-Sasson}, Lior Goldberg, Swastik Kopparty, and Shubhangi Saraf.
+\newblock {DEEP}-{FRI}: Sampling outside the box improves soundness.
+\newblock Cryptology ePrint Archive, Report 2019/336, 2019.
+\newblock \url{https://eprint.iacr.org/2019/336}.
+
+\bibitem[FS87]{C:FiaSha86}
+Amos Fiat and Adi Shamir.
+\newblock How to prove yourself: {Practical} solutions to identification and
+  signature problems.
+\newblock In Andrew~M. Odlyzko, editor, {\em CRYPTO'86}, volume 263 of {\em
+  {LNCS}}, pages 186--194. Springer, Heidelberg, August 1987.
+
+\bibitem[GKR{\etalchar{+}}21]{USENIX:GKRRS21}
+Lorenzo Grassi, Dmitry Khovratovich, Christian Rechberger, Arnab Roy, and
+  Markus Schofnegger.
+\newblock Poseidon: {A} new hash function for zero-knowledge proof systems.
+\newblock In Michael Bailey and Rachel Greenstadt, editors, {\em USENIX
+  Security 2021}, pages 519--535. {USENIX} Association, August 2021.
+
+\bibitem[Gol98]{Goldreich98}
+Oded Goldreich.
+\newblock {\em Modern Cryptography, Probabilistic Proofs and Pseudorandomness},
+  volume~17 of {\em Algorithms and Combinatorics}.
+\newblock Springer, 1998.
+
+\bibitem[GW20]{EPRINT:GabWil20}
+Ariel Gabizon and Zachary~J. Williamson.
+\newblock plookup: {A} simplified polynomial protocol for lookup tables.
+\newblock Cryptology ePrint Archive, Report 2020/315, 2020.
+\newblock \url{https://eprint.iacr.org/2020/315}.
+
+\bibitem[GWC19]{EPRINT:GabWilCio19}
+Ariel Gabizon, Zachary~J. Williamson, and Oana Ciobotaru.
+\newblock {PLONK}: Permutations over lagrange-bases for oecumenical
+  noninteractive arguments of knowledge.
+\newblock Cryptology ePrint Archive, Report 2019/953, 2019.
+\newblock \url{https://eprint.iacr.org/2019/953}.
+
+\bibitem[Hab22a]{EPRINT:Habock22M}
+Ulrich Hab{\"o}ck.
+\newblock Multivariate lookups based on logarithmic derivatives.
+\newblock Cryptology ePrint Archive, Report 2022/1530, 2022.
+\newblock \url{https://eprint.iacr.org/2022/1530}.
+
+\bibitem[Hab22b]{EPRINT:Habock22}
+Ulrich Hab{\"o}ck.
+\newblock A summary on the {FRI} low degree test.
+\newblock Cryptology ePrint Archive, Report 2022/1216, 2022.
+\newblock \url{https://eprint.iacr.org/2022/1216}.
+
+\bibitem[KZG10]{AC:KatZavGol10}
+Aniket Kate, Gregory~M. Zaverucha, and Ian Goldberg.
+\newblock Constant-size commitments to polynomials and their applications.
+\newblock In Masayuki Abe, editor, {\em ASIACRYPT~2010}, volume 6477 of {\em
+  {LNCS}}, pages 177--194. Springer, Heidelberg, December 2010.
+
+\bibitem[Mer88]{C:Merkle87}
+Ralph~C. Merkle.
+\newblock A digital signature based on a conventional encryption function.
+\newblock In Carl Pomerance, editor, {\em CRYPTO'87}, volume 293 of {\em
+  {LNCS}}, pages 369--378. Springer, Heidelberg, August 1988.
+
+\bibitem[PFM{\etalchar{+}}22]{EPRINT:PFMBM22}
+Luke Pearson, Joshua Fitzgerald, H{\'e}ctor Masip, Marta Bell{\'e}s-Mu{\~n}oz,
+  and Jose~Luis Mu{\~n}oz-Tapia.
+\newblock {PlonKup}: Reconciling {PlonK} with plookup.
+\newblock Cryptology ePrint Archive, Report 2022/086, 2022.
+\newblock \url{https://eprint.iacr.org/2022/086}.
+
+\bibitem[Sta21]{EPRINT:StarkWare21}
+StarkWare.
+\newblock {ethSTARK} documentation.
+\newblock Cryptology ePrint Archive, Report 2021/582, 2021.
+\newblock \url{https://eprint.iacr.org/2021/582}.
+
+\bibitem[VP19]{EPRINT:VlaPan19}
+Alexander Vlasov and Konstantin Panarin.
+\newblock Transparent polynomial commitment scheme with polylogarithmic
+  communication complexity.
+\newblock Cryptology ePrint Archive, Report 2019/1020, 2019.
+\newblock \url{https://eprint.iacr.org/2019/1020}.
+
+\end{thebibliography}

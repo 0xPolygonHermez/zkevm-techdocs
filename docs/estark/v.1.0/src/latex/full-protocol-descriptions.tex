@@ -1,0 +1,246 @@
+
+
+\section{Full Protocol Descriptions}\label{sec:full-descriptions}
+
+%TODO: Fix all the appendix
+In this section we provide ``skeleton'' descriptions of the STARKs constructed in this article. By skeleton, we mean that we only give those descriptions in terms of the communication complexity between both the prover and the verifier, avoiding details such as the computational work carried on by any of the two parties in each step. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{FRI}\label{sec:FRI-protocols}
+
+Define for this section the public parameters $\pparams$ as $(d,H,\FF,\KK)$
+
+\begin{figure}[H]
+\centering
+\hspace{-4.2cm}
+\begin{subfigure}[T]{0.4\textwidth}
+\mypbnonum{}{
+  \P(p_0,\pparams) \< \< \V(\pparams) \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(p_0)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$v_0$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(p_1)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$v_1$}} \< \\[-2mm]
+  \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+  \< \sendmessageleft{length=6cm,top={$v_{k-1}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$p_k$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$h_1$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{p_0(h_1),\dots,p_{k-1}(h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_1)),\dots,\MTP(p_{k-1}(h_1^{2^{k-1}}))\}$}} \<  \\
+  \< \sendmessageright{length=6cm,top={$\{p_0(-h_1),\dots,p_{k-1}(-h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_1)),\dots,\MTP(p_{k-1}(-h_1^{2^{k-1}}))\}$}} \< \\
+  \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+  \< \sendmessageleft{length=6cm,top={$h_{s}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{p_0(h_{s}),\dots,p_{k-1}(h_s^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_{s})),\dots,\MTP(p_{k-1}(h_s^{2^{k-1}}))\}$}} \<  \\
+  \< \sendmessageright{length=6cm,top={$\{p_0(-h_{s}),\dots,p_{k-1}(-h_s^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_{s})),\dots,\MTP(p_{k-1}(-h_s^{2^{k-1}}))\}$}} \<
+}
+\caption{FRI transcript.}
+\label{fig:FRI}
+\end{subfigure}
+\hspace{3.8cm}
+\begin{subfigure}[T]{0.4\textwidth}
+\mypbnonum{}{
+  \P(\{f_i\}_i,\pparams) \< \< \V(\pparams) \\[][\hline]
+  \< \sendmessageright{length=6cm,top={$\MTR(p_0)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$v_0$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\MTR(p_1)$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$v_1$}} \< \\[-2mm]
+  \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+  \< \sendmessageleft{length=6cm,top={$v_{k-1}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$p_k$}} \< \\[-2mm]
+  \< \sendmessageleft{length=6cm,top={$h_1$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{p_0(h_1),\dots,p_{k-1}(h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_1)),\dots,\MTP(p_{k-1}(h_1^{2^{k-1}}))\}$}} \<  \\
+  \< \sendmessageright{length=6cm,top={$\{p_0(-h_1),\dots,p_{k-1}(-h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_1)),\dots,\MTP(p_{k-1}(-h_1^{2^{k-1}}))\}$}} \< \\
+  \< \sendmessageright{length=6cm,top={$\{f_0(h_1),f_1(h_1),\dots,f_N(h_1)\}$},bottom={$\{\MTP(f_0(h_1)),\dots,\MTP(f_N(h_1))\}$}} \< \\
+  \< \sendmessageright{length=6cm,top={$\{f_0(-h_1),f_1(-h_1),\dots,f_N(-h_1)\}$},bottom={$\{\MTP(f_0(-h_1)),\dots,\MTP(f_N(-h_1))\}$}} \< \\
+  \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+  \< \sendmessageleft{length=6cm,top={$h_{s}$}} \< \\[-2mm]
+  \< \sendmessageright{length=6cm,top={$\{p_0(h_{s}),\dots,p_{k-1}(h_s^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_{s})),\dots,\MTP(p_{k-1}(h_s^{2^{k-1}}))\}$}} \<  \\
+  \< \sendmessageright{length=6cm,top={$\{p_0(-h_{s}),\dots,p_{k-1}(-h_s^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_{s})),\dots,\MTP(p_{k-1}(-h_s^{2^{k-1}}))\}$}} \< \\
+  \< \sendmessageright{length=6cm,top={$\{f_0(h_{s}),f_1(h_{s}),\dots,f_N(h_{s})\}$},bottom={$\{\MTP(f_0(h_{s})),\dots,\MTP(f_N(h_{s}))\}$}} \< \\
+  \< \sendmessageright{length=6cm,top={$\{f_0(-h_{s}),f_1(-h_{s}),\dots,f_N(-h_{s})\}$},bottom={$\{\MTP(f_0(-h_{s})),\dots,\MTP(f_N(-h))\}$}} \<
+}
+\caption{Batched FRI transcript.}
+\label{fig:batched-FRI}
+\end{subfigure}
+\caption{FRI transcripts of Section \ref{sec:FRI}.}
+\label{fig:STARK1}
+\end{figure}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Vanilla STARK}
+
+In this section, we will outline the STARK protocol step by step. The following definitions will be employed in the protocol:
+\begin{itemize}
+  \item We call \textit{prover parameters}, and denote them by $\pparams$, to the finite field $\FF$, the domains $G$ and $H$, the field extension $\KK$, the set of constraints, and the set of polynomial evaluations that the prover has access to.
+  \item We call \textit{verifier parameters}, and denote them by $\vparams$, to the finite field $\FF$, the domains $G$ and $H$, the field extension $\KK$, the set of constraints, and the set of polynomial evaluations that the verifier has access to.
+\end{itemize}
+\begin{protocol}
+The protocol starts with a set of constraints $\C = \left\{C_1,\dots,C_T\right\}$ and a set of polynomials $\tr_1,\dots,\tr_N \in \FF[X]$ (presumably) satisfying them. The prover and verifier proceed as follows:
+\begin{enumerate}
+  \item The prover sends oracle functions $[\tr_1],\dots,[\tr_N]$ for $\tr_1$,$\dots$,$\tr_N$ to the verifier:
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \<
+  }
+
+  \item The verifier samples uniformly random values $\afr_1,\bfr_1,\dots,\afr_T,\bfr_T \in \KK$ and sends them to the prover:
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \<
+  }
+
+  \item The prover computes the quotient polynomial $Q$, after which he computes the trace quotient polynomials $Q_1,\dots,Q_S$ and sends their oracle representatives $[Q_1],\dots,[Q_S]$ to the verifier.
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \<
+  }
+  
+  \item The verifier samples a uniformly random value $z \in \KK \backslash (G \cup \bar{H})$ and sends it to the prover:
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$z$}} \<
+  }
+
+  \item The prover computes the sets $\Evals(z)$ and $\Evals(gz)$ of trace column polynomials evaluations. Then, he sends $\Evals(z),\Evals(gz)$ and $Q_i(z^S)$ for all $i\in[S]$ to the verifier:
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$z$}} \< \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz),Q_1(z^S),\dots,Q_S(z^S)\}$}} \<
+  }
+
+  \item Recalling that $I_1 = \{i \in [N] \colon \tr_i(z) \in \Evals(z)\}$ and $I_2 = \{i \in [N] \colon \tr_i(gz) \in \Evals(gz)\}$, the verifier sends uniformly random values $\epsilon^{(1)}_i,\epsilon^{(2)}_j,\epsilon^{(3)}_k \in \KK$, where $i \in I_1,j\in I_2, k\in[S]$, to the prover:
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$z$}} \< \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz),Q_1(z^S),\dots,Q_S(z^S)\}$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\{\epsilon^{(1)}_i\}_{i\in I_1},\{\epsilon^{(2)}_j\}_{j\in I_2},\{\epsilon^{(3)}_k\}_{k\in [S]}\}$}} \< 
+  } 
+
+  \item The prover computes the $\FRI$ polynomial. Then, the prover initiates the FRI message exchange along with the verifier to prove the low degreness of the $\FRI$ polynomial to the verifier. The prover sends the resulting FRI proof $\pi_{\text{FRI}}$ to the verifier: 
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$z$}} \< \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz),Q_1(z^S),\dots,Q_S(z^S)\}$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\{\epsilon^{(1)}_i\}_{i\in I_1},\{\epsilon^{(2)}_j\}_{j\in I_2},\{\epsilon^{(3)}_k\}_{k\in [S]}\}$}} \<  \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\pi_{\text{FRI}}$}} \<
+  }
+
+  \item The verifier runs the three checks commented in Section \ref{sec:vanilla-STARK}: trace consistency, FRI consistency and batched consistency. If any of the checks fail, the verifier rejects. Otherwise, the verifier accepts.
+\end{enumerate}
+\end{protocol}
+
+\begin{figure}[H]
+\centering
+\hspace{-2cm}
+\begin{subfigure}[T]{0.5\textwidth}
+  \mypbnonum{}{
+    \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+    \< \sendmessageright{length=6cm,top={$[\tr_1],\dots,[\tr_N]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\afr_1,\bfr_1,\dots,\afr_T,\bfr_T\}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$[Q_1],\dots,[Q_S]$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$z$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz),Q_1(z^S),\dots,Q_S(z^S)\}$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$\{\{\epsilon^{(1)}_i\}_{i\in I_1},\{\epsilon^{(2)}_j\}_{j\in I_2},\{\epsilon^{(3)}_k\}_{k\in [S]}\}$}} \< \pclb
+    \pcintertext[dotted]{FRI: Commit Phase} \\[-4mm]
+    \< \sendmessageright{length=6cm,top={$\MTR(\FRI = p_0)$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$v_0$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\MTR(p_1)$}} \< \\[-2mm]
+    \< \sendmessageleft{length=6cm,top={$v_1$}} \< \\[-2mm]
+    \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+    \< \sendmessageleft{length=6cm,top={$v_{k-1}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$p_k$}} \< \pclb
+    \pcintertext[dotted]{FRI: Query Phase} \\[-4mm]
+    \< \sendmessageleft{length=6cm,top={$h_1$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{p_0(h_1),\dots,p_{k-1}(h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_1)),\dots,\MTP(p_{k-1}(h_1^{2^{k-1}}))\}$}} \<  \\
+    \< \sendmessageright{length=6cm,top={$\{p_0(-h_1),\dots,p_{k-1}(-h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_1)),\dots,\MTP(p_{k-1}(-h_1^{2^{k-1}}))\}$}} \< \\
+  }
+\end{subfigure}
+\hfill
+\begin{subfigure}[T]{0.4\textwidth}
+  \mypbnonum{}{
+    \t\t \< \< \t\t \\
+    \< \sendmessageright{length=6cm,top={$\{\Evals(h_1),Q_1(h_1^S),\dots,Q_S(h_1^S)\}$},bottom={$\{\MTP(\Evals(h_1))\dots,\MTP(Q_S(h_1^S))\}$}} \< \\
+    \< \sendmessageright{length=6cm,top={$\{\Evals(-h_1),Q_1((-h_1)^S),\dots,Q_S((-h_1)^S)\}$},bottom={$\{\MTP(\Evals(-h_1))\dots,\MTP(Q_S((-h_1)^S))\}$}} \< \\
+    \< \sendmessageleft{length=6cm,top={$h_{s}$}} \< \\[-2mm]
+    \< \sendmessageright{length=6cm,top={$\{p_0(h_{s}),\dots,p_{k-1}(h_{s}^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_{s})),\dots,\MTP(p_{k-1}(h_{s}^{2^{k-1}}))\}$}} \<  \\
+    \< \sendmessageright{length=6cm,top={$\{p_0(-h_{s}),\dots,p_{k-1}(-h_{s}^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_{s})),\dots,\MTP(p_{k-1}(-h_{s}^{2^{k-1}}))\}$}} \<  \\
+    \< \sendmessageright{length=6cm,top={$\{\Evals(h_s),Q_1(h_s^S),\dots,Q_S(h_s^S)\}$},bottom={$\{\MTP(\Evals(h_s))\dots,\MTP(Q_S(h_s^S))\}$}} \< \\
+    \< \sendmessageright{length=6cm,top={$\{\Evals(-h_s),Q_1((-h_s)^S),\dots,Q_S((-h_s)^S)\}$},bottom={$\{\MTP(\Evals(-h_s))\dots,\MTP(Q_S((-h_s)^S))\}$}} \< \\\
+  }
+\end{subfigure}
+\caption{Full STARK transcript of Section \ref{sec:vanilla-STARK}}
+\label{fig:STARK1}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{eSTARK}
+
+In this section, we provide the full eSTARK transcript. We reuse definitions from Section \ref{sec:our-IOP}.
+
+%https://es.overleaf.com/learn/latex/How_to_Write_a_Thesis_in_LaTeX_(Part_3)%3A_Figures%2C_Subfigures_and_Tables#Subfigures
+\begin{figure}[H]
+  \centering
+  \hspace{-2cm}
+  \begin{subfigure}[T]{0.5\textwidth}
+    \mypbnonum{}{
+      \P(\pparams) \< \< \V(\vparams) \\[][\hline]
+      \< \sendmessageright{length=6cm,top={$\MTR(\tr_1,\dots,\tr_N)$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$\{\alpha,\beta\}$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\MTR(h_{1,1},h_{1,2}, \dots, h_{M,1},h_{M,2})$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$\{\gamma,\delta\}$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\MTR(Z_1,\dots,Z_{M+M'+M''},\im_1,\dots,\im_{K+K'})$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$\afr$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\MTR(Q_1,Q_2)$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$z$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\{\Evals(z),\Evals(gz)\}$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$\epsilon_1,\epsilon_2$}} \< \pclb
+      \pcintertext[dotted]{FRI: Commit Phase} \\[-4mm]
+      \< \sendmessageright{length=6cm,top={$\MTR(\FRI = p_0)$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$v_0$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\MTR(p_1)$}} \< \\[-2mm]
+      \< \sendmessageleft{length=6cm,top={$v_1$}} \< \\[-2mm]
+      \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+      \< \sendmessageleft{length=6cm,top={$v_{k-1}$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$p_k$}} \< \pclb
+      \pcintertext[dotted]{FRI: Query Phase} \\[-4mm]
+      \< \sendmessageleft{length=6cm,top={$h_1$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\{p_0(h_1),\dots,p_{k-1}(h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_1)),\dots,\MTP(p_{k-1}(h_1^{2^{k-1}}))\}$}} \<  \\
+      \< \sendmessageright{length=6cm,top={$\{p_0(-h_1),\dots,p_{k-1}(-h_1^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_1)),\dots,\MTP(p_{k-1}(-h_1^{2^{k-1}}))\}$}} \< \\
+    }
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[T]{0.4\textwidth}
+    \mypbnonum{}{
+      \t\t \< \< \t\t \\
+      \< \sendmessageright{length=6cm,top={$\{\Evals(h_1),\MTP(\Evals(h_1))\}$}} \< \\
+      \< \sendmessageright{length=6cm,top={$\{\Evals(-h_1),\MTP(\Evals(-h_1))\}$}} \< \\[-2mm]
+      \< \t\t\t\t\t\t\t\t\t~~ \vdots \< \\
+      \< \sendmessageleft{length=6cm,top={$h_{s}$}} \< \\[-2mm]
+      \< \sendmessageright{length=6cm,top={$\{p_0(h_{s}),\dots,p_{k-1}(h_{s}^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(h_{s})),\dots,\MTP(p_{k-1}(h_{s}^{2^{k-1}}))\}$}} \<  \\
+      \< \sendmessageright{length=6cm,top={$\{p_0(-h_{s}),\dots,p_{k-1}(-h_{s}^{2^{k-1}})\}$},bottom={$\{\MTP(p_0(-h_{s})),\dots,\MTP(p_{k-1}(-h_{s}^{2^{k-1}}))\}$}} \<  \\
+      \< \sendmessageright{length=6cm,top={$\{\Evals(h_{s}),\MTP(\Evals(h_{s}))\}$}} \< \\
+      \< \sendmessageright{length=6cm,top={$\{\Evals(-h_{s}),\MTP(\Evals(-h_{s}))\}$}} \< \\
+    }
+  \end{subfigure}
+\caption{Full STARK transcript of Section \ref{sec:STIK-to-STARK}.}
+\label{fig:STARK3}
+\end{figure}

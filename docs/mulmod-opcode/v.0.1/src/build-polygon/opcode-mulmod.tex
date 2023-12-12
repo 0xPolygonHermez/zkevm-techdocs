@@ -1,0 +1,766 @@
+% !TeX document-id = {8fc77b15-3c07-42e1-8a11-7509577bf4d2}
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+% !TeX spellcheck = en_GB
+
+%https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf
+
+
+\documentclass[preprint]{iacrtrans} 
+\usepackage[utf8]{inputenc}
+
+\setcounter{tocdepth}{4}
+
+%% VERSION 
+\newcommand{\version}{v.0.1}
+
+
+%% TITLE
+\title{
+    \includegraphics[width=\columnwidth]{logo_zkEVM.png} 	\\ \vspace{0.3cm}
+    Technical Document 										\\ \vspace{0.3cm}	
+    Validating an EVM Opcode Example: MulMod     			\\ \vspace{0.3cm}
+    \version
+}
+
+\institute{}
+
+\usepackage{units}
+\usepackage{csquotes}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{textcomp}
+\frenchspacing
+\usepackage{booktabs}
+
+
+\usepackage{fontspec}
+\setmonofont{Iosevka Term}
+
+% This package controls how hyperlinks are displayed
+% https://es.overleaf.com/learn/latex/Hyperlinks
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=,urlcolor={blue!80!black}}
+
+
+\usepackage{dirtree}
+\renewcommand*\DTstyle{\ttfamily\scriptsize}
+%\renewcommand*\DTstyle{\ttfamily\textcolor{red}}
+
+\usepackage{wasysym} % For checkboxes:  \CheckedBox \Square
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BEGIN lstlistings                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{showexpl}% already includes listings package
+% The listings package defines an internal command for replacements within filenames. 
+% One of these replacements replaces - with \textendash. 
+% You can redefine this command to make the hyphens actual hyphens:
+\makeatletter
+\def\lst@filenamerpl{_\textunderscore $\textdollar}
+\makeatother
+\lstset{frame=shadowbox, basicstyle=\footnotesize\ttfamily, showstringspaces=false,
+    rulesepcolor=\color{black}, upquote=true}
+% \lstset{language=bash, frame=shadowbox, basicstyle=\footnotesize, showstringspaces=false,
+    % rulesepcolor=\color{black}, upquote=true, }
+\lstdefinestyle{scriptStyle}{
+    basicstyle=\footnotesize,% control font of code
+    preset=\footnotesize,% adjust font size of output
+    numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=5pt,
+    frame=tlbr,
+    pos=r,% want output on rightbackgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{terms}{
+    basicstyle=\scriptsize\ttfamily,% control font of code
+    preset=\footnotesize,% adjust font size of output
+}
+
+\lstdefinestyle{termt}{
+    basicstyle=\tiny\ttfamily,% control font of code
+    preset=\footnotesize,% adjust font size of output
+}
+
+\lstdefinestyle{verb}{
+    basicstyle=\footnotesize,% control font of code
+    preset=\footnotesize,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+    %     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{verbs}{
+    basicstyle=\scriptsize,% control font of code
+    preset=\scriptsize,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+    %     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{verbt}{
+    basicstyle=\tiny\ttfamily,% control font of code
+    preset=\tiny\ttfamily,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+    %     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END lstlistings                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BEGIN Code Highlighting Environments %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%sudo apt install texlive-latex-extra 
+%sudo apt install python-pip
+%pip install pygments
+%pip install pygments-lexer-babylon  #contains JSX
+%pip install pygments-lexer-solidity 
+
+%pip install pygments pygments-lexer-babylon pygments-lexer-solidity
+
+
+
+\usepackage{tcolorbox}
+\tcbuselibrary{minted,skins,listings}
+\definecolor{mybg}{rgb}{0.96,0.96,0.98}
+
+\newtcblisting{js}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{jison}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{js-normalsize}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={linenos=true,texcl=true,fontsize=\normalsize},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\newtcblisting{js-footnotesize}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={linenos=true,texcl=true,fontsize=\footnotesize},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\newtcblisting{js-scriptsize}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={linenos=true,texcl=true,fontsize=\scriptsize},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\newtcblisting{python}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=python,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{clang}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=c,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{php}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=php,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{mytext}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=bw,
+    minted language=text,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{htmlng2}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=html+ng2,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{http}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=http,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\newtcblisting{jsx}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=jsx,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\newtcblisting{ts}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=ts,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{bash}{
+    listing engine=minted,
+    colback=mybg,
+    listing only,
+    minted style=tango,
+    minted language=bash,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    colframe=black!30,
+    boxrule=0.1mm
+}
+
+\newtcblisting{json}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=json,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{xml}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!30,
+    listing only,
+    minted style=tango,
+    minted language=xml,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{yaml}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=yaml,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{html}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=html,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{css}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=css,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+\newtcblisting{solidity}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=solidity,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\newtcblisting{graphql}{
+    listing engine=minted,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    minted style=tango,
+    minted language=js,
+    minted options={linenos=true,texcl=true,fontsize=\tiny},
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+\lstdefinelanguage{circom}{
+    keywords=[1]{signal, input, output, <==, ==>, ===}, % generic keywords including crypto operations
+    keywordstyle=[1]\color{blue!70!}\bfseries,
+    keywords=[3]{pragma, include}, 
+    keywordstyle=[3]\color{brown}\bfseries,
+    keywords=[4]{for, if, var, else},
+    keywordstyle=[4]\color{teal}\bfseries,
+    keywords=[5]{template, component},
+    keywordstyle=[5]\color{violet}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{green!40!black}\ttfamily,
+    stringstyle=\color{blue}\ttfamily,
+    %	morestring=[b]',
+    %	morestring=[b]"
+}
+
+\newtcblisting{circom}{
+    listing engine=listings,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    listing options={
+        language={circom},
+        basicstyle=\tiny\ttfamily,
+        frame=none,
+        numbers=left,
+        numberstyle=\tiny,
+        numbersep=9pt,
+        tabsize=2,
+        breaklines=true,
+        showtabs=false,
+        captionpos=b
+    },
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+\lstdefinelanguage{Pil}{
+    keywords=[1]{pol, commit, constant, in, is, connect, public, namespace}, % generic keywords including crypto operations
+    keywordstyle=[1]\color{blue!70!}\bfseries,
+    keywords=[3]{include}, % modules
+    keywordstyle=[3]\color{brown}\bfseries,
+    keywords=[4]{},% types; money and time units
+    keywordstyle=[4]\color{teal}\bfseries,
+    keywords=[5]{field, bool, u32, u16, u8},	% environment variables
+    keywordstyle=[5]\color{violet}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{green!40!black}\ttfamily,
+    stringstyle=\color{blue}\ttfamily,
+    %	morestring=[b]',
+    %	morestring=[b]"
+}
+
+\newtcblisting{pil}{
+    listing engine=listings,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    listing options={
+        language={Pil},
+        basicstyle=\footnotesize\ttfamily,
+        frame=none,
+        numbers=left,
+        numberstyle=\tiny,
+        numbersep=9pt,
+        tabsize=2,
+        breaklines=true,
+        showtabs=false,
+        captionpos=b
+    },
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+
+\lstdefinelanguage{zkASM}{
+    keywords=[1]{}, % generic keywords including crypto operations
+    keywordstyle=[1]\color{blue!70!}\bfseries,
+    keywords=[3]{include}, % modules
+    keywordstyle=[3]\color{brown}\bfseries,
+    keywords=[4]{},% types; money and time units
+    keywordstyle=[4]\color{teal}\bfseries,
+    keywords=[5]{field, bool, u32, u16, u8},	% environment variables
+    keywordstyle=[5]\color{violet}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=false,
+    comment=[l]{;},
+    commentstyle=\color{green!40!black}\ttfamily,
+    stringstyle=\color{blue}\ttfamily,
+    %	morestring=[b]',
+    %	morestring=[b]"
+}
+
+\newtcblisting{zkasm}{
+    listing engine=listings,
+    colback=mybg,
+    colframe=black!70,
+    listing only,
+    listing options={
+        language={zkASM},
+        basicstyle=\footnotesize\ttfamily,
+        frame=none,
+        numbers=left,
+        numberstyle=\tiny,
+        numbersep=9pt,
+        tabsize=2,
+        breaklines=true,
+        showtabs=false,
+        captionpos=b
+    },
+    left=0.2mm,
+    top=0cm,
+    bottom=0cm,
+    boxrule=0.1mm
+}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END   Code Highlighting Environments %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Tikz Library
+% https://www.iacr.org/authors/tikz/
+\usepackage{tikz}
+\usetikzlibrary{shapes, shapes.callouts,calc, arrows, positioning, matrix, intersections, decorations.markings}
+\tikzset{point/.style={draw,fill,circle,inner sep=1pt}}
+\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+\tikzset{edge/.style = {-}}
+\tikzset{arrow/.style = {->}}
+
+
+\newcommand{\mysquare}[1]{\tikz{\node[draw=#1,fill=#1,rectangle,minimum
+        width=0.2cm,minimum height=0.2cm,inner sep=0pt] at (0,0) {};}}
+
+\newcommand{\mycircle}[1]{\tikz{\node[draw=#1,fill=#1,circle,minimum
+        width=0.2cm,minimum height=0.2cm,inner sep=0pt] at (0,0) {};}}
+
+\newcommand{\mytriangle}[1]{\tikz{\node[draw=#1,fill=#1,isosceles
+        triangle,isosceles triangle stretches,shape border rotate=90,minimum
+        width=0.2cm,minimum height=0.2cm,inner sep=0pt] at (0,0) {};}}
+
+\newcommand{\mystar}[1]{\tikz{\node[draw=#1,fill=#1,star,star points=5, star point ratio=2.25, minimum
+        width=0.2cm,minimum height=0.2cm,inner sep=0pt] at (0,0) {};}}
+
+
+\newcommand{\plotcurve}[4][thick, every plot/.style={smooth}]{
+    % plot curve y^2 = x^3 + a x + b in range [-#4,#4]^2
+    % parameter 1 (optional): style options for curve (color, etc)
+    % parameter 2: curve parameter a
+    % parameter 3: curve parameter b
+    % parameter 4: range to print
+    % \draw[gray] (-3,-3) rectangle (3,3);
+    \draw[->,>=latex,gray] (-#4,0) -- (#4,0);
+    \draw[->,>=latex,gray] (0,-#4) -- (0,#4);
+    \draw[name path=curve, #1] plot[id=curve#2#3, raw gnuplot] function {
+        f(x,y) = y**2 - x**3 - #2*x - #3;
+        set xrange [-#4:#4];
+        set yrange [-#4:#4];
+        set view 0,0;
+        set isosample 50,50;
+        set contour base;
+        set cntrparam levels incre 0,0.1,0;
+        unset surface;
+        splot f(x,y);
+    };
+}
+
+% For an explanation of the tangent coordinate system, check http://tex.stackexchange.com/a/25940 
+\tikzset{
+    tangent/.style={
+        decoration={markings, mark=at position #1 with {
+                \coordinate (tangent point-\pgfkeysvalueof{/pgf/decoration/mark info/sequence number}) at (0pt,0pt);
+                \coordinate (tangent unit vector-\pgfkeysvalueof{/pgf/decoration/mark info/sequence number}) at (1,0pt);
+                \coordinate (tangent orthogonal unit vector-\pgfkeysvalueof{/pgf/decoration/mark info/sequence number}) at (0pt,1);
+        }},
+        postaction=decorate
+    },
+    use tangent/.style={
+        shift=(tangent point-#1),
+        x=(tangent unit vector-#1),
+        y=(tangent orthogonal unit vector-#1)
+    },
+    use tangent/.default=1
+}
+
+% Alternative to tikz
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\usepackage{xspace}
+
+% Bold Math
+\renewcommand{\vec}[1]{\ensuremath{\boldsymbol{#1}}\xspace}
+\newcommand{\vel}[3]{\ensuremath{\vec{#1_{#2}}(#3)}\xspace}
+
+
+% Caligraphic Combiantions
+\DeclareMathAlphabet{\mathpgoth}{OT1}{pgoth}{m}{n}
+\newcommand{\plonk}{\ensuremath{\mathcal{P}\mathfrak{lon}\mathcal{K}}\xspace}
+\newcommand{\fflonk}{\ensuremath{\mathcal{FF}\mathfrak{lon}\mathcal{K}}\xspace}
+\newcommand{\plookup}{\ensuremath{\mathpgoth{plookup}}\xspace}
+
+
+
+% Mathcal
+\renewcommand{\P}{\mathcal{P}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\C}{\mathcal{C}}
+\renewcommand{\H}{\mathcal{H}}
+\newcommand{\T}{\ensuremath{\mathcal{T}}\xspace}
+
+
+\newcommand{\FF}{\ensuremath{\mathbb{F}}\xspace}
+\newcommand{\ZZ}{\ensuremath{\mathbb{Z}}\xspace}
+\newcommand{\GG}{\ensuremath{\mathbb{G}}\xspace}
+
+
+% Columns
+\newcommand{\instructionalphabet}[1]{\mathtt{#1}}
+
+%%%% Memory
+\newcommand{\MLOAD}{\ensuremath{\instructionalphabet{MLOAD}}\xspace}
+\newcommand{\MSTORE}{\ensuremath{\instructionalphabet{MSTORE}}\xspace}
+\newcommand{\MSTOREE}{\ensuremath{\instructionalphabet{MSTORE8}}\xspace}
+\newcommand{\INCS}{\ensuremath{\instructionalphabet{INCS}}\xspace}
+\newcommand{\ISNOTLAST}{\ensuremath{\instructionalphabet{ISNOTLAST}}\xspace}
+\newcommand{\step}{\ensuremath{\instructionalphabet{step}}\xspace}
+\newcommand{\mOp}{\ensuremath{\instructionalphabet{mOp}}\xspace}
+\newcommand{\mWr}{\ensuremath{\instructionalphabet{mWr}}\xspace}
+\newcommand{\addr}{\ensuremath{\instructionalphabet{addr}}\xspace}
+\newcommand{\lastAccess}{\ensuremath{\instructionalphabet{lastAccess}}\xspace}
+\newcommand{\val}{\ensuremath{\instructionalphabet{val}}\xspace}
+\newcommand{\op}{\ensuremath{\instructionalphabet{op}}\xspace}
+\newcommand{\offset}{\ensuremath{\instructionalphabet{offset}}\xspace}
+\newcommand{\rdSame}{\ensuremath{\instructionalphabet{rdSame}}\xspace}
+\newcommand{\isWrite}{\ensuremath{\instructionalphabet{isWrite}}\xspace}
+
+
+% For ticks
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+
+% Definitions of includes with if
+\newif\ifPROF
+\newif\ifEXTRA
+\newif\ifEXTRAEXTRA
+
+\newif\ifZEROSEC
+\newif\ifSEC
+\newif\ifSUBSEC
+\newif\ifSUBSUBSEC
+
+\newif\ifISZERO
+\ISZEROtrue
+
+\newif\ifpilstarkNonRecursivemFibonacciImplementation
+\pilstarkNonRecursivemFibonacciImplementationtrue
+
+
+%\PROFtrue
+%\EXTRAtrue
+
+% For setting the section's level 
+\newcommand{\mytitle}{title}
+\SECtrue
+
+
+
+%Working directory
+\newcommand{\definedir}[2]{\newcommand{#1}{#2}}
+\definedir{\securitydir}{../crypto}
+\graphicspath{{\securitydir/crypto/zkp/figures/}}
+
+\definecolor{constantcolor}{rgb}{0.67, 0.88, 0.69} %flavescent
+\definecolor{comittedcolor}{rgb}{0.97, 0.91, 0.56} % celadon
+
+%Columns with colors
+\usepackage{colortbl}  
+\definecolor{Gray}{gray}{0.9}
+\newcolumntype{a}{>{\columncolor{Gray}}c}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \maketitle
+    \today
+    \vspace{-5mm}
+\end{titlepage}
+
+% use optional argument because the \LaTeX command breaks the PDF keywords
+% \keywords[\publname, ToSC, TCHES, LaTeX]{TBD \and TBD}
+
+{\hypersetup{linkcolor=.}\tableofcontents}
+
+\newpage
+
+\input{../latex/opcode-mulmod} 
+
+\end{document}

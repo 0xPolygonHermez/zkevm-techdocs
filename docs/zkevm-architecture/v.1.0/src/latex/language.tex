@@ -1,0 +1,344 @@
+\section{zkASM Language} 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Basic Syntax}
+
+This section is devoted to explain the basic syntax of zkASM from a high-level point of view. Advanced syntax is totally dependent of the use case (e.g. the design of a zkEVM) and will be explained in more detail in Section \ref{sec:instructions}.
+
+\textbf{Comments} are made with the semicolon \texttt{;} symbol:
+
+\begin{zkasm}
+    ; This is a totally useful comment
+\end{zkasm}
+
+\textbf{Multi-line comments} are also supported via the following syntax:
+
+\begin{zkasm}
+/**
+* Totally
+* useful
+* comment
+*/
+\end{zkasm}
+
+One can subdivide the zkASM code into multiple files and import code with the \texttt{INCLUDE} keyword. This is what we refer to as the modularity of the zkASM.
+
+\begin{zkasm}
+    ; File: main.zkasm
+    
+    INCLUDE "utils.zkasm"
+    INCLUDE "constants.zkasm"
+    ; -- code --
+\end{zkasm}
+
+Each line of the code is, with some exception, considered as a clock of the state machine, named as \textbf{step}. There are several kinds of steps:
+
+% TODO: This should be reviewed. 
+
+\begin{itemize}
+
+\item \textit{An assignment.} Assignments involve assigning a value to one or more registers within the same clock cycle. The synatx to invoke an assignment is shown below and its discussed in more detail in Section \ref{sec:assignments}. 
+
+\begin{zkasm}
+0 => A, B, C, ...
+\end{zkasm}
+
+\item \textit{A list of instructions.} Another type of step is a list of instructions, which can be used to sequentially execute multiple operations among the registers. Each instruction in the list is executed in the same clock cycle. Section \ref{sec:instructions} provides more information on how to use instruction lists. To invoke an ordered list of instructions, use the following syntax:
+
+\begin{zkasm}
+                :INS1, INS2, INS3, ...
+\end{zkasm}
+
+\item \textit{A combination of both, an assignment and a list of operations.} More information on this will be added on Sections \ref{sec:free-inputs} and \ref{sec:instructions}. However, we propose below an use-case of this combined kind. The code below assigns the output of retrieving some value from the memory to the register \A. The interesting part here is the way we retrieve the output of the load instruction, which is called a Free Input and will be explained in detail in Section \ref{sec:free-inputs}.
+
+\begin{zkasm}
+$ => A			:MLOAD(address)
+\end{zkasm}
+
+\end{itemize}
+
+
+%Until this point, every instruction consisted in a direct interaction with the registers. Now, we move one step forward and we obtain interaction with other parts of the ROM thank to the introduction of the zkEVM opcodes.
+%
+%To assign the output of a zkEVM opcode into some register we use the following syntax:
+%
+%\begin{zkasm}
+%    $ => A,B    :OPCODE(param)
+%\end{zkasm}
+%
+%A clear example of such situation is when using the memory load opcode:
+%
+%\begin{zkasm}
+%    $ => A,B    :MLOAD(param)
+%\end{zkasm}
+%
+%When a registers appear at the side of an opcode, it is typically used to indicate that the value of the register \A is the input of the memory store opcode:
+%
+%\begin{zkasm}
+%    A   :MSTORE(param)
+%\end{zkasm}
+%
+%Similarly, we can assign a free input into a register and later on execute several zkEVM opcodes using the following syntax:
+%
+%\begin{zkasm}
+%    ${ExecutorMethod(params)} => A      :OPCODE1
+%                                        :OPCODE2
+%                                        :OPCODE3
+%    ...
+%\end{zkasm}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Assignments} \label{sec:assignments}
+
+An assignment is a statement in zkASM that is used to set a certain value to a register. Assignments in zkASM are denoted using the \texttt{=>} operator. For example, the following piece of code assigns the value $0$ to the register \A:
+
+\begin{zkasm}
+0 => A
+\end{zkasm}
+
+However, in zkASM there are a lot of options when dealing with assignments. Let us deep into each of them. First of all, one invoke an assignment to several (and not only one) registers using colons. For example, the code below assigns the value $0$ to registers \A, \B and \C:
+
+\begin{zkasm}
+0 => A, B, C
+\end{zkasm}
+
+Now, let us define all possible assignable elements. We have just seen that we can assign a constant value, like $0$. However, we can also assign other elements. More concretely, we can input linear combinations (with scalars being numbers or big numbers) of the following kinds of elements:
+
+\begin{itemize}
+
+\item Free Input tags (\texttt{\$\{\}}, \texttt{\$}). See Section \ref{sec:free-inputs}.
+
+\item Registers (\A, \B, \C, \D, \E, \SP, \RR, ...).
+
+\item Counters (\CNTARITH, \CNTBINARY, \CNTKECCAKF, \CNTMEMALIGN, \CNTPADDINGPG, \CNTPOSEIDONG). 
+
+\item Numbers or big numbers ($\texttt{0}, \texttt{0xFF}, \texttt{0n}, \texttt{0xFFn}$, ...). 
+
+\item Numbers' exponentiations ($\texttt{2 ** 2}, \texttt{2 ** 0xFF}$, ...). This numbers' exponentiations are being treated in turn as numbers or big numbers. 
+
+\item Constants (see Section \ref{sec:const-def}). Take into account that usage of \texttt{CONST} and \texttt{CONSTL} at the same time is not allowed in the same operation.
+
+% REFFERENCES ALSO ADMITED BUT NOT USED
+
+\end{itemize}
+
+Below, we show several examples of valid assignments
+
+\begin{zkasm}
+-A + B => A, B
+-2**2*A + B => A, B
+2*A + 3*B => A, B
+$ => A, B				:MLOAD(addr)
+${executorMethod()} => A, B
+${A >> 2} => C, D
+${A & 0x03} => C, D
+\end{zkasm}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Free Inputs and Commands} \label{sec:free-inputs}
+
+\textbf{Free Inputs} are values captured by the compiler which are not directly checked to be correct during execution. Free Inputs are introduced using the dollar operator \texttt{\$\{\}} under braces. We will call this statements \textbf{Free Inputs tags}. There are two ways we can introduce Free Inputs using the dollar operator: 
+
+\begin{itemize}
+    
+    \item \textit{Receiving values from instructions via free inputs}. Some instructions, like \MLOAD defined in Section \ref{sec:instructions} sends its corresponding output through Free Inputs. For example, the program below saves the value stored in the memory slot corresponding to the address \texttt{someAddr} into the register \A through a Free Input. 
+    
+    \begin{zkasm}
+        $ => A		MLOAD(someAddr)
+    \end{zkasm}
+    
+    \item \textit{Using a already implemented executor function}. The compiler can capture functions programmed inside the executor. The syntax to invoke them is the following one
+    
+    \begin{zkasm}
+        ${ executorMethod(params) } => A
+    \end{zkasm}
+    
+    where \texttt{executorMethod(params)} is a function which is programmed in the executor and can take several registers as parameters. An example on this can be found in the elliptic curves operations defined in the instructions section \ref{sec:instructions}:
+    
+    \begin{zkasm}
+        {xAddPointEc(A,B,C,D)} => E
+    \end{zkasm}
+    
+\end{itemize}
+
+
+Moreover, we can also use plain Javascript inside a zkASM program to introduce Free Inputs. This special feature can be invoked using the double dollars operator \texttt{\$\$\{\}} under braces. We will call this statements \textbf{Commands}. For example, one can define temporal variables that can be accessed and modified by Free Input tags at any point of the program. For example, the code below defines a temporal variable \texttt{\_someTmpVar} which will be equal to the sum of the values stored in registers \A and \C. Posteriorly, this variable will be captured by a Free Input tag, shifted $256$ bits and reassigned to the \A register. Note that we can use expressions under Free Input tags. 
+
+\begin{zkasm}
+    $${ var _someTmpVar = A + C }
+    ${ _someTmpVar >> 256 } => A
+\end{zkasm}
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Constants Definition} \label{sec:const-def}
+
+As in many programming languages, one can define constants in zkASM to avoid magic numbers. In order to explore all the possibilities that the compiler brings us, let us define the concept of a \textbf{numerical expression}.
+
+A numerical expression (\nexpr) can be defined recursively as 
+
+\begin{itemize}
+
+\item \textbf{Arithmetic expressions} among numerical expressions: $\nexpr + \nexpr$, $\nexpr - \nexpr$, $\nexpr \ \texttt{*} \ \nexpr$, $\nexpr \ \texttt{**} \ \nexpr$, $\nexpr \ \texttt{\%} \ \nexpr$, $\nexpr \ \texttt{/} \ \nexpr$. 
+
+\item A \textbf{shift} of numerical expressions: $\nexpr \ \ll \ \nexpr$ or $\nexpr \ \gg \ \nexpr$. 
+
+\item A \textbf{bit-wise operation} of numerical expressions: $\nexpr \ \mathtt{\land} \ \nexpr$, $\nexpr \ \texttt{|} \ \nexpr$ or $\nexpr \ \texttt{\&} \ \nexpr$.
+
+\item A \textbf{boolean operation} of numerical expressions: $\nexpr \ \texttt{<} \ \nexpr$, $\nexpr \ \texttt{>} \ \nexpr$, $\nexpr \ \texttt{<=} \ \nexpr$, $\nexpr \ \texttt{>=} \ \nexpr$, $\nexpr \ \texttt{==} \ \nexpr$, $\nexpr \ \texttt{!=} \ \nexpr$, $\nexpr \ \texttt{\&\&} \ \nexpr$, $\nexpr \ \texttt{||} \ \nexpr$.
+
+\item The \textbf{negation} of a numerical expression: $\texttt{!} \nexpr$. 
+
+\item A \textbf{ternary operator} over numerical expressions: $ \nexpr \ \texttt{?} \ \nexpr \ \texttt{:} \ \nexpr$. 
+
+\item Numerical expressions can also involve \textbf{parenthesis}: $( \nexpr )$. 
+
+\end{itemize}
+
+Since we defined \nexpr recursively, we should define the base cases:
+
+\begin{itemize}
+
+\item A numerical value: \texttt{0} or \texttt{0x01}.
+
+\item A long numerical value: \texttt{0n} or \texttt{0x04n}.
+
+\item A constant identifier, that we will define below.
+
+\end{itemize}
+
+To define a constant we will use the following syntax:
+
+\begin{zkasm}
+CONST %CONSTID = nexpr
+\end{zkasm}
+
+where $\mathtt{CONSTID}$ is a unique identifier for the constant we are defining. The way to invoke a constant inside can be shown in the example below, where we assign the value of the constant with identifier \texttt{SOMECONST} to the register \A:
+
+\begin{zkasm}
+CONST %SOMECONST = 5    
+%SOMECONST => A
+\end{zkasm}
+
+Observe that the definitions of a numerical expression allows us to define complex constants like:
+
+\begin{zkasm}
+CONST %NUMBERA = 10
+CONST %NUMBERB = 2
+CONST %EXP = %NUMBERA ** %NUMBERB
+CONST %TERNARY = %EXP == 100 ? 1 : 0
+\end{zkasm}
+
+Another feature that implements the compiler is the ability to choose between an expression or a constant depending on the existence of such a constant. For example, in the following piece of code:
+
+\begin{zkasm}
+CONST %NUMBERA = %NONEXISTINGCONST ?? 10
+\end{zkasm}
+
+the constant $\texttt{\%}\mathtt{NUMBERA}$ will take the value $10$. However, in the code below:
+
+\begin{zkasm}
+CONST %EXISTINGCONST = 2
+CONST %NUMBERA = %EXISTINGCONST ?? 10
+\end{zkasm}
+
+the constant $\texttt{\%}\mathtt{NUMBERA}$ will take the value $2$.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Variables Definition}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Some Examples}
+
+This section serves as a compendium of useful examples.
+
+\begin{zkasm}
+    opADD:
+    SP - 2          :JMPN(stackUnderflow)
+    SP - 1 => SP
+    $ => A          :MLOAD(SP--)
+    $ => C          :MLOAD(SP)
+    
+    ; Add operation with Arith
+    A               :MSTORE(arithA)
+    C               :MSTORE(arithB)
+                    :CALL(addARITH)
+    $ => E          :MLOAD(arithRes1)
+    E               :MSTORE(SP++)
+    1024 - SP       :JMPN(stackOverflow)
+    GAS-3 => GAS    :JMPN(outOfGas)
+    :JMP(readCode)
+\end{zkasm}
+
+Let us explain in detail how the \ADD opcode gets interpreted by us. Recall that at the beginning the stack pointer is pointing to the next "empty" address in the stack:
+
+\begin{itemize}
+    
+    \item First, we check if the stack is filled "properly" in order to carry on the \ADD operation. This means that, as the \ADD opcode needs two elements to operate, it is checked that these two elements are actually in the stack:
+    
+    \begin{zkasm}
+        SP - 2          :JMPN(stackUnderflow)
+    \end{zkasm}
+    
+    If less than two elements are present, then the \texttt{stackUnderflow} function gets executed.
+    
+    \item Next, we move the stack pointer to the first operand, load its value and place the result in the \A register. Similarly, we move the stack pointer to the next operated, load its value and place the result in the \C register.
+    
+    \begin{zkasm}
+        SP - 1 => SP
+        $ => A          :MLOAD(SP--)
+        $ => C          :MLOAD(SP)
+    \end{zkasm}
+    
+    \item Now its when the operation takes place. We perform the addition operation by storing the value of the registers \A and \C into the variables \texttt{arithA} and \texttt{arithB} and then we call the subrutine \texttt{addARITH} that is the one in charge of actually performing the addition.
+    
+    \begin{zkasm}
+        A               :MSTORE(arithA)
+        C               :MSTORE(arithB)
+        :CALL(addARITH)
+        $ => E          :MLOAD(arithRes1)
+        E               :MSTORE(SP++)
+    \end{zkasm}
+    
+    Finally, the result of the addition gets placed into the register \E and the corresponding value gets placed into the stack pointer location; moving it forward afterwise.
+    
+    
+    \item A bunch of checks are performed. It is first checked that after the operation the stack is not full and then that we do not run out of gas.
+    
+    \begin{zkasm}
+        1024 - SP       :JMPN(stackOverflow)
+        GAS-3 => GAS    :JMPN(outOfGas)
+        :JMP(readCode)
+    \end{zkasm}
+    
+    Last but not least, there is an instruction indicating to move forward to the next intruction.
+    
+\end{itemize}
+

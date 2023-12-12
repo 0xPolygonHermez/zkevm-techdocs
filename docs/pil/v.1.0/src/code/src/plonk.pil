@@ -1,0 +1,20 @@
+include "config.pil";
+
+namespace Plonk(%N);
+    pol constant QL, QR, QM, QO, QC;
+    pol constant SA, SB, SC;
+    pol constant L1;
+    
+    pol commit a, b, c;
+    
+    public pi = a(0);
+    
+    // Public values check 
+    L1 * (a - :pi) = 0;
+    
+    // Plonk equation 
+    pol ab = a*b;
+    QL*a + QR*b + QM*ab + QO*c + QC = 0;
+
+    // Copy-constraints check 
+    {a, b, c} connect {SA, SB, SC};

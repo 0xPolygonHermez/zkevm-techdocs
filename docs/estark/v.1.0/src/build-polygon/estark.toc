@@ -1,0 +1,25 @@
+\contentsline {section}{\numberline {1}Preliminaries}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Notation}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Interactive Oracle Proofs and STARKs}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}FRI}{5}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Vanilla STARK}{8}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Arguments}{12}{subsection.1.5}%
+\contentsline {section}{\numberline {2}Our Techniques}{15}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Commiting to Multiple Polynomial at Once}{15}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Transcript Generation and Computing Verifier Challenges}{17}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Preprocessed Polynomials and Public Values}{19}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Adding Selected Vector Arguments}{20}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}On the Quotient Polynomial}{24}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Controlling the Constraint Degree wih Intermediate Polynomials}{25}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}FRI Polynomial Computation}{27}{subsection.2.7}%
+\contentsline {section}{\numberline {3}Our eSTARK Protocol}{28}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Extended Algebraic Intermediate Representation (eAIR)}{28}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}The Setup Phase}{29}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Our IOP for eAIR}{30}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}From a STIK to a Non-Interactive STARK}{32}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Full Protocol Description}{33}{subsubsection.3.4.1}%
+\contentsline {section}{\numberline {A}Full Protocol Descriptions}{39}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}FRI}{39}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}Vanilla STARK}{40}{subsection.A.2}%
+\contentsline {subsection}{\numberline {A.3}eSTARK}{43}{subsection.A.3}%
+\contentsline {section}{\numberline {B}Code Naming Equivalences}{45}{appendix.B}%

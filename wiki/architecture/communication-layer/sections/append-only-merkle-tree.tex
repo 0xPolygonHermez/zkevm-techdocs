@@ -1,0 +1,37 @@
+% !TeX spellcheck = en_US
+% !TeX root = ../build/communication-layer.tex
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+
+
+\section{Append Only Merkle Trees}
+
+This section entails the design of an append-only sparse binary Merkle tree whose successive roots can be computed with a minimal amount of persistent data. This kind of trees are designed for scenarios where the tree represents an ordered list of data elements which can only be modified by appending new ones. Rather than storing the whole the tree, only two key elements are stored:
+
+\begin{itemize}
+
+\item An array of the size of the tree depth, denoted to as \texttt{branch}.
+
+\item The last appended element's index, denoted to as \texttt{lastElementIndex}.
+
+\end{itemize}
+
+
+Importantly, the depth of the tree, representing its maximum capacity, is known a priori. This drops the necessity to use markers to distinguish between branches and leaves. Furthermore, note that the tree is inherently balanced.
+
+By convention, for our append-only tree we are going to use $0$s as default value for empty leaves. Hence, when the list represented using theincremental Merkle tree is empty, the following holds:
+
+\begin{align*}
+h_i &= 0, \\
+h_{j, k} &= h(0, 0) := h^{(00)}, \\
+h_{m, n, l} &= h(h^{(00)}, h^{(00)}) := h^{(0000)}, \\
+&\cdots
+\end{align*}
+
+Here, $h$ denotes the employed hash function, and the notation \texttt{,} signifies juxtaposition. Observe that, in this scenario, each of the hashes stored \textbf{do only depend on the level being stored}. Hence, we just need to compute a different hash value per level.
+
+\paragraph*{A Toy Example}
+
+For sake of simplicity, let’s consider as a toy example a small incremental Merkle tree of a maximum capacity of 8 leaves (hence, the having maximum depth of $d = \log_2(8) = 3$).
+
+
+

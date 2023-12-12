@@ -1,0 +1,338 @@
+{
+ "nCommitments": 3,
+ "nQ": 1,
+ "nIm": 1,
+ "nConstants": 9,
+ "publics": [
+  {
+   "polType": "cmP",
+   "polId": 0,
+   "idx": 0,
+   "id": 0,
+   "name": "pi"
+  }
+ ],
+ "references": {
+  "Plonk.QL": {
+   "type": "constP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.QR": {
+   "type": "constP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.QM": {
+   "type": "constP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.QO": {
+   "type": "constP",
+   "id": 3,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.QC": {
+   "type": "constP",
+   "id": 4,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.SA": {
+   "type": "constP",
+   "id": 5,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.SB": {
+   "type": "constP",
+   "id": 6,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.SC": {
+   "type": "constP",
+   "id": 7,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.L1": {
+   "type": "constP",
+   "id": 8,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.a": {
+   "type": "cmP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.b": {
+   "type": "cmP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.c": {
+   "type": "cmP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Plonk.ab": {
+   "type": "imP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  }
+ },
+ "expressions": [
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "const",
+       "deg": 1,
+       "id": 8,
+       "next": false
+      },
+      {
+       "op": "sub",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 0,
+         "next": false
+        },
+        {
+         "op": "public",
+         "deg": 0,
+         "id": 0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "op": "number",
+     "deg": 0,
+     "value": "0"
+    }
+   ]
+  },
+  {
+   "op": "mul",
+   "deg": 1,
+   "idQ": 0,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 0,
+     "next": false
+    },
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 1,
+     "next": false
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "add",
+     "deg": 2,
+     "values": [
+      {
+       "op": "add",
+       "deg": 2,
+       "values": [
+        {
+         "op": "add",
+         "deg": 2,
+         "values": [
+          {
+           "op": "add",
+           "deg": 2,
+           "values": [
+            {
+             "op": "mul",
+             "deg": 2,
+             "values": [
+              {
+               "op": "const",
+               "deg": 1,
+               "id": 0,
+               "next": false
+              },
+              {
+               "op": "cm",
+               "deg": 1,
+               "id": 0,
+               "next": false
+              }
+             ]
+            },
+            {
+             "op": "mul",
+             "deg": 2,
+             "values": [
+              {
+               "op": "const",
+               "deg": 1,
+               "id": 1,
+               "next": false
+              },
+              {
+               "op": "cm",
+               "deg": 1,
+               "id": 1,
+               "next": false
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "op": "mul",
+           "deg": 2,
+           "values": [
+            {
+             "op": "const",
+             "deg": 1,
+             "id": 2,
+             "next": false
+            },
+            {
+             "op": "exp",
+             "deg": 1,
+             "id": 1,
+             "next": false
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "op": "mul",
+         "deg": 2,
+         "values": [
+          {
+           "op": "const",
+           "deg": 1,
+           "id": 3,
+           "next": false
+          },
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 2,
+           "next": false
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "op": "const",
+       "deg": 1,
+       "id": 4,
+       "next": false
+      }
+     ]
+    },
+    {
+     "op": "number",
+     "deg": 0,
+     "value": "0"
+    }
+   ],
+   "deps": [
+    1
+   ]
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 0,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 1,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 2,
+   "next": false
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 5,
+   "next": false
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 6,
+   "next": false
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 7,
+   "next": false
+  }
+ ],
+ "polIdentities": [
+  {
+   "e": 0,
+   "fileName": "plonk.pil",
+   "line": 13
+  },
+  {
+   "e": 2,
+   "fileName": "plonk.pil",
+   "line": 17
+  }
+ ],
+ "plookupIdentities": [],
+ "permutationIdentities": [],
+ "connectionIdentities": [
+  {
+   "pols": [
+    3,
+    4,
+    5
+   ],
+   "connections": [
+    6,
+    7,
+    8
+   ],
+   "fileName": "plonk.pil",
+   "line": 20
+  }
+ ]
+}

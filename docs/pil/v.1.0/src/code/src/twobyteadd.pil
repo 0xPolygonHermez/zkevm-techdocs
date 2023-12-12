@@ -1,0 +1,24 @@
+include "config.pil";
+
+namespace TwoByteAdd(%N);
+
+    pol constant BYTE_A, BYTE_B, BYTE_CARRY, BYTE_ADD;  
+    pol constant RESET;                                 
+    pol commit a, b;                                    
+    pol commit carry, prevCarry, add;                   
+
+    prevCarry' = carry;
+    a + b + (1 - RESET)*prevCarry = carry*2**8 + add;
+
+    {a, b, carry, add} in {BYTE_A, BYTE_B, BYTE_CARRY, BYTE_ADD};
+
+// namespace TwoByteAdd(%N);
+
+//     pol constant BYTE_A, BYTE_B, BYTE_PREVCARRY, BYTE_CARRY, BYTE_ADD;
+//     pol constant RESET;
+//     pol commit a, b;
+//     pol commit carry, prevCarry, add;
+
+//     prevCarry' = carry;
+
+//     {a, b, (1 - RESET)*prevCarry, carry, add} in {BYTE_A, BYTE_B, BYTE_PREVCARRY, BYTE_CARRY, BYTE_ADD};

@@ -1,0 +1,449 @@
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+% IACR Transactions CLASS DOCUMENTATION
+% Written by Gaetan Leurent gaetan.leurent@inria.fr (2016-2018)
+%
+% To the extent possible under law, the author(s) have dedicated all
+% copyright and related and neighboring rights to this software to the
+% public domain worldwide. This software is distributed without any
+% warranty.
+%
+% You should have received a copy of the CC0 Public Domain Dedication
+% along with this software. If not, see
+% <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+\documentclass[preprint]{iacrtrans}
+\usepackage[utf8]{inputenc}
+
+\setcounter{tocdepth}{4}
+
+%% VERSION
+\newcommand{\version}{v.1.0}
+
+
+%% TITLE
+\title{
+  \includegraphics[width=\columnwidth]{logo_zkEVM.png} \\ \vspace{0.3cm}
+  From Zero to zkEVM - L2 Scaling Solutions \vspace{0.3cm}\\
+  \version
+}
+
+
+\institute{}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+% This package controls how hyperlinks are displayed
+% https://es.overleaf.com/learn/latex/Hyperlinks
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor={red!80!black},urlcolor={blue!80!black}}
+
+%Multiple columns
+\usepackage{multicol}
+
+%Cell colors
+\usepackage{colortbl}
+
+% Used for super caligraphic font \mathscr{}
+\usepackage{mathrsfs}
+
+%This ensures spaces when using ensuremath and no $$ are used to introduce math
+\usepackage{xspace}
+
+%%%%%% BEGIN OF CODE HIGHLIGHTING ENVIRONMENTS %%%%%%
+
+%   sudo apt install texlive-latex-extra
+%   sudo apt install python-pip
+%   pip install pygments
+%   pip install pygments-lexer-babylon  #contains JSX
+%   pip install pygments-lexer-solidity
+%   pip install pygments pygments-lexer-babylon pygments-lexer-solidity
+
+
+% *** COLOR COMMANDS ***
+\definecolor{dblackcolor}{rgb}{0.0,0.0,0.0}
+\definecolor{dbluecolor}{rgb}{0.01,0.02,0.5}
+\definecolor{dgreencolor}{rgb}{0.2,0.4,0.0}
+\definecolor{dgraycolor}{rgb}{0.30,0.3,0.30}
+\newcommand{\dblue}{\color{dbluecolor}\bf}
+\newcommand{\dred}{\color{dredcolor}\bf}
+\newcommand{\dblack}{\color{dblackcolor}\bf}
+\definecolor{light-gray}{gray}{0.96} %the shade of grey that stack exchange uses
+
+\usepackage{showexpl}% already includes listings package
+\makeatletter
+\def\lst@filenamerpl{_\textunderscore $\textdollar}
+\makeatother
+\lstset{frame=shadowbox, basicstyle=\footnotesize\ttfamily, showstringspaces=false,
+rulesepcolor=\color{black}, upquote=true}
+
+\lstdefinestyle{scriptStyle}{
+    basicstyle=\footnotesize,% control font of code
+    preset=\footnotesize,% adjust font size of output
+    numbers=none,
+    frame=tlbr,
+    pos=r,% want output on rightbackgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{terms}{
+    basicstyle=\scriptsize\ttfamily,% control font of code
+    preset=\footnotesize,% adjust font size of output
+}
+
+\lstdefinestyle{termt}{
+    basicstyle=\footnotesize\ttfamily,% control font of code
+    preset=\footnotesize,% adjust font size of output
+	numbers=none,
+}
+
+\lstdefinestyle{verb}{
+    basicstyle=\footnotesize,% control font of code
+    preset=\footnotesize,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+%     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{verbs}{
+    basicstyle=\scriptsize,% control font of code
+    preset=\scriptsize,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+%     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+\lstdefinestyle{verbt}{
+    basicstyle=\tiny\ttfamily,% control font of code
+    preset=\tiny\ttfamily,% adjust font size of output
+    frame=tlbr,
+    pos=r,% want output on right
+%     backgroundcolor=\color{yellow!30},
+    width=0.50\linewidth,
+}
+
+%Linter for circom
+\usepackage{tcolorbox}
+\tcbuselibrary{minted,skins,listings}
+\definecolor{mybg}{rgb}{0.96,0.96,0.98}
+% \lstset{
+% 	backgroundcolor = \color{light-gray},
+% 	showtabs = False,
+% 	tabsize = 2,
+% 	showspaces = False,
+% 	showstringspaces = False,
+% 	commentstyle = {\ttfamily\color{dgreencolor}},
+% 	keywordstyle = {\ttfamily\color{dbluecolor}\bfseries},
+% 	stringstyle = {\ttfamily\color{dgraycolor}\bfseries},
+% 	language = circom,
+% 	basicstyle = {\fontsize{7pt}{7pt}\ttfamily},
+% 	aboveskip = 1em,
+% 	belowskip = 1em,
+% 	numbers = left,%none,
+% 	numbersep=5pt,    %space line numbers from code
+% 	xleftmargin=2em,
+% 	frame=single,	% adds a frame around the code
+% 	framexleftmargin=1.7em,
+% 	numberstyle=\tiny,%\color{gray}
+% 	emph = {proc,retp,endp,local},
+% 	emphstyle = {\color{blue}\textbf},
+% 	literate =
+% 		{<==}{{{\color{dbluecolor}<==}}}2
+% 		{==>}{{{\color{dbluecolor}==>{}}}}2
+% 		{===}{{{\color{dbluecolor}==={}}}}2
+% 		{<--}{{{\color{dbluecolor}<---{}}}}2
+% 		{-->}{{{\color{dbluecolor}--->{}}}}2
+% 		{*}{{{\color{dbluecolor}*{}}}}2
+% }
+
+\lstdefinelanguage{circom}{
+	keywords=[1]{signal, input, output, public, <==, ==>, ===}, % generic keywords including crypto operations
+  	keywordstyle=[1]\color{blue!70!}\bfseries,
+	keywords=[3]{pragma, include},
+  	keywordstyle=[3]\color{brown}\bfseries,
+	keywords=[4]{for, if, var, else},
+	keywordstyle=[4]\color{teal}\bfseries,
+	keywords=[5]{template, component},
+	keywordstyle=[5]\color{violet}\bfseries,
+	identifierstyle=\color{black},
+	sensitive=false,
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{green!40!black}\ttfamily,
+	stringstyle=\color{blue}\ttfamily,
+%	morestring=[b]',
+%	morestring=[b]"
+}
+
+\newtcblisting{circom}{
+  listing engine=listings,
+  colback=mybg,
+  colframe=black!70,
+  listing only,
+  listing options={
+    language={circom},
+	basicstyle=\footnotesize\ttfamily,
+    frame=none,
+	numbers=none, %left
+	numberstyle=\tiny,
+	numbersep=9pt,
+	tabsize=2,
+	breaklines=true,
+	showtabs=false,
+	captionpos=b
+  },
+  left=0.2mm,
+  top=0cm,
+  bottom=0cm,
+  boxrule=0.1mm
+}
+
+\newtcblisting{js}{
+	listing engine=minted,
+	colback=mybg,
+	colframe=black!30,
+	listing only,
+	minted style=tango,
+	minted language=js,
+	minted options={linenos=false,texcl=true},
+	left=0.2mm,
+	top=0cm,
+	bottom=0cm,
+	boxrule=0.1mm
+}
+
+\lstdefinelanguage{Pil}{
+	keywords=[1]{pol, commit, constant, in, is, connect, public, namespace}, % generic keywords including crypto operations
+  keywordstyle=[1]\color{blue!70!}\bfseries,
+	keywords=[3]{include}, % modules
+  keywordstyle=[3]\color{brown}\bfseries,
+	keywords=[4]{},% types; money and time units
+	keywordstyle=[4]\color{teal}\bfseries,
+	keywords=[5]{field, bool, u32, u16, u8},	% environment variables
+	keywordstyle=[5]\color{violet}\bfseries,
+	identifierstyle=\color{black},
+	sensitive=false,
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{green!40!black}\ttfamily,
+	stringstyle=\color{blue}\ttfamily,
+%	morestring=[b]',
+%	morestring=[b]"
+}
+
+\newtcblisting{pil}{
+  listing engine=listings,
+  colback=mybg,
+  colframe=black!70,
+  listing only,
+  listing options={
+    language={Pil},
+	basicstyle=\footnotesize\ttfamily,
+    frame=none,
+	numbers=none,
+	numberstyle=\tiny,
+	numbersep=9pt,
+	tabsize=2,
+	breaklines=true,
+	showtabs=false,
+	captionpos=b
+  },
+  left=0.2mm,
+  top=0cm,
+  bottom=0cm,
+  boxrule=0.1mm
+}
+
+%%%%%%% END OF CODE HIGHLIGHTING ENVIRONMENTS %%%%%%%
+
+\usepackage{url}
+\usepackage{tikz}
+\usepackage{graphicx} % Required for including images
+\usepackage[font=small,labelfont=bf]{caption}  % Required for specifying captions to tables and figures
+
+
+%%%%%%%%%%%%%%%%%%% BEGIN OF MACROS %%%%%%%%%%%%%%%%%%%
+
+% Cryptocode: https://github.com/arnomi/cryptocode
+\usepackage[
+lambda,
+operators,
+landau, %este es el de bigO
+probability,
+%sets,
+logic, %para or,and...
+asymptotics,
+keys
+]{cryptocode}
+
+% My own procedure blocks to show protocols
+\createprocedureblock{mypb}{center, boxed}{}{}{linenumbering}
+\createprocedureblock{mypbnonum}{center, boxed}{}{}{}
+
+% Numbering style
+\renewcommand{\pclnstyle}[1]{\text{#1}}
+\renewcommand{\pclnseparator}{.}
+
+% Hyphen inside mathmode
+\mathchardef\mhyphen="2D
+
+% Mathbb
+\newcommand{\FF}{\ensuremath{\mathbb{F}}\xspace}
+\newcommand{\KK}{\ensuremath{\mathbb{K}}\xspace}
+\newcommand{\NN}{\ensuremath{\mathbb{N}}\xspace}
+\newcommand{\ZZ}{\ensuremath{\mathbb{Z}}\xspace}
+
+% Mathcal
+\newcommand{\A}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\C}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\E}{\ensuremath{\mathcal{E}}\xspace}
+\newcommand{\F}{\ensuremath{\mathcal{F}}\xspace}
+\renewcommand{\H}{\ensuremath{\mathcal{H}}\xspace}
+\newcommand{\I}{\ensuremath{\mathcal{I}}\xspace}
+\renewcommand{\O}{\ensuremath{\mathcal{O}}\xspace}
+\renewcommand{\P}{\ensuremath{\mathcal{P}}\xspace}
+\newcommand{\R}{\ensuremath{\mathcal{R}}\xspace}
+\renewcommand{\S}{\ensuremath{\mathcal{S}}\xspace}
+\newcommand{\T}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\V}{\ensuremath{\mathcal{V}}\xspace}
+
+% Mathscr
+% \newcommand{\PPP}{\ensuremath{\mathscr{P}}\xspace}
+
+
+% Mathfrak
+\newcommand{\afr}{\ensuremath{\mathfrak{a}}\xspace}
+\newcommand{\bfr}{\ensuremath{\mathfrak{b}}\xspace}
+
+% Caligraphic Combiantions
+\DeclareMathAlphabet{\mathpgoth}{OT1}{pgoth}{m}{n}
+\newcommand{\plonk}{\ensuremath{\mathcal{P}\mathfrak{lon}\mathcal{K}}\xspace}
+\newcommand{\plookup}{\ensuremath{\mathpgoth{plookup}}\xspace}
+
+% Abbreviations
+% \newcommand{\Pp}{\ensuremath{\mathcal{P}_{\textsf{poly}}\xspace}}
+\newcommand{\MTR}{\ensuremath{\text{MTR}}\xspace}
+\newcommand{\MTP}{\ensuremath{\text{MTP}}\xspace}
+\newcommand{\LCC}{\ensuremath{\text{LCC}}\xspace}
+\newcommand{\FRI}{\ensuremath{\textsf{F}}\xspace}
+\newcommand{\z}{\ensuremath{\overline{z}}\xspace}
+\newcommand{\fsel}{\ensuremath{f^{\text{sel}}}\xspace}
+\newcommand{\tsel}{\ensuremath{t^{\text{sel}}}\xspace}
+\newcommand{\Evals}{\ensuremath{\textsf{Evals}}\xspace}
+\newcommand{\pparams}{\ensuremath{\text{pp}}\xspace}
+\newcommand{\vparams}{\ensuremath{\text{vp}}\xspace}
+\newcommand{\pre}{\ensuremath{\text{pre}}\xspace}
+\newcommand{\tr}{\ensuremath{\text{tr}}\xspace}
+\newcommand{\otr}{\ensuremath{\overline{\text{P}}}\xspace}
+\newcommand{\im}{\ensuremath{\text{im}}\xspace}
+\newcommand{\seed}{\ensuremath{\textsf{seed}}\xspace}
+\newcommand{\transcript}{\ensuremath{\textsf{transcript}}\xspace}
+\newcommand{\AIR}{\ensuremath{\textsf{A}}\xspace}
+\newcommand{\eAIR}{\ensuremath{\textsf{eA}}\xspace}
+\newcommand{\accept}{\ensuremath{\textsf{accept}}\xspace}
+\newcommand{\reject}{\ensuremath{\textsf{reject}}\xspace}
+\newcommand{\eFRI}{\ensuremath{\epsilon_{\textsf{FRI}}}\xspace}
+\newcommand{\eSTARK}{\ensuremath{\epsilon_{\textsf{STARK}}}\xspace}
+\newcommand{\eeSTARK}{\ensuremath{\epsilon_{\textsf{eSTARK}}}\xspace}
+\newcommand{\eC}{\ensuremath{\epsilon_{\textsf{C}}}\xspace}
+\newcommand{\ePlo}{\ensuremath{\epsilon_{\textsf{Plo}}}\xspace}
+\newcommand{\eMulEq}{\ensuremath{\epsilon_{\textsf{MulEq}}}\xspace}
+\newcommand{\eCon}{\ensuremath{\epsilon_{\textsf{Con}}}\xspace}
+\newcommand{\eArgs}{\ensuremath{\epsilon_{\textsf{Args}}}\xspace}
+\newcommand{\RS}{\ensuremath{\textsf{RS}[\FF,H,\rho]}\xspace}
+\newcommand{\RSK}{\ensuremath{\textsf{RS}[\KK,H,\rho]}\xspace}
+\newcommand{\LH}{\ensuremath{\textsf{LH}}\xspace}
+\newcommand{\ID}{\ensuremath{\textsf{ID}}\xspace}
+
+% C12
+\newcommand{\POSEIDON}{\ensuremath{\texttt{POSEIDON12}}\xspace}
+\newcommand{\acode}{\ensuremath{\texttt{a}}\xspace}
+\newcommand{\CONST}{\ensuremath{\texttt{C}}\xspace}
+\newcommand{\PARTIAL}{\ensuremath{\texttt{PARTIAL}}\xspace}
+\newcommand{\CMULADD}{\ensuremath{\texttt{CMULADD}}\xspace}
+\newcommand{\EVPOL}{\ensuremath{\texttt{EVPOL4}}\xspace}
+\newcommand{\FFT}{\ensuremath{\texttt{FFT4}}\xspace}
+\newcommand{\nextStep}{\ensuremath{\textsf{'}}\xspace}
+\newcommand{\scale}{\ensuremath{\texttt{s}}\xspace}
+\newcommand{\firstW}{\ensuremath{\texttt{firstW}}\xspace}
+\newcommand{\firstWSquare}{\ensuremath{\texttt{firstW2}}\xspace}
+\newcommand{\incW}{\ensuremath{\texttt{incW}}\xspace}
+% Caligraphic Combiantions
+ \DeclareMathAlphabet{\mathpgoth}{OT1}{pgoth}{m}{n}
+
+% Abbreviations
+\newcommand{\stoc}{\texttt{S2C}\xspace}
+\newcommand{\ctos}{\texttt{C2S}\xspace}
+
+
+% Make a nice emptyset
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+% Make a nice phi and epsilon
+\let\oldphi\phi
+\let\phi\varphi
+\let\oldepsilon\epsilon
+\let\epsilon\varepsilon
+
+% Make a nice q.e.d. symbol
+\renewcommand\qedsymbol{\ensuremath{\blacksquare}\xspace}
+
+\theoremstyle{definition}
+\newtheorem{protocol}{Protocol}
+\newtheorem{bremark}{Remark}
+
+\usepackage{paralist} % for compactitem environment
+
+%%%%%%%%%%%%%%%%%%% END OF MACROS %%%%%%%%%%%%%%%%%%%
+
+% \begin{pcvstack}[boxed, center]
+% % \pcsetargs{codesize=\scriptsize{}}
+
+% \procedure{}{
+%   \textbf{Prover } \P(g_1(x))  \< \< \textbf{verifier } \V(g_1(x)) \\[][\hline]
+%   \< \sendmessageright{top={$f_1(s)$, $f_2(s)$}} \< \\[-2mm]
+%   \< \sendmessageleft{top={randomness}} \< \\[-2mm]
+%   \< \sendmessageright{top={$f_3(s)$}} \< \\[-2mm]
+%   \< \< \text{Samples a random } z \in \FF \text{ and computes } z\vec{g}. \\[-2mm]
+%   \< \sendmessageleft{top={$z$}} \< \\[-2mm]
+%   \text{Computes evaluations:} \< \< \\
+%   \t g_1(z), f_1(z), f_2(z), f_3(z) \< \< \\[-2mm]
+%   \< \sendmessageright{top={$g_1(z)$, $f_1(z)$, $f_2(z)$, $f_3(z)$}} \< \\[-2mm]
+%   \< \sendmessageleft{top={$v$}} \< \\[-2mm]
+%   \< \sendmessageright{top={$\pi$}} \< \\[-2mm]
+%   \< \< \text{Verifies the opening proof } \pi \text{ and checks that:} \\
+%   \< \< \t g_1(z)(f_1(z) + f_2(z)) - f_3(z) = 0
+% }
+% \end{pcvstack}
+
+\newcommand{\definedir}[2]{\newcommand{#1}{#2}}
+\definedir{\trainingsectiondir}{..}
+
+
+\begin{document}
+\begin{titlepage}
+\centering
+\maketitle
+\today
+\end{titlepage}
+
+% use optional argument because the \LaTeX command breaks the PDF keywords
+% \keywords[\publname, ToSC, TCHES, LaTeX]{TBD \and TBD}
+
+%{\hypersetup{linkcolor=.}\tableofcontents}
+
+\newpage
+\input{\trainingsectiondir/sections/l2-scaling-solutions}
+
+%\newpage
+%\bibliographystyle{alpha}
+%\bibliography{../bib/bibliography}
+
+\newpage
+\appendix
+
+\end{document}

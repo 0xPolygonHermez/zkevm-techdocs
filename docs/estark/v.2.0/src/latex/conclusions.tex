@@ -1,0 +1,8 @@
+
+\section{Conclusions}\label{sec:conclusions}
+
+In this paper, we have presented a probabilistic proof that generalizes the STARK family by introducing a more generic intermediate representation that we have called eAIR. We first explained multiple techniques that enhance the vanilla STARK complexity in both proof size and verification time. In particular, we demonstrated many optimizations applied to some polynomial computations in vanilla STARK. Additionally, we showed the tradeoffs arising from controlling the constraint degree either at the representation of the AIR or inside the eSTARK itself, offering a rule to decide whether to choose the first option or the second one. We anticipate these techniques to be useful for other types of SNARKs.
+
+Secondly, we described our protocol in the polynomial IOP model as a combination of the optimized version of the vanilla STARK and the addition of rounds concerning the incorporation of three arguments into the protocol. Following the description, we proved that the protocol is sound in the polynomial IOP model.
+
+Lastly, we provided a full description of the protocol by replacing the oracle access to polynomials via Merkle trees and turning it non-interactive through the Fiat-Shamir heuristic. We expect this protocol to be further expanded with the addition of more types of arguments that could fit a wider range of applications.

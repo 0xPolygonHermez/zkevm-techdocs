@@ -1,0 +1,28 @@
+{
+  "name": "code",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:all": "mkdir -p build && npm run build:multiplier && npm run build:cyclic && npm run build:twobyteadd && npm run build:fibonacci && npm run build:permutation && npm run build:plonk && npm run build:main && npm run build:test",
+    "build:multiplier": "node node_modules/pilcom/src/pil.js src/multiplier.pil -o build/multiplier.json",
+    "build:test": "node node_modules/pilcom/src/pil.js src/test.pil -o build/test.json",
+    "build:cyclic": "node node_modules/pilcom/src/pil.js src/cyclic.pil -o build/cyclic.json",
+    "build:twobyteadd": "node node_modules/pilcom/src/pil.js src/twobyteadd.pil -o build/twobyteadd.json",
+    "build:fibonacci": "node node_modules/pilcom/src/pil.js src/fibonacci.pil -o build/fibonacci.json",
+    "build:permutation": "node node_modules/pilcom/src/pil.js src/permutation.pil -o build/permutation.json",
+    "build:main": "node node_modules/pilcom/src/pil.js src/main.pil -o build/main.json",
+    "build:plonk": "node node_modules/pilcom/src/pil.js src/plonk.pil -o build/plonk.json"
+  },
+  "author": "UPC",
+  "license": "ISC",
+  "dependencies": {
+    "pil-stark": "^0.0.52",
+    "pilcom": "^0.0.20"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "ffjavascript": "^0.2.57",
+    "yargs": "^17.6.2"
+  }
+}

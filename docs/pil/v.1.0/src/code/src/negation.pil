@@ -1,0 +1,14 @@
+include "config.pil";
+
+namespace Negation(%N);
+    pol commit bits, nbits;
+    pol commit a, neg_a;
+    pol constant FACTOR, RESET;
+
+    bits*(1-bits) = 0;
+    nbits*(1-nbits) = 0;
+
+    bits + nbits - 2*bits*nbits = 1;
+
+    a' = FACTOR'*bits' + (1 - RESET)*a;
+    neg_a' = FACTOR'*nbits' + (1 - RESET)*neg_a;

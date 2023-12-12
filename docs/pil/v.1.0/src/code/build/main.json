@@ -1,0 +1,543 @@
+{
+ "nCommitments": 10,
+ "nQ": 0,
+ "nIm": 0,
+ "nConstants": 3,
+ "publics": [],
+ "references": {
+  "Global.BITS4": {
+   "type": "constP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Multiplier.freeIn1": {
+   "type": "cmP",
+   "id": 0,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Multiplier.freeIn2": {
+   "type": "cmP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Multiplier.out": {
+   "type": "cmP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.bits": {
+   "type": "cmP",
+   "id": 3,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.nbits": {
+   "type": "cmP",
+   "id": 4,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.a": {
+   "type": "cmP",
+   "id": 5,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.neg_a": {
+   "type": "cmP",
+   "id": 6,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.FACTOR": {
+   "type": "constP",
+   "id": 1,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Negation.RESET": {
+   "type": "constP",
+   "id": 2,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Main.a": {
+   "type": "cmP",
+   "id": 7,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Main.neg_a": {
+   "type": "cmP",
+   "id": 8,
+   "polDeg": 1024,
+   "isArray": false
+  },
+  "Main.op": {
+   "type": "cmP",
+   "id": 9,
+   "polDeg": 1024,
+   "isArray": false
+  }
+ },
+ "expressions": [
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 2,
+     "next": false
+    },
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 0,
+       "next": false
+      },
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 1,
+       "next": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 3,
+       "next": false
+      },
+      {
+       "op": "sub",
+       "deg": 1,
+       "values": [
+        {
+         "op": "number",
+         "deg": 0,
+         "value": "1"
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 3,
+         "next": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "op": "number",
+     "deg": 0,
+     "value": "0"
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "mul",
+     "deg": 2,
+     "values": [
+      {
+       "op": "cm",
+       "deg": 1,
+       "id": 4,
+       "next": false
+      },
+      {
+       "op": "sub",
+       "deg": 1,
+       "values": [
+        {
+         "op": "number",
+         "deg": 0,
+         "value": "1"
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 4,
+         "next": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "op": "number",
+     "deg": 0,
+     "value": "0"
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "sub",
+     "deg": 2,
+     "values": [
+      {
+       "op": "add",
+       "deg": 1,
+       "values": [
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 3,
+         "next": false
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 4,
+         "next": false
+        }
+       ]
+      },
+      {
+       "op": "mul",
+       "deg": 2,
+       "values": [
+        {
+         "op": "mul",
+         "deg": 1,
+         "values": [
+          {
+           "op": "number",
+           "deg": 0,
+           "value": "2"
+          },
+          {
+           "op": "cm",
+           "deg": 1,
+           "id": 3,
+           "next": false
+          }
+         ]
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 4,
+         "next": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "op": "number",
+     "deg": 0,
+     "value": "1"
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 5,
+     "next": true
+    },
+    {
+     "op": "add",
+     "deg": 2,
+     "values": [
+      {
+       "op": "mul",
+       "deg": 2,
+       "values": [
+        {
+         "op": "const",
+         "deg": 1,
+         "id": 1,
+         "next": true
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 3,
+         "next": true
+        }
+       ]
+      },
+      {
+       "op": "mul",
+       "deg": 2,
+       "values": [
+        {
+         "op": "sub",
+         "deg": 1,
+         "values": [
+          {
+           "op": "number",
+           "deg": 0,
+           "value": "1"
+          },
+          {
+           "op": "const",
+           "deg": 1,
+           "id": 2,
+           "next": false
+          }
+         ]
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 5,
+         "next": false
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "sub",
+   "deg": 2,
+   "values": [
+    {
+     "op": "cm",
+     "deg": 1,
+     "id": 6,
+     "next": true
+    },
+    {
+     "op": "add",
+     "deg": 2,
+     "values": [
+      {
+       "op": "mul",
+       "deg": 2,
+       "values": [
+        {
+         "op": "const",
+         "deg": 1,
+         "id": 1,
+         "next": true
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 4,
+         "next": true
+        }
+       ]
+      },
+      {
+       "op": "mul",
+       "deg": 2,
+       "values": [
+        {
+         "op": "sub",
+         "deg": 1,
+         "values": [
+          {
+           "op": "number",
+           "deg": 0,
+           "value": "1"
+          },
+          {
+           "op": "const",
+           "deg": 1,
+           "id": 2,
+           "next": false
+          }
+         ]
+        },
+        {
+         "op": "cm",
+         "deg": 1,
+         "id": 6,
+         "next": false
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 7,
+   "next": false
+  },
+  {
+   "op": "const",
+   "deg": 1,
+   "id": 0,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 7,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 8,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 5,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 6,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 7,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 8,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 9,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 0,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 1,
+   "next": false
+  },
+  {
+   "op": "cm",
+   "deg": 1,
+   "id": 2,
+   "next": false
+  }
+ ],
+ "polIdentities": [
+  {
+   "e": 0,
+   "fileName": "multiplier.pil",
+   "line": 11
+  },
+  {
+   "e": 1,
+   "fileName": "negation.pil",
+   "line": 8
+  },
+  {
+   "e": 2,
+   "fileName": "negation.pil",
+   "line": 9
+  },
+  {
+   "e": 3,
+   "fileName": "negation.pil",
+   "line": 11
+  },
+  {
+   "e": 4,
+   "fileName": "negation.pil",
+   "line": 13
+  },
+  {
+   "e": 5,
+   "fileName": "negation.pil",
+   "line": 14
+  }
+ ],
+ "plookupIdentities": [
+  {
+   "f": [
+    6
+   ],
+   "t": [
+    7
+   ],
+   "selF": null,
+   "selT": null,
+   "fileName": "main.pil",
+   "line": 9
+  },
+  {
+   "f": [
+    8,
+    9
+   ],
+   "t": [
+    10,
+    11
+   ],
+   "selF": null,
+   "selT": null,
+   "fileName": "main.pil",
+   "line": 11
+  },
+  {
+   "f": [
+    12,
+    13,
+    14
+   ],
+   "t": [
+    15,
+    16,
+    17
+   ],
+   "selF": null,
+   "selT": null,
+   "fileName": "main.pil",
+   "line": 12
+  }
+ ],
+ "permutationIdentities": [],
+ "connectionIdentities": []
+}

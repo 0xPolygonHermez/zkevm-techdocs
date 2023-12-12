@@ -1,0 +1,11 @@
+include "config.pil";
+
+namespace Example1(%N);  
+    pol commit a, b;
+
+    {a} is {b};
+
+namespace Example2(%N);  
+    pol commit a, b;
+
+    {a} is {Example2.b};

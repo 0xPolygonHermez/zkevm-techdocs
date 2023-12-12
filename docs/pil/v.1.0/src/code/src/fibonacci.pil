@@ -1,0 +1,11 @@
+include "config.pil";
+
+namespace Fibonacci(%N);
+    pol constant ISLAST;   
+    pol commit a, b;
+
+    public result = a(%N-1);
+
+    (1-ISLAST) * (a' - b) = 0;
+    (1-ISLAST) * (b' - a - b) = 0;
+    ISLAST * (a - :result) = 0;
