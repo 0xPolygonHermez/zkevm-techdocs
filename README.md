@@ -1,9 +1,13 @@
-# zkevm-techdocs
+# Polygon zkEVM Technical Documentation Repository
 
 ## General info
-This repository contains slides, system description documents and technical specification documents about the different aspects of the Polygon zkEVM.
+This repository contains system description slides and documents as well as technical specification documents about the different aspects of the Polygon zkEVM.
 
-## Slides
+## Disclaimer
+Materials are being continously reviewed and updated.
+
+## System Description Slides
+
 - **Concepts:** [Here](./slides/zkevm-concepts.pdf) you can find slides about some concepts that are recommended to understand the zkEVM. 
 - **Proving System Principles:** [Here](./slides/zkevm-architecture-part1-proving-system-principles.pdf) you can find the first part of the zkEVM architecture slides that present the basic principles of the proving system used by the zkEVM.
 - **Sequencing and Proving:** [Here](./slides/zkevm-architecture-part2-sequencing-and-proving.pdf) you can find the 
@@ -14,9 +18,13 @@ third part fo the zkEVM architecture slides that shows how the different layers 
 fourth part fo the zkEVM architecture slides that shows how we use the layer exchange to transfer assets and messages between layers.
 
 
-## System description documents (knowledge layer)
+## System Description Documents
 
-## Technical Specification documents
+- Concepts:
+  - [Road to Scalability](./knowledge-layer/concepts/PDFs/road-to-scalability.pdf)
+
+## Technical Specification Documents
+
 Currently there are the following documents (the order is valid for linear reading):
 - trustless-l2-state-management: 
   This document describes the layer one infrastructure designed to ensure the security and reliability of the layer two state transitions of the Polygon zkEVM.
@@ -32,6 +40,3 @@ Currently there are the following documents (the order is valid for linear readi
   This document describes the Polynomial Identity Language (PIL), which is a novel domain-specific language useful for defining eAIR constraints.
 - proof-recursion:
   This document specifies how the polygon zkEVM is proven using recursion, agregation and composition. The constraints of the zkEVM are specified as polynomial identities using the PIL language. Then, an execution trace can be proven using the PIL specification for building a STARK that is proved with the FRI protocol. The problem is that STARKs generate big proofs. This document describes how to use recursion together with composition to shorten the prove size. 
-
-## Disclaimer
-These documents are being continously reviewed and updated.
