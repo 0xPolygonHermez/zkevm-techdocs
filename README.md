@@ -1,9 +1,14 @@
 # zkevm-techdocs
 
 ## General info
-This repository contains technical documents about the different aspects of the Polygon zk-EVM.
+This repository contains slides, system description documents and technical specification documents about the different aspects of the Polygon zkEVM.
 
-## Content
+## Slides
+- Some concepts that are recommended to understand the zkEVM are [here](./slides/zkevm-concepts.pdf).
+  
+## System description documents (knowledge layer)
+
+## Technical Specification documents
 Currently there are the following documents (the order is valid for linear reading):
 - trustless-l2-state-management: 
   This document describes the layer one infrastructure designed to ensure the security and reliability of the layer two state transitions of the Polygon zkEVM.
@@ -21,4 +26,4 @@ Currently there are the following documents (the order is valid for linear readi
   This document specifies how the polygon zkEVM is proven using recursion, agregation and composition. The constraints of the zkEVM are specified as polynomial identities using the PIL language. Then, an execution trace can be proven using the PIL specification for building a STARK that is proved with the FRI protocol. The problem is that STARKs generate big proofs. This document describes how to use recursion together with composition to shorten the prove size. 
 
 ## Disclaimer
-These documents are work in progress and new versions will be delivered.
+These documents are being continously reviewed and updated.
