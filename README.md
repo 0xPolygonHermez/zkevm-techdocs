@@ -4,13 +4,13 @@
 This repository contains slides, system description documents and technical specification documents about the different aspects of the Polygon zkEVM.
 
 ## Slides
-- zkEVM Concepts: [Here](./slides/zkevm-concepts.pdf) you can find slides about some concepts that are recommended to understand the zkEVM. 
-- Proving System Principles: [Here](./slides/zkevm-architecture-part1-proving-system-principles.pdf) you can find the first part of the zkEVM architecture slides that present the basic principles of the proving system used by the zkEVM.
-- Sequencing and Proving: [Here](./slides/zkevm-architecture-part2-sequencing-and-proving.pdf) you can find the 
+- **Concepts:** [Here](./slides/zkevm-concepts.pdf) you can find slides about some concepts that are recommended to understand the zkEVM. 
+- **Proving System Principles:** [Here](./slides/zkevm-architecture-part1-proving-system-principles.pdf) you can find the first part of the zkEVM architecture slides that present the basic principles of the proving system used by the zkEVM.
+- **Sequencing and Proving:** [Here](./slides/zkevm-architecture-part2-sequencing-and-proving.pdf) you can find the 
 second part fo the zkEVM architecture slides that presents the two main processes in the zkEVM: the sequencing and the proving.
-- Layer Communications: [Here](./slides/zkevm-architecture-part3-layer-communication.pdf) you can find the 
+- **Layer Communications:** [Here](./slides/zkevm-architecture-part3-layer-communication.pdf) you can find the 
 third part fo the zkEVM architecture slides that shows how the different layers exchange information in the zkEVM architecture.
-- Exchanging Assets and Messages: [Here](./slides/zkevm-architecture-part4-exchanging-assets-and-messages.pdf) you can find the 
+- **Exchanging Assets and Messages:** [Here](./slides/zkevm-architecture-part4-exchanging-assets-and-messages.pdf) you can find the 
 fourth part fo the zkEVM architecture slides that shows how we use the layer exchange to transfer assets and messages between layers.
 
 
