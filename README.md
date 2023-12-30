@@ -1,12 +1,13 @@
 # Polygon zkEVM Technical Documentation Repository
 
 ## General info
-This repository contains system description slides and documents as well as technical specification documents about the different aspects of the Polygon zkEVM.
+This repository contains documentation material about the different aspects of the Polygon zkEVM.
+In particular, this repository contains three types of materials: (A) system description slides, (B) system description documents (that we also name as our knowledge layer) and finally, (C) technical specification documents.
 
 ## Disclaimer
-Materials are being continously reviewed and updated.
+Materials in this repo are being continously reviewed and updated.
 
-## System Description Slides
+## A. System Description Slides
 
 - **Concepts:** [Here](./slides/zkevm-concepts.pdf) you can find slides about some concepts that are recommended to understand the zkEVM. 
 - **Proving System Principles:** [Here](./slides/zkevm-architecture-part1-proving-system-principles.pdf) you can find the first part of the zkEVM architecture slides that present the basic principles of the proving system used by the zkEVM.
@@ -18,12 +19,12 @@ third part fo the zkEVM architecture slides that shows how the different layers 
 fourth part fo the zkEVM architecture slides that shows how we use the layer exchange to transfer assets and messages between layers.
 
 
-## System Description Documents
+## B. System Description Documents (Knowledge Layer)
 
 - Concepts:
   - [Road to Scalability](./knowledge-layer/concepts/PDFs/road-to-scalability.pdf)
 
-## Technical Specification Documents
+## C. Technical Specification Documents
 
 Currently there are the following documents (the order is valid for linear reading):
 - trustless-l2-state-management: 
