@@ -24,6 +24,9 @@ fourth part fo the zkEVM architecture slides that shows how we use the layer exc
 - Concepts:
   - [Road to Scalability](./knowledge-layer/concepts/PDFs/road-to-scalability.pdf)
 
+- Architecture:
+  - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
+
 ## C. Technical Specification Documents
 
 Currently there are the following documents (the order is valid for linear reading):
