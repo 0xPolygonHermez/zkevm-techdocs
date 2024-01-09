@@ -19,14 +19,35 @@
 %% VERSION
 \newcommand{\version}{v.1.0}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% To include GIT commits %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Two required libraries
+\usepackage{xstring}
+\usepackage{catchfile}
+\newcommand{\gitfolder}{../../../../.git}             % Relative path to .git folder from .tex file
+\newcommand{\reponame}{worldbank/d4di}    % Name of account and repo. Will be included in URL
+\CatchFileDef{\headfull}{\gitfolder/HEAD}{}              % Get path to head file for checked out branch
+\StrGobbleRight{\headfull}{1}[\head]                      % Remove end of line character
+\StrBehind[2]{\head}{/}[\branch]                          % Parse out the path only
+\CatchFileDef{\commit}{\gitfolder/refs/heads/\branch}{}  % Get the content of the branch head
+\StrGobbleRight{\commit}{1}[\commithash]                  % Remove end of line character
+% Build the URL to this commit based on the information we now have
+%\newcommand{\commiturl}{\url{https://github.com/\reponame/commit/\commithash}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END GIT commits        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %% TITLE
 \title{
   \includegraphics[width=\columnwidth]{logo_zkEVM.png} \\ \vspace{0.3cm}
-  Concepts - Ethereum State \vspace{0.3cm}\\
-  \version
+  Knowledge Layer \\ \vspace{0.3cm}
+  Concepts \\ \vspace{0.3cm}
+  Ethereum State \vspace{0.3cm}\\
+  \normalsize
+  Version: \commithash
 }
-
 
 \institute{}
 
@@ -421,7 +442,8 @@ keys
 % \end{pcvstack}
 
 \newcommand{\definedir}[2]{\newcommand{#1}{#2}}
-\definedir{\trainingsectiondir}{..}
+\definedir{\topicdir}{..}
+\definedir{\zkevmdir}{../../../..}
 
 
 \begin{document}
@@ -437,7 +459,7 @@ keys
 %{\hypersetup{linkcolor=.}\tableofcontents}
 
 \newpage
-\input{\trainingsectiondir/sections/storage-intro}
+\input{\topicdir/sections/storage-intro}
 
 %\newpage
 %\bibliographystyle{alpha}
