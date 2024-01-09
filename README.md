@@ -1,6 +1,6 @@
 # Polygon zkEVM Technical Documentation Repository
 
-## General info
+## General Info
 This repository contains documentation material about the different aspects of the Polygon zkEVM.
 In particular, this repository contains three types of materials: (A) system description slides, (B) system description documents (that we also name as our knowledge layer) and finally, (C) technical specification documents.
 
