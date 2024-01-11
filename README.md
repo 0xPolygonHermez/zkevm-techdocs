@@ -30,6 +30,10 @@ fourth part of the zkEVM architecture slides that shows how we use the layer exc
 - Architecture:
   - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
 
+- Specs:
+  - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
+  - [L2 State Storage](./knowledge-layer/specs/PDFs/l2-state-storage.pdf)
+
 ## C. Technical Specification Documents
 
 Currently there are the following documents (the order is valid for linear reading):
