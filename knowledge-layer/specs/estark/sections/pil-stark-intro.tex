@@ -1,13 +1,13 @@
 % !TeX spellcheck = en_GB
 % !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
-% !TeX root = ../build-polygon/estark-intro-wiki.tex
+% !TeX root = ../build/estark.tex
 
 
 The setting for STARK proofs are machine-like computations from which we can derive a certain arithmetization, giving us a set of constraints describing its correct execution. The polynomial interpolating the constrained values that arise from a certain arithmetization can, in fact, depend on the inputs of the computation itself giving what we call \textbf{committed polynomials} and, by definition, should be computed once per proof. However, a polynomial that is completely independent of the input values so it is kept constant among several executions of the same computation should be computed only once per arithmetization. The former kind of polynomials are called \textbf{constant polynomials} and, together with the constraints, represent the computation that is being executed, so that they are publicly available for both the prover and the verifier, unlike the committed ones, which are not directly available to the verifier.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\columnwidth]{\starkintrodir/figures/proving-scheme.drawio.pdf}
+\includegraphics[width=0.9\columnwidth]{\zkevmdir/figures/estark/proving-scheme.drawio.pdf}
 \caption{Proving Architecture Scheme in zkEVM.}
 \label{fig:proving-arch-scheme}
 \end{figure}

@@ -23,9 +23,9 @@
 %% TITLE
 \title{
   \includegraphics[width=\columnwidth]{logo_zkEVM.png} \\ \vspace{0.3cm}
-  Wiki Document\\ \vspace{0.3cm}
-  Prover - eSTARK\\ \vspace{0.3cm}
-  An Introduction to the Polygon zkEVM Proving Mechanism using \texttt{pil-stark} \\
+  Knowledge Layer \\ \vspace{0.3cm}
+  Specs \\ \vspace{0.3cm}
+  L2 State Storage \\ \vspace{0.3cm}
   \version
 }
 
@@ -122,6 +122,16 @@ rulesepcolor=\color{black}, upquote=true}
 %     backgroundcolor=\color{yellow!30},
     width=0.50\linewidth,
 }
+
+\lstdefinestyle{verbtt}{
+    basicstyle=\footnotesize\ttfamily,% control font of code
+    preset=\footnotesize\ttfamily,% adjust font size of output
+    frame=none,
+    pos=r,% want output on right
+    xleftmargin=.2\textwidth, xrightmargin=.2\textwidth,
+    width=0\linewidth,
+}
+
 
 %Linter for circom
 \usepackage{tcolorbox}
@@ -419,7 +429,9 @@ keys
 % \end{pcvstack}
 
 \newcommand{\definedir}[2]{\newcommand{#1}{#2}}
-\definedir{\starkintrodir}{..}
+\definedir{\topicdir}{..}
+\definedir{\zkevmdir}{../../../..}
+
 
 
 \begin{document}
@@ -435,13 +447,7 @@ keys
 %{\hypersetup{linkcolor=.}\tableofcontents}
 
 \newpage
-\input{\starkintrodir/wiki/pil-stark-intro}
-
-\newpage
-\bibliographystyle{alpha}
-\bibliography{../bib/bibliography}
-
-\newpage
-\appendix
+\input{\topicdir/sections/storage}
+\input{\topicdir/sections/keys-values}
 
 \end{document}
