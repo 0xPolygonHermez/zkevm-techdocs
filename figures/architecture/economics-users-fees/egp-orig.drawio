@@ -1,0 +1,254 @@
+<mxfile host="app.diagrams.net" modified="2023-12-28T17:17:56.223Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" etag="aRFHrQArXgI1N7UkSrj2" version="22.1.15" type="google" pages="2">
+  <diagram name="Workflow" id="u5pyhqsyImXJNCgcevNq">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-3" value="gasPriceSigned" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-1" target="PTDAsOTdOf0mLYpqNabR-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-1" value="Tx" style="shape=parallelogram;html=1;strokeWidth=2;perimeter=parallelogramPerimeter;whiteSpace=wrap;rounded=1;arcSize=12;size=0.23;" vertex="1" parent="1">
+          <mxGeometry x="70" y="90" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-4" value="eth_gasPrice (gasPriceRPC)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.56;entryY=0.01;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-2" target="PTDAsOTdOf0mLYpqNabR-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="140" y="40" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="400" y="50" />
+              <mxPoint x="143" y="50" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-2" target="PTDAsOTdOf0mLYpqNabR-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-2" value="RPC" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="90" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-8" value="OOC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-5" target="PTDAsOTdOf0mLYpqNabR-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-5" target="PTDAsOTdOf0mLYpqNabR-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-5" value="pre-execute Tx" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="340" y="165" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-7" value="Reject Tx" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="735" y="158.5" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="PTDAsOTdOf0mLYpqNabR-9" target="fSou8c0r4dYQEHeoxb6x-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTDAsOTdOf0mLYpqNabR-9" value="Compute&amp;nbsp;&lt;br&gt;BreakEvenGasPrice&lt;br&gt;(see Formulas tab)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="245" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-9" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-4" target="fSou8c0r4dYQEHeoxb6x-8">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="730" y="178.5" as="targetPoint" />
+            <mxPoint x="610" y="420" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-8" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-4" target="ExnMCmKuYy50QpjaRMNh-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-4" value="BreakEvenGasPrice*BreakEvenFactor&lt;br&gt;&amp;lt;=&lt;br&gt;gasPriceSigned" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="190" y="325" width="420" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="_YZ-UJOdQCqK23P05abH-2" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-8" target="_YZ-UJOdQCqK23P05abH-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-4" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-8" target="ExnMCmKuYy50QpjaRMNh-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-8" value="gasPriceSigned&lt;br&gt;&amp;gt;=&lt;br&gt;gasPriceRPC now" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="670" y="330" width="210" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-10" target="fSou8c0r4dYQEHeoxb6x-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-10" value="Add Tx to the pool&lt;br&gt;(sorted by gasPriceSigned)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="320" y="541.5" width="160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-14" target="fSou8c0r4dYQEHeoxb6x-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-14" value="Sequencer&lt;br&gt;Add Tx to WIP Batch" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="621.5" width="120" height="42.5" as="geometry" />
+        </mxCell>
+        <mxCell id="Gmw5vIZ3c98Rc46c-pFa-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fSou8c0r4dYQEHeoxb6x-16" target="44SuAlO2qZxqS0ICrL18-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fSou8c0r4dYQEHeoxb6x-16" value="Re-compute&lt;br&gt;BreakEvenGasPrice" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="701.5" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Sri-iVak4Cm3FGocuRm1-2" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="44SuAlO2qZxqS0ICrL18-1" target="7hYwaUTehUZsWrdPb7QH-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-13" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="44SuAlO2qZxqS0ICrL18-1" target="AWlS-QvjOPNpMsTzr5s3-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="44SuAlO2qZxqS0ICrL18-1" value="EffectiveGasPrice&lt;br&gt;&amp;lt;&lt;br&gt;gasPriceSigned" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="290" y="846.5" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="Sri-iVak4Cm3FGocuRm1-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="44SuAlO2qZxqS0ICrL18-3" target="44SuAlO2qZxqS0ICrL18-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="44SuAlO2qZxqS0ICrL18-3" value="1- Compute&lt;br&gt;EffectiveGasPrice (EGP)&lt;br&gt;(see Formulas tab)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="330" y="766.5" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-1" target="7hYwaUTehUZsWrdPb7QH-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="1057" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-1" value="Execute Tx using EffectiveGasPrice (EGP)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="981.5" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-4" target="7hYwaUTehUZsWrdPb7QH-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-4" value="2 - Re-compute new EffectiveGasPrice (NEGP)&lt;br&gt;using gasUsed returned by the executor" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1060" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-10" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-6" target="7hYwaUTehUZsWrdPb7QH-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7KvV06YTc8Zz0ZZEeIaP-7" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-6" target="7KvV06YTc8Zz0ZZEeIaP-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-6" value="Diff (EGP and NEGP)&lt;br&gt;&amp;lt;&lt;br&gt;finalDeviation" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="250" y="1150" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-9" value="End" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;rounded=1;strokeColor=default;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1320" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-22" target="7hYwaUTehUZsWrdPb7QH-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7hYwaUTehUZsWrdPb7QH-22" value="Execute Tx using gasPriceSigned (0xFF)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="45" y="981.5" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_YZ-UJOdQCqK23P05abH-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="_YZ-UJOdQCqK23P05abH-1" target="ExnMCmKuYy50QpjaRMNh-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_YZ-UJOdQCqK23P05abH-1" value="Warning log&lt;br&gt;(loss = BreakEvenGasPrice - gasPriceSigned)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="456.75" width="270" height="46.5" as="geometry" />
+        </mxCell>
+        <mxCell id="7KvV06YTc8Zz0ZZEeIaP-8" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="7KvV06YTc8Zz0ZZEeIaP-6" target="AWlS-QvjOPNpMsTzr5s3-4">
+          <mxGeometry x="-0.3333" relative="1" as="geometry">
+            <mxPoint x="870" y="1295" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-11" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="7KvV06YTc8Zz0ZZEeIaP-6" target="AWlS-QvjOPNpMsTzr5s3-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7KvV06YTc8Zz0ZZEeIaP-6" value="NEGP&lt;br&gt;&amp;lt;&lt;br&gt;gasPriceSigned" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="630" y="1145" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="7KvV06YTc8Zz0ZZEeIaP-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="7KvV06YTc8Zz0ZZEeIaP-9" target="ExnMCmKuYy50QpjaRMNh-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7KvV06YTc8Zz0ZZEeIaP-9" value="Execute Tx using gasPriceSigned (0xFF)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1328.75" width="140" height="42.5" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="AWlS-QvjOPNpMsTzr5s3-4" target="7KvV06YTc8Zz0ZZEeIaP-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-15" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="AWlS-QvjOPNpMsTzr5s3-4" target="AWlS-QvjOPNpMsTzr5s3-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-4" value="has_gasprice_opcode&amp;nbsp;&lt;br&gt;||&lt;br&gt;has_balance_opcode" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="840" y="1305" width="220" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="AWlS-QvjOPNpMsTzr5s3-10" target="7KvV06YTc8Zz0ZZEeIaP-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-10" value="if (loss &amp;gt; 0) Warning log (loss)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="590" y="1270" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="AWlS-QvjOPNpMsTzr5s3-14" target="ExnMCmKuYy50QpjaRMNh-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-14" value="Execute Tx using new EffectiveGasPricel (NEGP)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="615" y="1400" width="200" height="43.5" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="AWlS-QvjOPNpMsTzr5s3-17" target="7hYwaUTehUZsWrdPb7QH-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-17" value="if (loss &amp;gt; 0) Warning log&lt;br&gt;(loss = EffectiveGasPrice - gasPriceSigned)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="-20" y="866.63" width="270" height="49.75" as="geometry" />
+        </mxCell>
+        <mxCell id="AWlS-QvjOPNpMsTzr5s3-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="7hYwaUTehUZsWrdPb7QH-22" target="7hYwaUTehUZsWrdPb7QH-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lxcncLh-afrvvH1t4t_J-1" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="606.5" as="sourcePoint" />
+            <mxPoint x="1040" y="606.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lxcncLh-afrvvH1t4t_J-2" value="Sequencer" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=21;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="606.5" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lxcncLh-afrvvH1t4t_J-3" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="10" as="sourcePoint" />
+            <mxPoint x="1040" y="10" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lxcncLh-afrvvH1t4t_J-4" value="RPC" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=21;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="10" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-1" value="Store EGP Log information" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=default;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="1400" width="150" height="43.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-6" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ExnMCmKuYy50QpjaRMNh-3" target="_YZ-UJOdQCqK23P05abH-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-3" value="Is EffectiveGasPrice&lt;br&gt;enabled?" style="rhombus;whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="670" y="240" width="210" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ExnMCmKuYy50QpjaRMNh-3" target="PTDAsOTdOf0mLYpqNabR-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ExnMCmKuYy50QpjaRMNh-7" target="fSou8c0r4dYQEHeoxb6x-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-7" value="Log all info related to BreakEvenGasPrice calculation (post analysis)" style="whiteSpace=wrap;html=1;rounded=1;arcSize=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="280" y="455" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ExnMCmKuYy50QpjaRMNh-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ExnMCmKuYy50QpjaRMNh-1" target="7hYwaUTehUZsWrdPb7QH-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="UUq7DqJpYWOeq_MCsaRT-1" value="Solo si NEGP &amp;lt; EGP?" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="970" y="1145" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="aahT7ubA1FIr1v24BDiM-1" value="Comparar BEGP*Factor???" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="OfOgGhgHDn_CtmajkobP" name="Formulas">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6qMaSsMnatB8Z7qBaQlJ-2" value="&lt;b&gt;Config parameters&lt;/b&gt;&lt;br&gt;ByteGasCost = 16&amp;nbsp;&lt;br&gt;ZeroByteGasCost = 4&lt;br&gt;L1GasPriceFactor = 0.25&lt;br&gt;NetProfit = 1&lt;br&gt;&lt;br&gt;&lt;b&gt;Constants&lt;/b&gt;&lt;br&gt;&lt;div&gt;signatureBytesLength = 65&lt;span style=&quot;&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;&quot;&gt;effectivePercentageBytesLength = 1&lt;/span&gt;&lt;/div&gt;constBytesTx&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;= signatureBytesLength + effectivePercentageBytesLength (previously&amp;nbsp;&lt;/span&gt;totalRlpFieldsLength)&lt;br&gt;&lt;br&gt;&lt;b&gt;Calculation&lt;br&gt;&lt;/b&gt;&lt;br&gt;&lt;div&gt;txZeroBytes := uint64(bytes.Count(rawTx, []byte{0}))&lt;span style=&quot;&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;&quot;&gt;txNonZeroBytes := uint64(len(rawTx)) - txZeroBytes&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;font color=&quot;#3333ff&quot;&gt;L2MinGasPrice&lt;/font&gt; := L1GasPrice * L1GasPriceFactor&lt;br&gt;&lt;font color=&quot;#e51400&quot;&gt;totalTxPrice&lt;/font&gt; := (tx.gasUsed * &lt;font color=&quot;#3333ff&quot;&gt;L2MinGasPrice&lt;/font&gt;) +&lt;br&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ((constBytesTx+txNonZeroBytes)*ByteGasCost+txZeroBytes*ZeroByteGasCost)*L1GasPrice&lt;br&gt;&lt;font color=&quot;#009900&quot;&gt;breakEvenGasPrice&lt;/font&gt; := &lt;font color=&quot;#e51400&quot;&gt;totalTxPrice&lt;/font&gt;/tx.gasUsed * netProfit" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="90" y="70" width="660" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="6qMaSsMnatB8Z7qBaQlJ-3" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;BreakEvenGasPrice formula&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="90" y="30" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="waZaZrpP7FxpVhjt_JAv-1" value="&lt;span style=&quot;background-color: initial;&quot;&gt;if gasPriceSigned &amp;gt; gasPriceRPC {&lt;/span&gt;&lt;br&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp;&lt;font color=&quot;#e51400&quot;&gt;ratioPriority&lt;/font&gt; =&amp;nbsp;(gasPriceSigned / gasPriceRPC) - 1&lt;/div&gt;&lt;div&gt;} else {&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp;&lt;font color=&quot;#e51400&quot;&gt;ratioPriority&lt;/font&gt; = 0&lt;/div&gt;&lt;div&gt;}&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;effectiveGasPriceFinal = breakEvenGasPrice * (1 + &lt;font color=&quot;#e51400&quot;&gt;ratioPriority&lt;/font&gt;)" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="90" y="430" width="660" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="waZaZrpP7FxpVhjt_JAv-2" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;EffectiveGasPrice formula&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="90" y="390" width="230" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
