@@ -30,6 +30,7 @@ fifth part of the zkEVM architecture slides that explains the economic aspects o
 
 - Architecture:
   - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
+  - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
 
 - Specs:
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
