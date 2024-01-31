@@ -1,0 +1,134 @@
+% !TeX spellcheck = en_US
+% !TeX root = ../build/intro-proving-system.tex
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+
+
+
+
+\section{Execution Trace Shape Design}
+
+In this section we will discuss some aspects about the shapes (or dimensions) of the execution traces. In an execution trace, each row is in charge of validating a \textbf{single zkASM operation} or \textbf{part of an operation}. For example, suppose that we are given a set of $3$ operations implemented in zkASM \texttt{OP1, OP2} and \texttt{OP3}. These operations change the next value of the \A register, as show in Figure \ref{fig:operations}. Take into account that primes mean next value of some column. For example $a'$ means the next value in the \A column.
+
+\begin{figure}[H]
+\begin{align*}\label{eq:op-effects}
+&\texttt{OP1}: a'=a+b+c \\
+&\texttt{OP2}: a'=a+b+c+d+e\\
+&\texttt{OP3}: a'=a+b+c+d+e+f+g+h
+\end{align*}
+\caption{This constraints define how each of the operations work within the execution trace. }
+\label{fig:operations}
+\end{figure}
+
+Consider also that we have an execution trace matrix of $6$ columns as shown below:
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\texttt{A} & \texttt{B} & \texttt{C} & \texttt{D} & \texttt{E} & \texttt{F} \\ \hline
+&  &  & & &\\ \hline
+&  &  &  &  &  \\ \hline
+&  &  &  &  & \\ \hline
+&  &  &&& \\ \hline
+\end{tabular}
+\end{table}
+
+\texttt{OP1} and \texttt{OP2} can be easily fit in the matrix, but \texttt{OP3} gives a problem at first look, since we have 8 summands but only 6 registers. The question is: \textit{can we fit this computation inside the matrix? If so, how can we do it?} We purpose two straightforward strategies:
+
+\begin{enumerate}
+
+\item Increasing the number of columns so that we can fit every summand. More specifically, we can add registers \texttt{G} and \texttt{H}. This strategy has several contras: one the one hand, adding extra columns increases the proving time and, on the other hand, wider matrices may have too many unused cells and, furthermore, they might be inefficient for mixing many different instructions. We will see examples of the later right below.
+
+\item Use the next row in order to fit some of the remaining operands of the operation. Increasing the number of rows is also delicate, because, since the number of rows is a power of two, we can only double the size of the matrix, not add extra rows one by one. So we have to be careful when adding rows, making sure that (if possible) we do not double the size of the matrix unnecessarily, since the cost of doing so
+
+\end{enumerate}
+
+Here, we face a dilemma regarding whether to expand the execution matrix in width or length. Later on we will introduce a third approach involving \textit{look ups}. For now, let's examine through an example how we can accommodate \texttt{OP3} within a 6-column matrix:
+
+
+\paragraph*{Working Example}
+We will use the second approach. We can define an execution matrix in which \texttt{OP3} uses two rows: we store $g$ and $h$ in the next row filling the next values of the registers \B and \C. See Figure \ref{fig:op3} to visualize the new arrangement of \texttt{OP3}. Then we can perform \texttt{OP3} as follows, keeping both \texttt{OP1} and \texttt{OP2} operating in the same way:
+\[
+\texttt{OP3}: a'=a+b+c+d+e+f+b'+c'
+\]
+
+\begin{figure}[H]
+\centering
+
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\A & \B & \C & \D & \E & \F \\ \hline
+$a_0$ & $b_0$ & $c_0$ & & &\\ \hline
+$a_1$ & $b_1$ & $c_1$ & $d_1$ & $e_1$ & \\ \hline
+\cellcolor{yellow} $a_2$ & \cellcolor{yellow} $b_2$ & \cellcolor{yellow}  $c_2$ & \cellcolor{yellow} $d_2$ & \cellcolor{yellow} $e_2$ & \cellcolor{yellow} $f_2$ \\ \hline
+\cellcolor{green} $a_3$ & \cellcolor{yellow}  $b_3$ & \cellcolor{yellow}  $c_3$ &&& \\ \hline
+\end{tabular}
+\hspace{1em}
+\begin{tabular}{c}
+\\
+$\mathtt{OP1}$ \\
+$\mathtt{OP2}$ \\
+$\mathtt{OP3}$ \\
+$             $ \\
+\end{tabular}
+
+\caption{In this table the yellow cell represent the right hand side operands of the \texttt{OP3} instruction. The green cell represents the output of summing together all the yellow cells. Note that there are other possible arrangements in order to fit \texttt{OP3} considering the shape of this execution matrix. }
+\label{fig:op3}
+
+\end{figure}
+
+
+This example shows that we can reduce the number of needed columns by increasing the number of rows. In the next example we will show how to optimize the proving system representing the computation of applying \texttt{OP1} and \texttt{OP2} consecutively by means of simply modifying the shape of the execution matrix.
+
+One approach may be using $6$ columns as before \A, \B, \C, \D, \E and \F, as shown in Figure \ref{fig:shape-first-design}. In this case we fit the computation in $2$ rows, having the output in the third row.
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}\hline
+\A & \B & \C & \D & \E & \F \\ \hline
+$a_0$ & $b_0$ & $c_0$ & \cellcolor{cyan} & \cellcolor{cyan} & \cellcolor{cyan} \\ \hline
+$a_1$ & $b_1$ & $c_1$ & $d_1$ & $e_1$ & \cellcolor{cyan} \\ \hline
+\cellcolor{green} $a_2$ & \cellcolor{cyan} & \cellcolor{cyan} & \cellcolor{cyan} & \cellcolor{cyan} & \cellcolor{cyan} \\ \hline
+\end{tabular}
+\hspace{1em}
+\begin{tabular}{c}
+$             $ \\
+$\mathtt{OP1}$ \\
+$\mathtt{OP2}$ \\
+$             $
+\end{tabular}
+\caption{Design of the execution trace having $6$ columns. Blue cells represent unused cells. }
+\label{fig:shape-first-design}
+\end{figure}
+
+Here, we have a configuration with $6$ columns and $2$ rows, with an additional row used for allocating the output. This results in a total of $18$ cells, with $9$ cells remaining unused. It's important to highlight that the unused cells constitute half of the matrix's space, which seems quite inefficient.
+
+
+Alternatively, we can arrange this problem by redefining \texttt{OP2} to use $3$ columns and $2$ rows as follows:
+\[
+\texttt{OP2}: a'=a+b+c+a'+b'
+\]
+This way, we can remove the three last registers and only use a matrix half bigger than the last one for the same purpose.
+
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|c|c|c|}\hline
+  $\A$ & $\B$ & $\C$ \\ \hline
+  $a_0$ & $b_0$ & $c_0$ \\ \hline
+  $a_1$ & $b_1$ & $c_1$ \\ \hline
+  $a_2$ & $b_2$ & \cellcolor{green}$c_2$ \\ \hline
+\end{tabular}
+\begin{tabular}{c}
+   $            $ \\
+   $\mathtt{OP1}$ \\
+   $\mathtt{OP2}$ \\
+   $            $
+\end{tabular}
+\caption{In this revised layout, we utilize the entire space, ensuring that no cells remain unused. }
+\label{fig:shape-second-design}
+\end{figure}
+
+In this case, we have a configuration with $6$ columns and $3$ rows. This results in a total of $18$ cells, all of them used. To sum up, \textbf{the number of unused cells strongly depends on the instructions executed and the shape of the execution matrix. }
+
+
+

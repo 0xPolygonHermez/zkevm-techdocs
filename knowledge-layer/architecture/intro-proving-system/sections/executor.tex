@@ -1,0 +1,132 @@
+% !TeX spellcheck = en_US
+% !TeX root = ../build/intro-proving-system.tex
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Executor}
+The \textbf{Executor} (Figure \ref{fig:executor-goal}) is the component whose main purpose is to generate a correct execution trace from a given set of inputs.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\columnwidth]{\zkevmdir/figures/architecture/intro-proving-system/general-executor}
+\caption{The goal of the Executor is to take some inputs and generate an execution trace. }
+\label{fig:executor-goal}
+\end{figure}
+
+There are two approaches when implementing the executor component, depending on whether we prefer single computation executor, that is, an executor that only works for a single specific program or a general purpose executor, which can run several computations.
+
+\paragraph*{Single-computation executor}
+
+A \textbf{single-computation executor} is specifically tailored for a particular computation. This means that changing this computation involves modifying the executor. This approach is the faster computationally speaking but at the cost that the single-computation executor is not easy to change, test or audit. We also call this executor a \textbf{native executor}. An electronic analogy of the native executor are Application Specific Integrated Circuitss (ASICs) circuits. An ASIC is a circuit specifically designed to run, very efficiently, a single computation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\columnwidth]{\zkevmdir/figures/architecture/intro-proving-system/executor-asic-approach.drawio}
+\caption{A single computation executor always perform the same operation maybe with different sets of inputs.}
+\label{fig:single-computation-executor}
+\end{figure}
+
+
+\paragraph*{General-computation executor}
+
+General-computation executors can run a wide variety of programs. In this approach, the executor component not only reads the inputs, as in the previous approach but also interprets a program that guides the executor on how to compute the execution trace for a specific calculation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\columnwidth]{\zkevmdir/figures/architecture/intro-proving-system/executor-cpu-approach.drawio}
+\caption{In this case, we should add a zkASM program as an input for the Executor.}
+\label{fig:general-computation-executor}
+\end{figure}
+
+
+For example, below we have two different computations and their respective execution traces. These two are computed by the same general-executor but with different programs (that is, different ordered sets of instructions describing the computation) and different inputs.
+
+We already know the first program, explained before (Figure \ref{fig:example-execution-trace}). It computes $[(x_0+x_1)\cdot4]\cdot x_2$ using $(1, 2, 5)$ as set of inputs. Recall that we model it using the available instructions. However, we can modify the used instructions, its order and the set of inputs and obtain the following execution trace:
+
+
+\begin{figure}[h!]
+
+\centering
+
+\begin{tabular}{|c|}
+\hline
+\texttt{step} \\ \hline
+1  \\ \hline
+2  \\ \hline
+3 \\ \hline
+4 \\ \hline
+\end{tabular}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{A} & \textbf{B} & \cellcolor{lightgray} \textbf{C} \\ \hline
+2 &  & \cellcolor{lightgray} 4\\ \hline
+8 & & \cellcolor{lightgray} 4 \\ \hline
+32 & 3 & \cellcolor{lightgray} \\ \hline
+96 & & \cellcolor{lightgray} \\ \hline
+\end{tabular}
+\hspace{1mm}
+\begin{tabular}{r}
+\\
+$[a_0=x_0]$  \\
+\\
+$[b_2 = x_1]$         \\
+\\
+
+\end{tabular}
+\hspace{1em}
+\begin{tabular}{l}
+\\
+\texttt{TIMES4} \\
+\texttt{TIMES4} \\
+\texttt{MUL} \\
+\\
+\end{tabular}
+
+\caption{Modifying the used instructions and its order we can get different execution traces modeling a wide variety of computation. }
+\label{fig:changing-computation}
+\end{figure}
+
+Observe that the former execution trace (Figure \ref{fig:changing-computation}) actually models the following computation
+\[
+(x_0\cdot16)\cdot x_1.
+\]
+
+
+
+In our context, input programs are written in a language called \textbf{zkASM}, read as \textit{zk-assembly}. zkASM is the language developed by the team that is used to write instructions for the general executor. In the repository \href{https://github.com/0xPolygonHermez/zkasmcom-vscode}{\texttt{zkasmcom-vscode}} there is a syntax highlighter for VSCode. An example of zkASM which is present in the project can be found in Figure \ref{fig:zkasm-example}.
+
+\begin{figure}[H]
+\begin{zkasm}
+STEP => A
+0                                   :ASSERT ; Ensure it is the beginning of the execution
+
+CTX                                 :MSTORE(forkID)
+CTX - %FORK_ID                      :JMPNZ(failAssert)
+
+B                                   :MSTORE(oldStateRoot)
+\end{zkasm}
+\caption{\textbf{zkASM} Language Example. }
+\label{fig:zkasm-example}
+\end{figure}
+
+We have implemented a \href{https://github.com/0xPolygonHermez/zkasmcom}{zkASM compiler} (See Figure \ref{fig:zkasmcom}) that reads a zkASM specification file and compiles it to an output file with the list steps and instructions which the executor will consume in order to compute the execution trace.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\columnwidth]{\zkevmdir/figures/architecture/intro-proving-system/zkasmcom-basic.drawio}
+\caption{The zkASM compiler reads a program written in a \texttt{.zkasm} file and outputs a \texttt{.json} file indicating the instructions that the executor needs to follow in order to fill the execution trace accordingly. }
+\label{fig:zkasmcom}
+\end{figure}
+
+In Figure \ref{fig:single-vs-general} we present the advantages and drawbacks of each approach. The single-computation executor is faster because it does not need to read assembly; it can efficiently generate the execution trace for the specific computation, optimizing the process for that particular case. Nonetheless, the drawback lies in its inflexibility—being challenging to modify, test, or audit. The general-executor approach is needed within the zkEVM context because both the EVM and the zkEVM evolve, and it is more efficient to keep modifying the assembly code than the whole executor. The zkASM program that processes EVM transactions is called \textbf{zkEVM ROM} (Read Only Memory) or simply the ROM. By changing the ROM, we can make our L2 zkEVM more and more closer to the L1 EVM. Henceforth, we have different versions of the zkEVM ROM. Each of these versions will be denoted with a unique identifier called \texttt{forkID}. It is worth mentioning that another advantage of using a ROM-based approach is that we can test small parts of the assembly program in isolation. However, we will have both, each one serving different purposes. The single-computation executor is still work in progress.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{\zkevmdir/figures/architecture/intro-proving-system/single-vs-general.drawio}
+\caption{Pros and Cons of each Single-computation and General-computation Executors.}
+\label{fig:single-vs-general}
+\end{figure}

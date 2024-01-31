@@ -1,0 +1,35 @@
+% !TeX spellcheck = en_US
+% !TeX root = ../build/intro-proving-system.tex
+% !TeX TXS-program:compile = txs:///xelatex/[--shell-escape]
+
+
+
+\section{zkEVMs Compatibility/Equivalence}
+
+In the post \href{https://vitalik.eth.limo/general/2022/08/04/zkevm.html}{\textit{The different types of ZK-EVMs}}, Vitalik Buterin explores the concept of EVM compatibility/equivalence. We say that layer 2 is EVM compatible or equivalent if it can run EVM byte code without modifying the underlying smart contract logic. EVM compatibility allow L2’s to use existing Ethereum smart contracts, patterns, standards, and tooling. Being EVM compatible is important for the
+widespread adoption of these L2 since this allows using existing tools can be used. In practice, there are several types of compatibility (See Figure \ref{fig:zkEVM-compatibility-post-vitalik}):
+
+\begin{itemize}
+
+\item \textbf{Type 1}: Fully Ethereum equivalent, i.e., they do not change any part of the Ethereum system but generating proofs can take several hours.
+
+\item \textbf{Type 2}: Fully EVM-equivalent, but changes some different internal representations like how they store the state of the chain, for the purpose of improving Zero-Knowledge proof generation times.
+
+\item \textbf{Type 2.5}: Fully EVM-equivalent, except they use different gas costs for some operations to ``significantly improve worst-case prover times''.
+
+\item \textbf{Type 3}: Almost EVM-equivalent zkEVMs make sacrifices in exact equivalence to further enhance prover times and simplify EVM development.
+
+\item \textbf{Type 4}: High-level language equivalent zkEVMs compile smart contract source code written in a high-level language to a friendly language for Zero-Knowledge, resulting in faster prover times but potentially introducing incompatibilities and limitations.
+
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\columnwidth]{\zkevmdir/figures/architecture/intro-proving-system/zkEVM-compatibility-post-vitalik}
+\caption{Vitalik Buterin's categorization of ZK-EVM compatibility types.}
+\label{fig:zkEVM-compatibility-post-vitalik}
+\end{figure}
+
+At present, our compatibility stands at type 2.5, with ongoing efforts directed towards achieving type 2. The objective is not to attain type 1 compatibility, as type 2 yields greater throughput when using zero-knowledge technologies. A notable distinction lies in the storage mechanisms employed, where Ethereum L1 utilizes a Patricia Trie, which proves to be highly inefficient for verification. In contrast, zkEVM employs a binary sparsed Merkle tree, offering enhanced efficiency for proof generation.
+
+
