@@ -30,6 +30,7 @@ fifth part of the zkEVM architecture slides that explains the economic aspects o
 
 - Architecture:
   - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
+  - [Introduction to the Proving System](./knowledge-layer/architecture/PDFs/intro-proving-system.pdf)
   - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
 
 - Specs:
