@@ -32,7 +32,7 @@ where \texttt{SuggestedFactor} (which is currently of $0.15$) satisfies
 \]
 in order to be able to cover data availability costs. Observe that the suggested gas price varies over time as \texttt{L1GasPrice} also does.
 
-\item Now, the user sends the transaction selecting a \texttt{GasPriceSigned}, the same as in L1. Observe that, from asking for a suggested gas price to sending the transaction has passed some unbounded period of time, where the L1 Gas Price could have increased. Henceforth, rejecting a transaction if $\texttt{GasPriceSigned} < \texttt{GasPriceSuggested}$ does not offer a good user experience. In contrast, we give a margin of $5$ minutes (controlled by the \texttt{MinAllowedGasPriceInterval} parameter). If the signed gas price does not strictly exceed \texttt{MinL2GasPrice}, which is the minumum suggested gas price of $5$ minutes before sending the transaction refreshed every $5$ seconds, called (controlled by the \texttt{IntervalToRefreshGasPrices} parameter),
+\item Now, the user sends the transaction selecting a \texttt{GasPriceSigned}, the same as in L1. Observe that, from asking for a suggested gas price to sending the transaction has passed some unbounded period of time, where the L1 Gas Price could have increased. Henceforth, rejecting a transaction if $\texttt{GasPriceSigned} < \texttt{GasPriceSuggested}$ does not offer a good user experience. In contrast, we give a margin of $5$ minutes (controlled by the \texttt{MinAllowedGasPriceInterval} parameter). If the signed gas price does not strictly exceed \texttt{MinL2GasPrice}, which is the minumum suggested gas price of $5$ minutes before sending the transaction refreshed every $5$ seconds (controlled by the \texttt{IntervalToRefreshGasPrices} parameter),
 \[
 \texttt{GasPriceSigned} > \texttt{L2MinGasPrice},
 \]
@@ -81,7 +81,7 @@ Let us continue the numerical example that has been carried during the whole doc
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{\zkevmdir/figures/architecture/economics-users-fees/example-minimum-gas-price.drawio}
+\includegraphics[width=0.9\textwidth]{\zkevmdir/figures/architecture/economics-users-fees/numerical-example-rpc.drawio}
 \caption{Timeline displaying the current \texttt{L1GasPrice} and its associated suggested gas price. }
 \label{fig:numerical-example-rpc}
 \end{figure}
@@ -127,7 +127,7 @@ the introduction of the \texttt{BreakEvenFactor} (which acts as a protective mea
 \[
 \texttt{GasPriceSigned} = 3 \geq 2.85 = \texttt{GasPriceSuggested},
 \]
-which is the current case. Henceforth, we accept the transaction and store it into the \textbf{Pool}.
+which is the current case. Henceforth, we accept the transaction and store it into the \textbf{Pool} even though we are risking a financial loss.
 
 \end{enumerate}
 
@@ -237,7 +237,7 @@ Let us continue the numerical example that has been carried during the whole doc
 
 \begin{enumerate}
 
-\item Imagine that the user signed a gas price $3.3$ GWei/Gas. As illustrated in Figure \ref{fig:numerical-example-sequencer}, the network recommends a gas price of $3$ at the sequencing moment, equivalent to an L1 gas price of $20$. This results in an \texttt{EEGP} of
+\item Imagine that the user signed a gas price of $3.3$ GWei/Gas. As illustrated in Figure \ref{fig:numerical-example-sequencer}, the network recommends a gas price of $3$ at the sequencing moment, equivalent to an L1 gas price of $20$. This results in an \texttt{EEGP} of
 \[
 \texttt{EEGP} = 2.722 \text{ GWei/Gas},
 \]
@@ -268,7 +268,7 @@ Observe that the transaction cost is way higher than the estimated one of $126,0
 \]
 This deviation penalizes the user a lot since
 \[
-\texttt{GasPriceSigned} = 3 > 2.52 = \texttt{EEGP} \gg 2.056 = \texttt{NEGP},
+\texttt{GasPriceSigned} = 3.3 > 2.52 = \texttt{EEGP} \gg 2.056 = \texttt{NEGP},
 \]
 so we try to charge \texttt{NEGP} to the user to further adjust the gas price.
 

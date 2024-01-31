@@ -199,6 +199,21 @@ rulesepcolor=\color{black}, upquote=true}
   boxrule=0.1mm
 }
 
+\newtcblisting{toml}{
+  listing engine=minted,
+  colback=mybg,
+  colframe=black!70,
+  listing only,
+  minted style=tango,
+  minted language=toml,
+  minted options={linenos=true,texcl=true,fontsize=\tiny},
+  left=0.2mm,
+  top=0cm,
+  bottom=0cm,
+  boxrule=0.1mm
+}
+
+
 \newtcblisting{js}{
 	listing engine=minted,
 	colback=mybg,
@@ -434,6 +449,8 @@ keys
 % \keywords[\publname, ToSC, TCHES, LaTeX]{TBD \and TBD}
 
 %{\hypersetup{linkcolor=.}\tableofcontents}
+
+{\hypersetup{linkcolor=.}\tableofcontents}
 
 \newpage
 \input{\topicdir/sections/main-users-fees}
