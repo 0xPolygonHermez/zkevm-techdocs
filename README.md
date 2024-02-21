@@ -33,6 +33,7 @@ fifth part of the zkEVM architecture slides that explains the economic aspects o
   - [Introduction to the Proving System](./knowledge-layer/architecture/PDFs/intro-proving-system.pdf)
   - [Sequencing Batches](./knowledge-layer/architecture/PDFs/sequencing-batches.pdf)
   - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
+  - [Unified LXLY](./knowledge-layer/architecture/PDFs/ulxly.pdf)
 
 - Specs:
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
