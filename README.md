@@ -18,8 +18,10 @@ second part of the zkEVM architecture slides that presents the two main processe
 third part of the zkEVM architecture slides that shows how the different layers exchange information in the zkEVM architecture.
 - **Exchanging Assets and Messages:** [Here](./slides/zkevm-architecture-part4-exchanging-assets-and-messages.pdf) you can find the 
 fourth part of the zkEVM architecture slides that shows how we use the layer exchange to transfer assets and messages between layers.
-- **Economics:** [Here](./slides/zkevm-architecture-part5-economics.pdf) you can find the 
-fifth part of the zkEVM architecture slides that explains the economic aspects of the zkEVM.
+- **uLXLY:** [Here](./slides/zkevm-architecture-part5-ulxly.pdf) you can find the fifth part of the zkEVM architecture slides 
+that explains the unified LXLY. 
+- **Economics:** [Here](./slides/zkevm-architecture-part6-economics.pdf) you can find the 
+sixth part of the zkEVM architecture slides that explains the economic aspects of the zkEVM.
 
 ## B. System Description Documents (Knowledge Layer)
 

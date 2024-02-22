@@ -130,14 +130,29 @@ Each rollup is associated with either none or a single rollup type. In order to 
 
 \end{itemize}
 
-When creating a new rollup, we employ the \href{https://blog.openzeppelin.com/the-transparent-proxy-pattern}{transparent proxy pattern}, by generating an instance of the \texttt{PolygonTransparentProxy} contract, with the consensus contract specified by the rollup type serving as its implementation. The \texttt{RollupData} is \textit{partially} filled (because the rollup is not currently initialized) and stored in the \texttt{rollupIDToRollupData} mapping within the contract's storage. To end up, the rollup creation calls the \texttt{initialize()} function of the consensus, which is in charge of setting the previously specified addresses in the consensus contract.
+When creating a new rollup, we employ the
+\href{https://blog.openzeppelin.com/the-transparent-proxy-pattern}{transparent
+proxy pattern} (See Figure \ref{fig:transparent-proxy}), by generating an
+instance of the \texttt{PolygonTransparentProxy} contract, with the consensus
+contract specified by the rollup type serving as its implementation. The
+\texttt{RollupData} is \textit{partially} filled (because the rollup is not
+currently initialized) and stored in the \texttt{rollupIDToRollupData} mapping
+within the contract's storage. To end up, the rollup creation calls the
+\texttt{initialize()} function of the consensus, which is in charge of setting
+the previously specified addresses in the consensus contract.
 
 \vspace{1em}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\columnwidth]{\zkevmdir/figures/architecture/ulxly/creating-new-rollup.drawio}
-\caption{text}
+\caption{Schematic representation of the transparent proxy pattern within the
+Rollup Manager context. Proxies are frequently utilized in Ethereum for
+upgradability, albeit their management can pose difficulties, which can be
+solved by using a transparent proxy pattern that distinguishes calls based on
+the caller before the function selector. This ensures that interactions with
+the proxy are indistinguishable from interactions with the logic contract for
+all users except the admin.}
 \label{fig:transparent-proxy}
 \end{figure}
 
@@ -213,16 +228,22 @@ Observe that most of these parameters were actually provided by the \texttt{Roll
 \section{Bridge within Layers}
 
 
-
-
 \subsection{New Global Exit Tree}
 
-In uLXLY, we have multiple layers, so, we need to adapt the global exit tree for storing the exits on all these layers. The design of the new global exit tree is as follows:
+In uLXLY, due to the presence of multiple layers, it becomes necessary to
+adjust the global exit tree to accommodate exits across all these layers. The
+design of the updated global exit tree is depicted in Figure
+\ref{fig:ulxly-tree}.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=.7\columnwidth]{\zkevmdir/figures/architecture/ulxly/ulxly-tree.drawio}
-\caption{text}
+\caption{As can be observed, the global exit tree has been modified to
+introduce more than one rollup. Now, there are two main branches, one
+containing the root of the mainnet exit tree and the other containing the root
+summarizingthe exit trees of all the rollups, which we call the \textbf{rollup
+exit tree}. This tree has as its leaves all the local exit roots of the
+different rollups.}
 \label{fig:ulxly-tree}
 \end{figure}
 
@@ -234,27 +255,41 @@ In uLXLY, we have multiple layers, so, we need to adapt the global exit tree for
 
 
 
-
-
-
 \paragraph*{Rollup Identifiers.} Every rollup has a set of distinct identifiers that are essential for its functioning and interaction within the larger network ecosystem.
 
 \begin{itemize}
 
-\item The \texttt{chainID} is a unique identifier that distinguishes the rollup from other chains in the Ethereum ecosystem and is crucial for preventing anti-replay attacks.
+\item The \texttt{chainID} is a unique identifier that distinguishes the rollup
+from other chains in the Ethereum ecosystem and is crucial for preventing
+anti-replay attacks. See the \href{https://chainlist.org/}{chainlist} to see
+the chain Ids of the different networks.
 
-\item The \texttt{networkID} identifier defines the rollup in the Polygon ecosystem, allowing network participants to uniquely identify and interact with them.
+\item The \texttt{networkID} identifier defines the rollup in the Polygon
+ecosystem, allowing network participants to uniquely identify and interact with
+them. The \texttt{networkID = 0} is used for Ethereum mainnet, while the
+\texttt{networkID = 1} is used for the zkEVM and so on for the rest of the
+networks.
+
+\item The \texttt{rollupIndex}, which is an identifier used to identify a
+rollup within the rollup tree. The first rollup (the zkEVM) has
+\texttt{rollupIndex} = $0$ and in general, \texttt{rollupIndex} =
+\texttt{networkID - 1}.
 
 \end{itemize}
 
-While the \texttt{networkID} convention typically begins with $1$ (because the $0$ one is reserved for mainnet), for compatibility with Merkle proof indices, its advisable to initiate counting from $0$. The rollup index (\texttt{rollupIndex}) accomplishes this goal, being $0$ when \texttt{networkID} is $1$ and similarly for higher \texttt{networkID}s.
 
-
-\paragraph*{Global Index.} To create and verify the proofs, we use an index called \texttt{globalIndex} that allows to uniquely locate a leaf in the new global exit tree. The \texttt{globalIndex} consists of a string of 256 bits, with its definition starting from the most significant bit as follows:
+\paragraph*{Global Index.} To create and verify the proofs, we use an index
+called \texttt{globalIndex} that allows to uniquely locate a leaf in the new
+global exit tree. The \texttt{globalIndex} consists of a string of 256 bits,
+with its definition starting from the most significant bit as follows. Figure
+\ref{fig:global-index} exemplifies the usage of \texttt{globalIndex} to locate
+leafs on the tree.
 
 \begin{itemize}
 
-\item \textbf{Unused bits, 191 bits:} These bits are designated to be filled with zeros, indicating their unused status within the data structure.
+\item \textbf{Unused bits, 191 bits:} These bits are unused and can be filled
+with any value being the best option to fill them with zeros (since zeros are
+cheaper).
 
 \item \textbf{Mainnet Flag, 1 bit:} This single bit serves as a flag indicating whether an exit pertains to a rollup (represented by $0$) or to the mainnet (indicated by $1$).
 
@@ -267,7 +302,15 @@ While the \texttt{networkID} convention typically begins with $1$ (because the $
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\columnwidth]{\zkevmdir/figures/architecture/ulxly/ulxly-tree-globalIndex.drawio}
-\caption{This figure shows how the \texttt{globalIndex} arranges the leaves of the tree. The \texttt{globalIndex} on the left has the mainnet flag set to $1$, indicating that the bits associated with the rollup index are not utilized. Given a local root index of $11$ (equivalent to 3 in binary), we point the fourth leaf in the tree. In the right example, the mainnet flag is set to $0$. Therefore, we utilize the rollup index to find the local exit tree associated with $1$ as rollup index, which corresponds to the second leaf of the tree of rollups. Subsequently, we identify the leaf with index $10$ (equivalent to 2 in binary), which is the third leaf within the corresponding local exit tree. }
+\caption{This figure shows how the \texttt{globalIndex} arranges the leaves of
+the tree. The \texttt{globalIndex} on the left has the mainnet flag set to $1$,
+indicating that the bits associated with the rollup index are not utilized.
+Given a local root index of $3$, we point the fourth leaf in the tree. In the
+right example, the mainnet flag is set to $0$. Therefore, we utilize the rollup
+index to find the local exit tree associated with $1$ as rollup index, which
+corresponds to the second leaf of the tree of rollups. Subsequently, we
+identify the leaf with index $2$, which is the third leaf within the
+corresponding local exit tree. }
 \label{fig:global-index}
 \end{figure}
 
@@ -347,18 +390,9 @@ The native currency to pay the \textbf{gas} at a certain layer can be:
 
   \end{itemize}
 
-If we use a token to pay the gas at a layer, we call this token, the \textbf{gas token} for the layer.
+If we use a token to pay the gas at a layer, we call this token, the \textbf{gas token} for the layer. If we are using a gas token at a layer, it is still possible to send \textbf{L1 ETH} to the layer. In this case, the ETH gets accounted in an ERC20 contract called \textbf{W-ETH}, which is just another \textbf{ERC20} instance. Note that \texttt{W-ETH} is different from the contract \texttt{WETH} (a contract for converting ETH into an ERC20 token that runs at L1 at \href{https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\#code}{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2}).
 
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=.7\columnwidth]{\zkevmdir/figures/architecture/ulxly/ulxly-exchanges.drawio}
-\caption{Diagram illustrating the interchange of assets between layers, focusing on \textbf{LY} as a layer of interest. It depicts several scenarios, such as bridging a ERC20 token from mainnet to another ERC20 token in LY, bridging L1 ETH to the LY gas token or bridging a wrapped ERC20 token living on LX to LY ETH. }
-\label{fig:inter-layer-exchanges}
-\end{figure}
-
-
-If we are using a gas token at a layer, it is still possible to send \textbf{L1 ETH} to the layer. In this case, the ETH gets accounted in an ERC20 contract called \textbf{W-ETH}, which is just another \textbf{ERC20} instance. Note that \texttt{W-ETH} is different from the contract \texttt{WETH} (a contract for converting ETH into an ERC20 token that runs at L1 at \href{https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\#code}{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2}). Regarding the creation of the ERC20 tokens with \texttt{CREATE2}:
+Regarding the creation of the ERC20 tokens with \texttt{CREATE2}:
 
 \begin{itemize}
 \item We use \texttt{salt = 0} to create the \texttt{W-ETH} contract.
@@ -367,7 +401,15 @@ If we are using a gas token at a layer, it is still possible to send \textbf{L1 
 \texttt{tokenInfoHash} = \texttt{keccak256}(\texttt{originNetwork}, \texttt{originTokenAddress}).
 \]
 \end{itemize}
-Finally, we would like to remark that L1 ETH is the only native currency that can be used as a native currency in another layer.
+Finally, we would like to remark that L1 ETH is the only native currency that can be used as a native currency in another layer. Figure \ref{fig:inter-layer-exchanges} illustrates various inter-layer exchanges scenarios which can occur within the system.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.7\columnwidth]{\zkevmdir/figures/architecture/ulxly/ulxly-exchanges.drawio}
+\caption{Diagram illustrating the interchange of assets between layers, focusing on \textbf{LY} as a layer of interest. It depicts several scenarios, such as bridging a ERC20 token from mainnet to another ERC20 token in LY, bridging L1 ETH to the LY gas token or bridging a wrapped ERC20 token living on LX to LY ETH. }
+\label{fig:inter-layer-exchanges}
+\end{figure}
+
 
 
 \paragraph*{Issue with the Upgradable CREATE2 Factory.}
