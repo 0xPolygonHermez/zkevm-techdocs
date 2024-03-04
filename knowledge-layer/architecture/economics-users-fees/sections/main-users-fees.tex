@@ -297,7 +297,11 @@ where \texttt{TxZeroBytes} (respectively \texttt{TxNonZeroBytes}) represents the
 
 \subsection{Computational Costs}
 
-For the computational cost, we will use the following formula:
+The cost associated with transaction execution will be denoted as \texttt{ExecutionCost} and it is measured in gas. Observe that, in contrast to data availability costs, to compute computational costs we will need to \textbf{execute} the transaction. Then,
+\[
+\texttt{GasUsed} = \texttt{DataCost} + \texttt{ExecutionCost}.
+\]
+Since we also have to pay for data in L2, the total fee that L2 will receive is computed as follows
 \[
 \texttt{GasUsed} \cdot \texttt{L2GasPrice},
 \]
@@ -307,7 +311,7 @@ where recall that we can obtain \texttt{L2GasPrice} by multiplying \texttt{L1Gas
 \]
 In particular, we will choose a factor of $0.04$.
 
-In contrast to data availability costs, to compute computational costs we will need to \textbf{execute} the transaction.
+
 
 \subsection{Total Price of the Transaction}
 
@@ -404,7 +408,7 @@ In the example, even though we assumed that the decrease in \texttt{BreakEvenGas
 
 \section{\texttt{EffectiveGasPrice}: Introducing Priority}
 
-Prioritization of transactions in Ethereum is determined by \texttt{GasPriceSigned}: transactions signed at a higher price will be given priority. To implement this, consider that users are only aware of two gas price values: the one signed with the transaction, called \texttt{GasPriceSigned} and the current \texttt{GasPriceSuggested}, which is the one that provides the RPC. 
+Prioritization of transactions in Ethereum is determined by \texttt{GasPriceSigned}: transactions signed at a higher price will be given priority. To implement this, consider that users are only aware of two gas price values: the one signed with the transaction, called \texttt{GasPriceSigned} and the current \texttt{GasPriceSuggested}, which is the one that provides the RPC.
 
 It is important to note that this part of the process \textbf{is not} computed in the \textbf{RPC} but in the \textbf{Sequencer}, so it possible that the suggested gas price at this moment differs from the suggested one when user sent the transaction.
 

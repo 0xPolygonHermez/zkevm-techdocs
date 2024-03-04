@@ -146,7 +146,7 @@ The \textbf{Sequencer} is the zkEVM component that is responsible for fetching t
 
 \begin{enumerate}
 
-\item The \textbf{Sequencer} computes the estimated \texttt{EffectiveGasPrice} (which we will call \texttt{EEGP}) using the \texttt{GasUsedRPC} obtained in the \textbf{RPC} pre-execution using a previous state root (which has now changed) and the current \texttt{L1GasPrice} (which also may differ from the one used when sending the transaction to the \textbf{RPC}) for all the transactions stored in the \textbf{Pool} and sequence the one having higher \texttt{EEGP}. It is important to note that this is done in this precise order. We could have calculated the \texttt{EEGP} just before storing the transactions in the \textbf{Pool} and sorting it by \texttt{EEGP}, but this would not yield the same result because the \texttt{L1GasPrice} at that moment is different from the one at the time of sequencing a transaction, potentially changing the \texttt{EEGP} as well as the prioritization order of transactions.
+\item The \textbf{Sequencer} takes from the \textbf{Pool} the transaction having higher gas price and computes the estimated \texttt{EffectiveGasPrice} (which we will call \texttt{EEGP}) using the \texttt{GasUsedRPC} obtained in the \textbf{RPC} pre-execution using a previous state root (which has now changed) and the current \texttt{L1GasPrice} (which also may differ from the one used when sending the transaction to the \textbf{RPC})
 
 \item At this point, we have two options:
 
