@@ -13,7 +13,7 @@ In the context of managing key-value data within a Merkle tree structure, it is 
 
 The current methodology employed for hashing the leaf data to derive the node's key unfolds as follows:
 
-$$ \texttt{leafKey} = \texttt{Poseidon}(\texttt{capacityHash}; \texttt{addr}, \texttt{SMT\_KEY}, 0) $$
+$$ \texttt{leafKey} = \texttt{Poseidon}(\texttt{capacityHash}; \texttt{addr}, 0, \texttt{SMT\_KEY}, 0) $$
 
 The array
 
@@ -36,13 +36,13 @@ The computation of the capacity hash differs depending on whether we are storing
 
 \item When storing data that is not a storage slot, the capacity hash is computed as follows:
 \[
-\texttt{capacityHash}  = \texttt{Poseidon}(0; 0),
+\texttt{capacityHash}  = \texttt{Poseidon}(\texttt{0}; 0, 0, 0, 0, 0, 0, 0, 0),
 \]
 where the capacity shown as \texttt{0} is an array of $4$ field elements all of them set to $0$.
 
 \item Since a single smart contract's address can have multiple storage slots, we create different keys for each slot as follows:
 \[
-\texttt{capacityHash} = \texttt{Poseidon}(0; \texttt{storageKey}),
+\texttt{capacityHash} = \texttt{Poseidon}(\texttt{0}; \texttt{storageKey}),
 \]
 where \texttt{storageKey} is an array of $8$ field elements where each of these elements is constrained to values of $32$ bits for the representation of the storage slot identifiers, which in the EVM have a size of $256$-bits.
 
@@ -53,12 +53,12 @@ where \texttt{storageKey} is an array of $8$ field elements where each of these 
 
 Having specified the procedure for deriving the keys associated with the leaves, it is equally important to outline the process by which the values stored within these leaves are obtained. The current methodology employed for hashing the leaf data to derive the node's value unfolds as follows:
 \[
-\texttt{leafValue} = \texttt{Poseidon}(1; \texttt{remLeafKey}, \texttt{valueHash}).
+\texttt{leafValue} = \texttt{Poseidon}(\texttt{1}; \texttt{remLeafKey}, \texttt{valueHash}).
 \]
 
 In this case, the capacity $\texttt{1}$ is an array of 4 field elements with $\texttt{c}[0] = 1$ and $\texttt{c}[1] = \texttt{c}[2] = \texttt{c}[3] = 0$. The \texttt{remLeafKey} argument of the hash consists as an array of $4$ field elements, which collectively represent the remaining key associated with the leaf node. The second argument \texttt{valueHash} is is an array of 4 field elements that is calculated as follows:
 \[
-\texttt{valueHash} = \texttt{Poseidon}(0; \texttt{value}),
+\texttt{valueHash} = \texttt{Poseidon}(\texttt{0}; \texttt{value}),
 \]
 where $\texttt{value}$ is an array of 8 field elements, with each element constrained to values of 32 bits. The $32$-bits values in the array are computed differently depending on the type of the data intended for storage within the tree.:
 

@@ -36,12 +36,12 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
   - [Sequencing Batches](./knowledge-layer/architecture/PDFs/sequencing-batches.pdf)
   - [Aggregator](./knowledge-layer/architecture/PDFs/aggregator.pdf)
   - [JSON-RPC](./knowledge-layer/architecture/PDFs/zkevm-network.pdf)
+  - [L2StateTree: Keys and Values](./knowledge-layer/architecture/PDFs/L2StateTree.pdf)
   - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
   - [Unified LXLY](./knowledge-layer/architecture/PDFs/ulxly.pdf)
 
 - Specs:
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
-  - [L2 State Storage](./knowledge-layer/specs/PDFs/l2-state-storage.pdf)
 
 ## C. Technical Specification Documents
 
