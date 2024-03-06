@@ -34,6 +34,8 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
   - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
   - [Introduction to the Proving System](./knowledge-layer/architecture/PDFs/intro-proving-system.pdf)
   - [Sequencing Batches](./knowledge-layer/architecture/PDFs/sequencing-batches.pdf)
+  - [Aggregator](./knowledge-layer/architecture/PDFs/aggregator.pdf)
+  - [JSON-RPC](./knowledge-layer/architecture/PDFs/zkevm-network.pdf)
   - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
   - [Unified LXLY](./knowledge-layer/architecture/PDFs/ulxly.pdf)
 
