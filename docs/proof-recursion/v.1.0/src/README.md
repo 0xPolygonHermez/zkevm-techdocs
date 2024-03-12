@@ -1,1 +1,0 @@
-# STARK Composition
