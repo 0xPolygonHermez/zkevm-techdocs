@@ -240,10 +240,10 @@ dimensions:
 
 The table below shows an overview of the scaling solutions:
 
-                    Validity Proof      Fraud Proof
-  ---------------- ---------------- -------------------
-   Data on-chain       zkRollup      Optimistic Rollup
-   Data off-chain     zkValidium          Plasma
+| Data Storage  | Validity Proof | Fraud Proof    |
+|--------------|----------------|----------------|
+| On-chain      | zkRollup       | Optimistic Rollup |
+| Off-chain     | zkValidium     | Plasma            |
 
 One noteworthy feature of the zkValidium approach is its reliance on ZKP
 technology to ensure that even if L2 operators withhold data from users,

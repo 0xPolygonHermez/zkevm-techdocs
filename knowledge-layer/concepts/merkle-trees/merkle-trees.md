@@ -371,7 +371,7 @@ for its unique properties and suitability in the context of
 Zero-Knowledge proofs. It was originally designed to address some of the
 limitations and challenges faced by traditional hash functions in this
 specific application domain. From now on, we will consider an
-instantiation of `Poseidon` over a Goldilocks field (that is, $\FF_p$
+instantiation of `Poseidon` over a Goldilocks field (that is, $F_p$
 where $p = 2^{64} - 2^{32} + 1$), that takes as entry $8$ field elements
 divided into two groups: four of them are know as **capacity elements**,
 and the other $4$ are the elements to be hashed, known as **input

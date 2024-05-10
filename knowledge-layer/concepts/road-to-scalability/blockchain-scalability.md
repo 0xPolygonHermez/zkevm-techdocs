@@ -105,31 +105,31 @@ there exist several approaches:
     require access to transaction data. On the other hand, each shard
     possesses the execution capability akin to that of the beacon chain.
 
-    In essence, as shown in Figure
-    [3](#fig:sharding-chains){reference-type="ref"
-    reference="fig:sharding-chains"}, this approach creates a scenario
-    in which both data availability and transaction execution are
-    inherent features of each individual shard.
+In essence, as shown in Figure
+[3](#fig:sharding-chains){reference-type="ref"
+reference="fig:sharding-chains"}, this approach creates a scenario
+in which both data availability and transaction execution are
+inherent features of each individual shard.
 
-    ![Diagram depicting the initial sharding strategy, where each shard
-    possesses the capability to execute
-    transactions.](../../../figures/concepts/road-to-scalability/data-shard-chains.drawio.png){#fig:sharding-chains
-    width=".9\\columnwidth"}
+![Diagram depicting the initial sharding strategy, where each shard
+possesses the capability to execute
+transactions.](../../../figures/concepts/road-to-scalability/data-shard-chains.drawio.png){#fig:sharding-chains
+width=".9\\columnwidth"}
 
-    Nonetheless, this approach gives rise to significant challenges for
-    Ethereum specifications. Firstly, with this approach, Ethereum
-    specifications must define the rules for managing the states of each
-    individual shard. This entails the execution of transactions and how
-    inter-shard communication should work. Henceforth, an inherent
-    consequence of this approach is the potential hindrance to L1
-    ossification. In the context of Ethereum, ossification refers to the
-    stabilization and immutability of the Layer 1 protocol. The need for
-    L1 Ethereum to actively manage and adapt to the evolving
-    requirements of each shard can impede the process of ossification,
-    as it requires ongoing updates and adjustments to accommodate the
-    dynamic nature of the network. In conclusion, this method generates
-    a huge instability in the specificiations of the Ethereum layer
-    (Layer 1).
+Nonetheless, this approach gives rise to significant challenges for
+Ethereum specifications. Firstly, with this approach, Ethereum
+specifications must define the rules for managing the states of each
+individual shard. This entails the execution of transactions and how
+inter-shard communication should work. Henceforth, an inherent
+consequence of this approach is the potential hindrance to L1
+ossification. In the context of Ethereum, ossification refers to the
+stabilization and immutability of the Layer 1 protocol. The need for
+L1 Ethereum to actively manage and adapt to the evolving
+requirements of each shard can impede the process of ossification,
+as it requires ongoing updates and adjustments to accommodate the
+dynamic nature of the network. In conclusion, this method generates
+a huge instability in the specificiations of the Ethereum layer
+(Layer 1).
 
 (b) In this approach, Ethereum specifications provide a single L1
     execution layer providing execution, the beacon chain, maintaining a
@@ -142,14 +142,14 @@ there exist several approaches:
     the beacon chain can execute transactions, as depicted in Figure
     [4](#fig:EIP4844){reference-type="ref" reference="fig:EIP4844"}.
 
-    ![Diagram illustrating the post EIP-4844 design. Transactions can
-    only be executed on the beacon chain, as denoted by gears atop the
-    states, while shards exclusively function as data
-    shards.](../../../figures/concepts/road-to-scalability/block-of-blobs.drawio.png){#fig:EIP4844
-    width=".6\\columnwidth"}
+![Diagram illustrating the post EIP-4844 design. Transactions can
+only be executed on the beacon chain, as denoted by gears atop the
+states, while shards exclusively function as data
+shards.](../../../figures/concepts/road-to-scalability/block-of-blobs.drawio.png){#fig:EIP4844
+width=".6\\columnwidth"}
 
-    In this scheme, instead of conventional transactions, the blocks
-    within each shard are now structured to contain **blobs** (binary
-    large objects). These binary data hold no intrinsic meaning for the
-    Layer 1; their intended purpose is to be decoded and processed by
-    upper layers, which are widely known as **Layers 2**.
+In this scheme, instead of conventional transactions, the blocks
+within each shard are now structured to contain **blobs** (binary
+large objects). These binary data hold no intrinsic meaning for the
+Layer 1; their intended purpose is to be decoded and processed by
+upper layers, which are widely known as **Layers 2**.
