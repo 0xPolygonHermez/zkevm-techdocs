@@ -20,7 +20,7 @@ to as **branches**, are assigned the cryptographic hash of their
 respective child nodes.
 
 ![Depiction of a Merkle
-Tree.](../../../figures/concepts/ethereum-state/merkle-tree.drawio.pdf.png){#fig:merkle-tree
+Tree.](../../../figures/concepts/ethereum-state/merkle-tree.drawio.png){#fig:merkle-tree
 width="0.6\\columnwidth"}
 
 The **root** represents the overall integrity of all the data in the
@@ -55,7 +55,7 @@ $\mathcal{O}(\log_2(n))$.
 
 ![The yellow nodes represent the given nodes in the Merkle proof for the
 leaf node
-$L_2$.](../../../figures/concepts/ethereum-state/merkle-proof.drawio.pdf.png){#fig:merkle-proof
+$L_2$.](../../../figures/concepts/ethereum-state/merkle-proof.drawio.png){#fig:merkle-proof
 width="0.6\\columnwidth"}
 
 If an attacher wants to forge a proof, he needs to find a collision of
@@ -301,11 +301,13 @@ system at any given block.
 The tree is built by linking nodes using deterministically-generated
 cryptographic hash digests. More specifically, the key of an specific
 `ethereumAddress` is always computed as its `keccak256` hash:
-$$\texttt{keccak256(ethereumAddress)},$$ meanwhile the value (whose hash
+$$\texttt{keccak256(ethereumAddress)},$$
+meanwhile the value (whose hash
 will be included in the tree as a leaf) is always obtained applying the
 Recursive-length prefix serialization (a.k.a `rlp`) of the $4$ item
 consisting on the $4$ stored elements specified before:
-$$\texttt{rlp([nonce, balance, storageRoot, codeHash])}.$$ Observe that,
+$$\texttt{rlp([nonce, balance, storageRoot, codeHash])}.$$ 
+Observe that,
 `storageRoot` is also the root of another Patricia trie which: the
 **storage trie**. Storage trie is where all contract data lives. Unlike
 the previous one, there is a separate storage trie for each account.
