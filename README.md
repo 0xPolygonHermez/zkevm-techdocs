@@ -26,19 +26,19 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
 ## B. System Description Documents (Knowledge Layer)
 
 - Concepts:
-  - [Ethereum State](./knowledge-layer/concepts/PDFs/ethereum-state.pdf)
-  - [Road to Scalability](./knowledge-layer/concepts/PDFs/road-to-scalability.pdf)
-  - [L2 Scaling Strategies](./knowledge-layer/concepts/PDFs/l2-scaling-strategies.pdf)
+  - [Ethereum State](./knowledge-layer/concepts/ethereum-state.pdf)
+  - [Road to Scalability](./knowledge-layer/concepts/road-to-scalability.pdf)
+  - [L2 Scaling Strategies](./knowledge-layer/concepts/l2-scaling-strategies.pdf)
 
 - Architecture:
-  - [Pre-requisities](./knowledge-layer/architecture/PDFs/pre-requisites.pdf)
-  - [Introduction to the Proving System](./knowledge-layer/architecture/PDFs/intro-proving-system.pdf)
-  - [Sequencing Batches](./knowledge-layer/architecture/PDFs/sequencing-batches.pdf)
-  - [Aggregator](./knowledge-layer/architecture/PDFs/aggregator.pdf)
-  - [JSON-RPC](./knowledge-layer/architecture/PDFs/zkevm-network.pdf)
-  - [L2StateTree: Keys and Values](./knowledge-layer/architecture/PDFs/L2StateTree.pdf)
-  - [Users Fees](./knowledge-layer/architecture/PDFs/users-fees.pdf)
-  - [Unified LXLY](./knowledge-layer/architecture/PDFs/ulxly.pdf)
+  - [Pre-requisities](./knowledge-layer/architecture/pre-requisites.pdf)
+  - [Introduction to the Proving System](./knowledge-layer/architecture/intro-proving-system.pdf)
+  - [Sequencing Batches](./knowledge-layer/architecture/sequencing-batches.pdf)
+  - [Aggregator](./knowledge-layer/architecture/aggregator.pdf)
+  - [JSON-RPC](./knowledge-layer/architecture/zkevm-network.pdf)
+  - [L2StateTree: Keys and Values](./knowledge-layer/architecture/L2StateTree.pdf)
+  - [Users Fees](./knowledge-layer/architecture/users-fees.pdf)
+  - [Unified LXLY](./knowledge-layer/architecture/ulxly.pdf)
 
 - Specs:
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
