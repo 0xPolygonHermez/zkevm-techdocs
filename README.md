@@ -33,6 +33,9 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
 - Architecture:
   - [Pre-requisities](./knowledge-layer/architecture/pre-requisites.pdf)
   - [Introduction to the Proving System](./knowledge-layer/architecture/intro-proving-system.pdf)
+  - [L2 State Tree Concept](./knowledge-layer/architecture/l2-state-tree-concept.pdf)
+  - [Proving System Inputs](./knowledge-layer/architecture/proof-inputs.pdf)
+  - [Order Then Prove](./knowledge-layer/architecture/order-then-prove.pdf)
   - [Sequencing Batches](./knowledge-layer/architecture/sequencing-batches.pdf)
   - [Aggregator](./knowledge-layer/architecture/aggregator.pdf)
   - [JSON-RPC](./knowledge-layer/architecture/zkevm-network.pdf)
