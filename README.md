@@ -40,6 +40,9 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
   - [Aggregator](./knowledge-layer/architecture/aggregator.pdf)
   - [JSON-RPC](./knowledge-layer/architecture/zkevm-network.pdf)
   - [L2StateTree: Keys and Values](./knowledge-layer/architecture/L2StateTree.pdf)
+  - [Processing L2 Blocks](./knowledge-layer/architecture/processing-l2-blocks.pdf)
+  - [Synchronizer](./knowledge-layer/architecture/synchronizer.pdf)
+  - [Bridge in Etrog](./knowledge-layer/architecture/bridge-etrog.pdf)
   - [Users Fees](./knowledge-layer/architecture/users-fees.pdf)
   - [Unified LXLY](./knowledge-layer/architecture/ulxly.pdf)
 
