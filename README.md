@@ -31,20 +31,37 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
   - [L2 Scaling Strategies](./knowledge-layer/concepts/l2-scaling-strategies.pdf)
 
 - Architecture:
+
   - [Pre-requisities](./knowledge-layer/architecture/pre-requisites.pdf)
-  - [Introduction to the Proving System](./knowledge-layer/architecture/intro-proving-system.pdf)
-  - [L2 State Tree Concept](./knowledge-layer/architecture/l2-state-tree-concept.pdf)
-  - [Proving System Inputs](./knowledge-layer/architecture/proof-inputs.pdf)
-  - [Order Then Prove](./knowledge-layer/architecture/order-then-prove.pdf)
-  - [Sequencing Batches](./knowledge-layer/architecture/sequencing-batches.pdf)
-  - [Aggregator](./knowledge-layer/architecture/aggregator.pdf)
-  - [JSON-RPC](./knowledge-layer/architecture/zkevm-network.pdf)
-  - [L2StateTree: Keys and Values](./knowledge-layer/architecture/L2StateTree.pdf)
-  - [Processing L2 Blocks](./knowledge-layer/architecture/processing-l2-blocks.pdf)
-  - [Synchronizer](./knowledge-layer/architecture/synchronizer.pdf)
-  - [Bridge in Etrog](./knowledge-layer/architecture/bridge-etrog.pdf)
-  - [Users Fees](./knowledge-layer/architecture/users-fees.pdf)
-  - [Unified LXLY](./knowledge-layer/architecture/ulxly.pdf)
+
+  - Proving System Principles:
+
+    - [Introduction to the Proving System](./knowledge-layer/architecture/intro-proving-system.pdf)
+    - [L2 State Tree Concept](./knowledge-layer/architecture/l2-state-tree-concept.pdf)
+    - [Proving System Inputs](./knowledge-layer/architecture/proof-inputs.pdf)
+
+  - Sequencing and Proving:
+    - [Order Then Prove](./knowledge-layer/architecture/order-then-prove.pdf)
+    - [Sequencing Batches](./knowledge-layer/architecture/sequencing-batches.pdf)
+    - [Aggregator](./knowledge-layer/architecture/aggregator.pdf)
+    - [JSON-RPC](./knowledge-layer/architecture/zkevm-network.pdf)
+    - [L2StateTree: Keys and Values](./knowledge-layer/architecture/L2StateTree.pdf)
+    - [Processing L2 Blocks](./knowledge-layer/architecture/processing-l2-blocks.pdf)
+    - [Synchronizer](./knowledge-layer/architecture/synchronizer.pdf)
+  
+  - Communication Between Layers:
+
+    - [Bridge](./knowledge-layer/architecture/bridge.pdf)
+    - [Append Only Merkle Tree](./knowledge-layer/architecture/append-only-smt.pdf)
+    - [Bridge in Etrog](./knowledge-layer/architecture/bridge-etrog.pdf)
+
+  - uLXLY:
+    
+    - [Unified LXLY](./knowledge-layer/architecture/ulxly.pdf)
+
+  - Economics:
+
+    - [Users Fees](./knowledge-layer/architecture/users-fees.pdf)
 
 - Specs:
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
