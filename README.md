@@ -25,12 +25,12 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
 
 ## B. System Description Documents (Knowledge Layer)
 
-- Concepts:
+- **Concepts:**
   - [Ethereum State](./knowledge-layer/concepts/ethereum-state.pdf)
   - [Road to Scalability](./knowledge-layer/concepts/road-to-scalability.pdf)
   - [L2 Scaling Strategies](./knowledge-layer/concepts/l2-scaling-strategies.pdf)
 
-- Architecture:
+- **Architecture:**
 
   - [Pre-requisities](./knowledge-layer/architecture/pre-requisites.pdf)
 
@@ -63,7 +63,7 @@ sixth part of the zkEVM architecture slides that explains the economic aspects o
 
     - [Users Fees](./knowledge-layer/architecture/users-fees.pdf)
 
-- Specs:
+- **Specs:**
   - [pil-stark](./knowledge-layer/specs/PDFs/estark.pdf)
 
 ## C. Technical Specification Documents
